@@ -1,0 +1,35 @@
+{
+  "language": "fr",
+  "theme": "light",
+  "imageDisplayMode": "fit",
+  "transition": {
+    "type": "fade",
+    "duration": 1000
+  },
+  "showImageCounter": false,
+  "showCountdown": false,
+  "rotationTime": 60,
+  "weather": {
+    "show": true,
+    "location": "Nice, France",
+    "forecastMode": "smart",
+    "position": "top-right",
+    "unit": "metric",
+    "size": "size-2"
+  },
+  "timeDisplay": {
+    "show": true,
+    "format24h": true,
+    "showSeconds": false,
+    "position": "center",
+    "size": "size-8"
+  },
+  "dateDisplay": {
+    "show": true,
+    "format": "EEEE, MMMM d, yyyy",
+    "position": "center",
+    "size": "size-1",
+    "enableCalendar": true,
+    "firstDayOfWeek": 1
+  }
+}

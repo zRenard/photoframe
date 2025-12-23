@@ -1,0 +1,886 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Prevent scrollbars in fullscreen mode */
+:root:fullscreen {
+  overflow: hidden;
+}
+
+/* For Firefox */
+:root:-moz-full-screen {
+  overflow: hidden;
+}
+
+/* For Safari and Chrome */
+:root:-webkit-full-screen {
+  overflow: hidden;
+}
+
+/* Ensure html and body take full viewport */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Ensure the app container takes full viewport without any spacing and centers content */
+#root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Main container for the entire app */
+#root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Image Transitions */
+.slideshow-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1; /* Base z-index for slideshow */
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: all 0.7s ease-in-out;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  transform: translateX(0);
+}
+
+.slide.active {
+  opacity: 1;
+  z-index: 2;
+  transform: translateX(0);
+}
+
+/* Fade transition */
+.transition-fade {
+  opacity: 0;
+}
+
+.transition-fade.active {
+  opacity: 1;
+}
+
+/* Slide transitions */
+.transition-slide-right {
+  transform: translateX(100%);
+}
+
+.transition-slide-right.active {
+  transform: translateX(0);
+}
+
+.transition-slide-left {
+  transform: translateX(-100%);
+}
+
+.transition-slide-left.active {
+  transform: translateX(0);
+}
+
+.transition-slide-up {
+  transform: translateY(100%);
+}
+
+.transition-slide-up.active {
+  transform: translateY(0);
+}
+
+.transition-slide-down {
+  transform: translateY(-100%);
+}
+
+.transition-slide-down.active {
+  transform: translateY(0);
+}
+
+/* Zoom transitions */
+.transition-zoom-in {
+  transform: scale(0.8);
+  opacity: 0;
+}
+
+.transition-zoom-in.active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.transition-zoom-out {
+  transform: scale(1.2);
+  opacity: 0;
+}
+
+.transition-zoom-out.active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Rotate transition */
+.transition-rotate {
+  transform: rotate(-180deg) scale(0.5);
+  opacity: 0;
+}
+
+.transition-rotate.active {
+  transform: rotate(0) scale(1);
+  opacity: 1;
+}
+
+/* Flip transition */
+.transition-flip {
+  transform: rotateY(180deg);
+  opacity: 0;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+.transition-flip.active {
+  transform: rotateY(0);
+  opacity: 1;
+}
+
+/* Blur transition */
+.transition-blur {
+  filter: blur(10px);
+  opacity: 0;
+}
+
+.transition-blur.active {
+  filter: blur(0);
+  opacity: 1;
+}
+
+/* UI Controls Container */
+.ui-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10; /* Above slideshow */
+  pointer-events: none; /* Allow clicks to pass through to elements below */
+}
+
+/* Make control buttons interactive */
+.ui-controls > *,
+.ui-controls > div > * {
+  pointer-events: auto;
+}
+
+/* Time and date displays */
+.time-display,
+.date-display {
+  position: absolute;
+  z-index: 20;
+  pointer-events: auto;
+}
+
+/* Bottom bar and controls */
+.bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.bottom-bar > * {
+  pointer-events: auto;
+}
+
+/* Settings button */
+.settings-button {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 30;
+  pointer-events: auto;
+}
+
+/* Settings panel overlay */
+.config-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: auto;
+}
+
+/* Settings panel container */
+.config-panel {
+  position: relative;
+  background-color: var(--panel-bg);
+  border-radius: 0.5rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 64rem;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--panel-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  z-index: 1001;
+  pointer-events: auto;
+}
+
+/* Ensure the panel content is scrollable */
+.config-panel-content {
+  max-height: calc(90vh - 4rem);
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Fade Transition */
+.transition-fade {
+  transition: opacity 0.5s ease-in-out;
+}
+
+/* Slide Right Transition */
+.transition-slide-right {
+  transform: translateX(-100%);
+  transition: transform 0.5s ease-in-out;
+}
+
+.transition-slide-right.active {
+  transform: translateX(0);
+}
+
+/* Slide Left Transition */
+.transition-slide-left {
+  transform: translateX(100%);
+  transition: transform 0.5s ease-in-out;
+}
+
+.transition-slide-left.active {
+  transform: translateX(0);
+}
+
+/* Slide Up Transition */
+.transition-slide-up {
+  transform: translateY(100%);
+  transition: transform 0.5s ease-in-out;
+}
+
+.transition-slide-up.active {
+  transform: translateY(0);
+}
+
+/* Slide Down Transition */
+.transition-slide-down {
+  transform: translateY(-100%);
+  transition: transform 0.5s ease-in-out;
+}
+
+.transition-slide-down.active {
+  transform: translateY(0);
+}
+
+/* Zoom In Transition */
+.transition-zoom-in {
+  transform: scale(0.8);
+  opacity: 0;
+  transition: all 0.5s ease-in-out;
+}
+
+.transition-zoom-in.active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Zoom Out Transition */
+.transition-zoom-out {
+  transform: scale(1.2);
+  opacity: 0;
+  transition: all 0.5s ease-in-out;
+}
+
+.transition-zoom-out.active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Rotate Transition */
+.transition-rotate {
+  transform: rotateY(90deg);
+  opacity: 0;
+  transition: all 0.7s ease-in-out;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.transition-rotate.active {
+  transform: rotateY(0deg);
+  opacity: 1;
+}
+
+/* Flip Transition */
+.transition-flip {
+  transform: rotateY(180deg);
+  opacity: 0;
+  transition: all 0.7s ease-in-out;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.transition-flip.active {
+  transform: rotateY(0deg);
+  opacity: 1;
+}
+
+/* Blur Transition */
+.transition-blur {
+  filter: blur(10px);
+  opacity: 0;
+  transition: all 0.7s ease-in-out;
+}
+
+.transition-blur.active {
+  filter: blur(0);
+  opacity: 1;
+}
+
+/* Theme Variables */
+:root {
+  --bg-color: #000000;
+  --text-color: #e5e7eb;
+  --accent-color: #818cf8;
+  --accent-hover: #6366f1;
+  --icon-color: #9ca3af;
+  --icon-hover: #ffffff;
+  --button-bg: rgba(255, 255, 255, 0.1);
+  --button-hover: rgba(255, 255, 255, 0.2);
+  --panel-bg: rgba(0, 0, 0, 0.9);
+  --panel-border: #374151;
+  --input-bg: rgba(31, 41, 55, 0.7);
+  --input-border: #4b5563;
+  --input-focus: #818cf8;
+  --panel-text-color: #f9fafb;
+  --panel-text-muted: #9ca3af;
+  --panel-bg-hover: #1f2937;
+}
+
+/* Theme classes - override panel styles to match light theme */
+.theme-light,
+.theme-blue,
+.theme-green,
+.theme-red,
+.theme-purple,
+.theme-orange,
+.theme-pink {
+  --panel-bg: rgba(255, 255, 255, 0.95);
+  --panel-border: #e5e7eb;
+  --panel-text-color: #111827;
+  --panel-text-muted: #4b5563;
+  --panel-bg-hover: #f9fafb;
+  --input-bg: #f3f4f6;
+  --input-border: #d1d5db;
+}
+
+/* Dark theme - keep the dark background */
+.theme-dark {
+  --bg-color: #9c9898;
+  --text-color: #000000;
+  --accent-color: #4d5b9e;
+  --accent-hover: #3a4573;
+  --icon-color: #495057;
+  --icon-hover: #212529;
+  --button-bg: rgba(218, 164, 164, 0.5);
+  --button-hover: rgba(0, 0, 0, 0.1);
+  --panel-bg: rgba(0, 0, 0, 0.95); /* Always use light theme panel */
+  --panel-border: #e5e7eb; /* Light theme border */
+  --input-bg: #f3f4f6; /* Light theme input */
+  --input-border: #d1d5db; /* Light theme border */
+  --input-focus: #4d5b9e;
+  --panel-text-color: #111827; /* Light theme text color */
+  --panel-text-muted: #4b5563; /* Muted text color */
+  --panel-bg-hover: #f9fafb; /* Hover state */
+}
+
+/* Blue Theme */
+.theme-blue {
+  --bg-color: #1e40af;
+  --text-color: #6080bb;
+  --accent-color: #60a5fa;
+  --accent-hover: #3b82f6;
+  --icon-color: #bfdbfe;
+  --icon-hover: #ffffff;
+  --button-bg: rgba(96, 165, 250, 0.2);
+  --button-hover: rgba(96, 165, 250, 0.3);
+  --panel-bg: rgba(30, 64, 175, 0.95);
+  --panel-border: #3b82f6;
+  --input-bg: rgba(30, 64, 175, 0.7);
+  --input-border: #60a5fa;
+  --input-focus: #93c5fd;
+  --panel-text-color: #000000; /* Blue theme text color for control panel */
+}
+
+/* Green Theme */
+.theme-green {
+  --bg-color: #166534;
+  --text-color: #6cc48b;
+  --accent-color: #4ade80;
+  --accent-hover: #22c55e;
+  --icon-color: #bbf7d0;
+  --icon-hover: #ffffff;
+  --button-bg: rgba(74, 222, 128, 0.2);
+  --button-hover: rgba(74, 222, 128, 0.3);
+  --panel-bg: rgba(22, 101, 52, 0.95);
+  --panel-border: #22c55e;
+  --input-bg: rgba(22, 101, 52, 0.7);
+  --input-border: #4ade80;
+  --input-focus: #86efac;
+  --panel-text-color: #000000; /* Green theme text color for control panel */
+}
+
+/* Red Theme */
+.theme-red {
+  --bg-color: #991b1b;
+  --text-color: #bd7b7b;
+  --accent-color: #f87171;
+  --accent-hover: #ef4444;
+  --icon-color: #fecaca;
+  --icon-hover: #ffffff;
+  --button-bg: rgba(248, 113, 113, 0.2);
+  --button-hover: rgba(248, 113, 113, 0.3);
+  --panel-bg: rgba(153, 27, 27, 0.95);
+  --panel-border: #ef4444;
+  --input-bg: rgba(153, 27, 27, 0.7);
+  --input-border: #f87171;
+  --input-focus: #fca5a5;
+  --panel-text-color: #000000; /* Red theme text color for control panel */
+}
+
+/* Purple Theme */
+.theme-purple {
+  --bg-color: #6b21a8;
+  --text-color: #8a61b6;
+  --accent-color: #a78bfa;
+  --accent-hover: #8b5cf6;
+  --icon-color: #ddd6fe;
+  --icon-hover: #ffffff;
+  --button-bg: rgba(167, 139, 250, 0.2);
+  --button-hover: rgba(167, 139, 250, 0.3);
+  --panel-bg: rgba(107, 33, 168, 0.95);
+  --panel-border: #a855f7;
+  --input-bg: rgba(107, 33, 168, 0.7);
+  --input-border: #a78bfa;
+  --input-focus: #c4b5fd;
+  --panel-text-color: #000000; /* Purple theme text color for control panel */
+}
+
+/* Orange Theme */
+.theme-orange {
+  --bg-color: #9a3412;
+  --text-color: #c49659;
+  --accent-color: #fb923c;
+  --accent-hover: #f97316;
+  --icon-color: #fed7aa;
+  --icon-hover: #ffffff;
+  --button-bg: rgba(251, 146, 60, 0.2);
+  --button-hover: rgba(251, 146, 60, 0.3);
+  --panel-bg: rgba(154, 52, 18, 0.95);
+  --panel-border: #f97316;
+  --input-bg: rgba(154, 52, 18, 0.7);
+  --input-border: #fb923c;
+  --input-focus: #fdba74;
+  --panel-text-color: #000000; /* Orange theme text color for control panel */
+}
+
+/* Pink Theme */
+.theme-pink {
+  --bg-color: #9d174d;
+  --text-color: #b8568d;
+  --accent-color: #f472b6;
+  --accent-hover: #ec4899;
+  --icon-color: #fbcfe8;
+  --icon-hover: #ffffff;
+  --button-bg: rgba(244, 114, 182, 0.2);
+  --button-hover: rgba(244, 114, 182, 0.3);
+  --panel-bg: rgba(157, 23, 77, 0.95);
+  --panel-border: #ec4899;
+  --input-bg: rgba(157, 23, 77, 0.7);
+  --input-border: #f472b6;
+  --input-focus: #f9a8d4;
+  --panel-text-color: #000000; /* Pink theme text color for control panel */
+}
+
+/* Apply theme colors */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s, fill 0.3s;
+}
+
+/* Apply theme to icons */
+.icon-theme {
+  color: var(--icon-color);
+  transition: color 0.2s;
+}
+
+.icon-theme:hover {
+  color: var(--icon-hover);
+}
+
+/* Apply theme to buttons */
+.button-theme {
+  background-color: var(--button-bg);
+  color: var(--icon-color);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.button-theme:hover {
+  background-color: var(--button-hover);
+  color: var(--icon-hover);
+}
+
+/* Apply theme to inputs */
+.input-theme {
+  background-color: var(--input-bg);
+  border-color: var(--input-border);
+  color: var(--text-color);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-theme:focus {
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 2px var(--input-focus);
+  outline: none;
+}
+
+/* Configuration Panel Specific Styles */
+.config-panel {
+  background-color: #f9fafb !important;
+  color: #111827 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Form elements in config panel */
+.config-panel input[type='text'],
+.config-panel input[type='number'],
+.config-panel input[type='email'],
+.config-panel input[type='password'],
+.config-panel input[type='tel'],
+.config-panel input[type='url'],
+.config-panel input[type='search'],
+.config-panel input[type='date'],
+.config-panel input[type='time'],
+.config-panel input[type='datetime-local'],
+.config-panel input[type='month'],
+.config-panel input[type='week'],
+.config-panel select,
+.config-panel textarea {
+  background-color: #f9fafb !important;
+  border: 1px solid #d1d5db !important;
+  color: #111827 !important;
+  border-radius: 0.375rem;
+}
+
+/* Checkboxes and radios */
+.config-panel input[type='checkbox'],
+.config-panel input[type='radio'] {
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  color: #4f46e5 !important;
+}
+
+/* Range inputs */
+.config-panel input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 0.5rem;
+  background: #e5e7eb;
+  border-radius: 0.25rem;
+}
+
+.config-panel input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: #4f46e5;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+/* Buttons */
+.config-panel button:not(.theme-option) {
+  background-color: #f3f4f6 !important;
+  border: 1px solid #d1d5db !important;
+  color: #111827 !important;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+}
+
+.config-panel button:hover:not(.theme-option) {
+  background-color: #e5e7eb !important;
+}
+
+.config-panel button:focus {
+  outline: 2px solid #818cf8;
+  outline-offset: 2px;
+}
+
+/* Save button specifically */
+.config-panel button.bg-accent {
+  background-color: #4f46e5 !important;
+  color: white !important;
+  border-color: #4338ca !important;
+}
+
+.config-panel button.bg-accent:hover {
+  background-color: #4338ca !important;
+}
+
+/* Dropdowns */
+.config-panel select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 0.5rem center !important;
+  background-repeat: no-repeat !important;
+  background-size: 1.5em 1.5em !important;
+  padding-right: 2.5rem !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Headers and text */
+.config-panel h2,
+.config-panel h3,
+.config-panel h4,
+.config-panel label,
+.config-panel p {
+  color: #111827 !important;
+}
+
+/* Borders and dividers */
+.config-panel .border-panel-border {
+  border-color: #e5e7eb !important;
+}
+
+/* Hover states */
+.config-panel .hover\:bg-panel-bg-hover:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Icons */
+.config-panel .icon-theme {
+  color: #4b5563 !important;
+}
+
+/* Tooltip styling - always use light theme colors */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 10;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: nowrap;
+  pointer-events: none;
+  
+  /* Light theme colors */
+  background-color: #1f2937; /* gray-800 */
+  color: #f9fafb; /* gray-50 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 5px;
+  border-style: solid;
+  border-color: #1f2937 transparent transparent transparent; /* gray-800 transparent */
+}
+
+.tooltip-container:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Focus states */
+.config-panel input:focus,
+.config-panel select:focus,
+.config-panel textarea:focus,
+.config-panel button:focus {
+  border-color: #818cf8 !important;
+  box-shadow: 0 0 0 1px #818cf8 !important;
+  outline: 2px solid transparent !important;
+  outline-offset: 2px !important;
+}
+
+/* Style for config panel to use theme colors */
+.bg-gray-800 {
+  background-color: var(--panel-bg);
+  border-color: var(--panel-border);
+}
+
+.text-white {
+  color: var(--text-color);
+}
+
+.text-indigo-500 {
+  color: var(--accent-color);
+}
+
+.bg-indigo-500 {
+  background-color: var(--accent-color);
+}
+
+.hover\:bg-indigo-600:hover {
+  background-color: color-mix(in srgb, var(--accent-color), black 15%);
+}
+
+.ring-indigo-500 {
+  --tw-ring-color: var(--accent-color);
+}
+
+.focus\:ring-indigo-500:focus {
+  --tw-ring-color: var(--accent-color);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.date-below-time {
+  position: relative;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 1rem;
+  display: inline-block;
+  width: auto;
+}
+
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+}
+/* Style for select elements in the control panel */
+select {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  width: 100%;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Style for select options */
+select option {
+  background-color: var(--panel-bg);
+  color: var(--panel-text-color);
+}
+
+/* Focus state for better accessibility */
+select:focus {
+  outline: none;
+  border-color: var(--input-focus);
+  box-shadow: 0 0 0 2px var(--input-focus);
+}
+
+/* Style for select dropdown arrow */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23a0aec0' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
