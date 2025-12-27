@@ -74,7 +74,7 @@ function ModularApp() {
     isTransitioning,
     getCurrentImage,
     setTimeLeft
-  } = useImageSlideshow(images, settings.rotationTime, settings.showCountdown);
+  } = useImageSlideshow(images, settings.rotationTime, settings.showCountdown, settings.slideshowOrder);
 
   // Apply theme class to the root element
   useEffect(() => {

@@ -10,6 +10,7 @@
   "showImageCounter": true,
   "showCountdown": true,
   "rotationTime": 30,
+  "slideshowOrder": "sequential",
   "weather": {
     "show": true,
     "location": "Test City",

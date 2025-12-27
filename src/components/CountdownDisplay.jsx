@@ -25,10 +25,28 @@ const CountdownDisplay = memo(({
   // Get valid position
   const validPosition = position && positionClasses[position] ? position : 'bottom-left';
   
+  // Format time based on remaining duration
+  const formatTime = (seconds) => {
+    if (seconds < 60) {
+      // Less than 1 minute: show only seconds
+      return `${seconds}s`;
+    } else if (seconds < 3600) {
+      // Between 1 minute and 1 hour: show minutes and seconds
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}m ${secs}s`;
+    } else {
+      // More than 1 hour: show hours and minutes
+      const hours = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      return `${hours}h ${mins.toString().padStart(2, '0')}m`;
+    }
+  };
+  
   return (
     <div className={`${positionClasses[validPosition]} z-50 bg-black bg-opacity-50 text-white p-3 rounded-lg`}>
       <div className="text-sm text-gray-300">{t.nextIn}</div>
-      <div className="text-2xl font-bold">{timeLeft}s</div>
+      <div className="text-2xl font-bold">{formatTime(timeLeft)}</div>
     </div>
   );
 });

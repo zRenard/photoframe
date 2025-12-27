@@ -138,6 +138,7 @@ const SettingsPanel = memo(({
       language: settings.language,
       theme: settings.theme,
       imageDisplayMode: settings.imageDisplayMode,
+      slideshowOrder: settings.slideshowOrder,
       transition: {
         type: transition?.type || 'fade',
         duration: transition?.duration || 1000
@@ -226,6 +227,7 @@ const SettingsPanel = memo(({
             if (importedData.language !== undefined) settings.setLanguage(importedData.language);
             if (importedData.theme !== undefined) settings.setTheme(importedData.theme);
             if (importedData.imageDisplayMode !== undefined) settings.setImageDisplayMode(importedData.imageDisplayMode);
+            if (importedData.slideshowOrder !== undefined) settings.setSlideshowOrder(importedData.slideshowOrder);
             if (importedData.showImageCounter !== undefined) settings.setShowImageCounter(importedData.showImageCounter);
             if (importedData.showCountdown !== undefined) settings.setShowCountdown(importedData.showCountdown);
             if (importedData.countdownPosition !== undefined) settings.setCountdownPosition(importedData.countdownPosition);
@@ -347,7 +349,8 @@ const SettingsPanel = memo(({
         const url = URL.createObjectURL(file);
         console.log(`Image ${filename} would be uploaded. Preview URL: ${url}`);
         
-      } catch (_error) {
+      } catch (error) {
+        console.error('Upload error:', error);
         errors.push(`${file.name}: Upload failed`);
       }
     }
@@ -717,6 +720,25 @@ const SettingsPanel = memo(({
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Slideshow Order Mode */}
+                <div className="form-group">
+                  <label className="form-label">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                    </svg>
+                    {t.slideshowOrder || 'Slideshow Order'}
+                  </label>
+                  <select
+                    value={settings.slideshowOrder || 'sequential'}
+                    onChange={(e) => settings.setSlideshowOrder(e.target.value)}
+                    className="form-select"
+                  >
+                    <option value="sequential">➡️ {t.sequential || 'Sequential'}</option>
+                    <option value="random">🔀 {t.random || 'Random'}</option>
+                  </select>
+                  <p className="form-description">{t.slideshowOrderDescription || 'Choose how images transition'}</p>
                 </div>
 
                 {/* Image Display Mode */}

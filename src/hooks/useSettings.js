@@ -18,6 +18,7 @@ export const useSettings = () => {
   const [timeFormat24h, setTimeFormat24h] = useState(defaultConfig.timeDisplay.format24h);
   const [showSeconds, setShowSeconds] = useState(defaultConfig.timeDisplay.showSeconds);
   const [imageDisplayMode, setImageDisplayMode] = useState(defaultConfig.imageDisplayMode);
+  const [slideshowOrder, setSlideshowOrder] = useState(defaultConfig.slideshowOrder ?? 'sequential');
   
   // Time and date display settings
   const [timeDisplay, setTimeDisplay] = useState({
@@ -67,6 +68,7 @@ export const useSettings = () => {
     if (settings.imageCounterPosition !== undefined) setImageCounterPosition(settings.imageCounterPosition);
     if (settings.uiControlsPosition !== undefined) setUiControlsPosition(settings.uiControlsPosition);
     if (settings.rotationTime !== undefined) setRotationTime(settings.rotationTime);
+    if (settings.slideshowOrder !== undefined) setSlideshowOrder(settings.slideshowOrder);
   }, []);
 
   const loadWeatherSettings = useCallback((weather) => {
@@ -158,6 +160,7 @@ export const useSettings = () => {
     setTimeFormat24h(defaultConfig.timeDisplay.format24h);
     setShowSeconds(defaultConfig.timeDisplay.showSeconds);
     setImageDisplayMode(defaultConfig.imageDisplayMode);
+    setSlideshowOrder(defaultConfig.slideshowOrder ?? 'sequential');
     
     setTimeDisplay({
       position: defaultConfig.timeDisplay.position,
@@ -207,6 +210,7 @@ export const useSettings = () => {
       imageCounterPosition,
       uiControlsPosition,
       rotationTime,
+      slideshowOrder,
       weather: {
         show: showWeather,
         location: weatherLocation,
@@ -250,7 +254,7 @@ export const useSettings = () => {
     
     localStorage.setItem('photoframeSettings', JSON.stringify(settings));
   }, [
-    language, theme, imageDisplayMode, showImageCounter, showCountdown, countdownPosition, imageCounterPosition, uiControlsPosition, rotationTime,
+    language, theme, imageDisplayMode, showImageCounter, showCountdown, countdownPosition, imageCounterPosition, uiControlsPosition, rotationTime, slideshowOrder,
     showWeather, weatherLocation, weatherCoordinates, forecastMode, weatherPosition,
     weatherUnit, weatherSize, weatherRefreshInterval, showWeatherCountdown, showAirQuality,
     showTime, timeFormat24h, showSeconds, timeDisplay, timerEnabled, timerType,
@@ -282,6 +286,7 @@ export const useSettings = () => {
     timeFormat24h, setTimeFormat24h,
     showSeconds, setShowSeconds,
     imageDisplayMode, setImageDisplayMode,
+    slideshowOrder, setSlideshowOrder,
     
     // Display settings
     timeDisplay, setTimeDisplay,

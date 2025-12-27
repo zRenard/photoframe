@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-export const useImageSlideshow = (images, rotationTime, showCountdown) => {
+export const useImageSlideshow = (images, rotationTime, showCountdown, slideshowOrder = 'sequential') => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(rotationTime);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -9,7 +9,7 @@ export const useImageSlideshow = (images, rotationTime, showCountdown) => {
   const transitionTimeoutRef = useRef(null);
 
   // Navigate to next/previous image with memoized function
-  const navigateImage = useCallback((direction = 'next') => {
+  const navigateImage = useCallback((direction = 'next', useRandom = false) => {
     if (images.length <= 1 || isTransitioning) return;
     
     setIsTransitioning(true);
@@ -23,9 +23,25 @@ export const useImageSlideshow = (images, rotationTime, showCountdown) => {
     // Update image index after transition starts
     transitionTimeoutRef.current = setTimeout(() => {
       setCurrentImageIndex(prevIndex => {
-        const nextIndex = direction === 'next'
-          ? (prevIndex + 1) % images.length
-          : (prevIndex - 1 + images.length) % images.length;
+        let nextIndex;
+        
+        if (useRandom) {
+          // Random mode: pick a random index that's different from current
+          // Only apply exclusion if there are at least 2 images
+          if (images.length > 1) {
+            do {
+              nextIndex = Math.floor(Math.random() * images.length);
+            } while (nextIndex === prevIndex);
+          } else {
+            nextIndex = 0;
+          }
+        } else {
+          // Sequential mode
+          nextIndex = direction === 'next'
+            ? (prevIndex + 1) % images.length
+            : (prevIndex - 1 + images.length) % images.length;
+        }
+        
         return nextIndex;
       });
       
@@ -47,7 +63,8 @@ export const useImageSlideshow = (images, rotationTime, showCountdown) => {
 
     const slideInterval = setInterval(() => {
       if (!isTransitioning) {
-        navigateImage('next');
+        const useRandom = slideshowOrder === 'random';
+        navigateImage('next', useRandom);
       }
     }, rotationTime * 1000);
 
@@ -67,7 +84,7 @@ export const useImageSlideshow = (images, rotationTime, showCountdown) => {
       clearInterval(slideInterval);
       if (countdownInterval) clearInterval(countdownInterval);
     };
-  }, [rotationTime, images.length, isTransitioning, showCountdown, navigateImage]);
+  }, [rotationTime, images.length, isTransitioning, showCountdown, slideshowOrder, navigateImage]);
 
   // Reset countdown when rotation time changes
   useEffect(() => {

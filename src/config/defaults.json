@@ -13,6 +13,7 @@
   "imageCounterPosition": "bottom-right",
   "uiControlsPosition": "top-right",
   "rotationTime": 60,
+  "slideshowOrder": "random",
   "weather": {
     "show": true,
     "location": "",

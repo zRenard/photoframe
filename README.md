@@ -23,19 +23,28 @@ A modern, responsive photo frame application built with React, Vite, and Express
   - Real-time preview of changes
   - Responsive design for all screen sizes
   - Dark mode optimized UI
-  - Image management (upload/delete in dev mode)
+  - Professional configuration system with multiple sources
 
 - 🖼️ **Image Management**
   - Built-in image browser with thumbnails
   - Upload images directly from browser (dev mode)
   - Delete images with confirmation (dev mode)
+  - **Remote API uploads** with authentication and rate limiting
   - Automatic image detection and caching
   - Support for JPG, JPEG, PNG, GIF, WebP formats
 
-- 🚀 **Deployment Options**
+- � **Remote API (NEW)**
+  - Secured API endpoints with API key authentication
+  - Rate limiting (10 uploads per 15 minutes)
+  - File validation and security features
+  - Interactive validation page for testing
+  - Multiple configuration sources (env vars, local config, defaults)
+
+- �🚀 **Deployment Options**
   - Development server with hot-reload
   - Production-ready builds
   - Support for Node.js and Apache
+  - Professional configuration management
 
 ## 🚀 Getting Started
 
@@ -69,7 +78,32 @@ npm run dev
 - **Port**: http://localhost:5173
 - **Image Management**: Manual file system only
 - **Features**: View images, automatic detection
-- **Best for**: Quick setup, production deployment
+- **Best for**: Quick setup, basic usage
+
+#### Mode 2: Full Development Mode  
+```bash
+npm run dev:full
+```
+- **Ports**: http://localhost:5173 (Vite) + http://localhost:3001 (Express)
+- **Image Management**: Upload/delete from browser + file system
+- **Features**: All features including browser-based image management
+- **Best for**: Development, content management
+
+#### Mode 3: Remote API Mode (NEW)
+```bash
+# Configure your API key first
+cp config/api.local.template.js config/api.local.js
+# Edit the file with your settings
+
+# Start the server
+node server.js
+```
+- **Port**: http://localhost:3001 (or your configured port)
+- **Image Management**: Secured remote uploads + all local features
+- **Features**: Enterprise-grade API with authentication and rate limiting
+- **Validation Page**: http://localhost:3001/validate
+- **Best for**: Production deployment, remote integrations
+- **Best for**: Quick setup, basic usage
 
 #### Mode 2: Full Development Mode  
 ```bash
@@ -94,20 +128,101 @@ npm run dev:full
 3. Click red ❌ button on thumbnails to delete
 4. Files are automatically synced
 
+#### Remote API Mode (NEW)
+1. **Configure Authentication**: Set API key in config or environment
+2. **Use Validation Page**: Visit `/validate` for interactive testing
+3. **Remote Uploads**: POST to `/api/remote-upload` with API key
+4. **Monitor Activity**: Check server logs for upload tracking
+5. **Rate Limits**: Automatic protection (10 uploads per 15 minutes)
+
 ### 📋 Feature Comparison
 
-| Feature | Static Mode | Full Mode |
-|---------|-------------|-----------|
-| View thumbnails | ✅ | ✅ |
-| Auto-detect images | ✅ | ✅ |
-| Browser upload | ❌ | ✅ |
-| Browser delete | ❌ | ✅ |
-| File validation | ❌ | ✅ |
-| Duplicate handling | ❌ | ✅ |
-| Real-time sync | ❌ | ✅ |
-| Memory usage | Low | Medium |
-| Setup complexity | Simple | Medium |
-| Production ready | ✅ | ❌ (dev only) |
+| Feature | Static Mode | Full Mode | Remote API |
+|---------|-------------|-----------|------------|
+| View thumbnails | ✅ | ✅ | ✅ |
+| Auto-detect images | ✅ | ✅ | ✅ |
+| Browser upload | ❌ | ✅ | ✅ |
+| Browser delete | ❌ | ✅ | ✅ |
+| File validation | ❌ | ✅ | ✅ |
+| Duplicate handling | ❌ | ✅ | ✅ |
+| Real-time sync | ❌ | ✅ | ✅ |
+| **API Authentication** | ❌ | ❌ | ✅ |
+| **Rate Limiting** | ❌ | ❌ | ✅ |
+| **Remote Uploads** | ❌ | ❌ | ✅ |
+| **Production Security** | ❌ | ❌ | ✅ |
+| Memory usage | Low | Medium | Medium |
+| Setup complexity | Simple | Medium | Advanced |
+| Production ready | ✅ | ❌ (dev only) | ✅ |
+
+## 🔐 Remote API Configuration (NEW)
+
+The PhotoFrame API now includes a professional configuration system with secured remote upload capabilities.
+
+### Quick Setup
+
+#### Option 1: Environment Variables (Production)
+```bash
+# Set your API key
+export PHOTOFRAME_API_KEY="your-secure-api-key-here"
+export NODE_ENV=production
+
+# Start the server
+node server.js
+```
+
+#### Option 2: Local Configuration File (Development)
+```bash
+# Copy the template
+cp config/api.local.template.js config/api.local.js
+
+# Edit config/api.local.js with your settings
+node server.js
+```
+
+### Configuration Sources (Priority Order)
+1. **Environment Variables** (highest priority)
+2. **Local Config File** (`config/api.local.js`)
+3. **Default Configuration** (fallback)
+
+### Available Settings
+
+| Setting | Environment Variable | Default | Description |
+|---------|---------------------|---------|-------------|
+| `apiKey` | `PHOTOFRAME_API_KEY` | `'default-api-key-change-me'` | API authentication key |
+| `port` | `PHOTOFRAME_PORT` | `3001` | Server port number |
+| `rateLimitMaxRequests` | `PHOTOFRAME_RATE_LIMIT` | `10` | Max uploads per 15min window |
+| `maxFileSize` | `PHOTOFRAME_MAX_FILE_SIZE` | `10485760` | Max file size (10MB) |
+| `isDevelopment` | `NODE_ENV` | `true` | Development/Production mode |
+
+### Remote API Endpoints
+
+- `GET /api/info` - API documentation and status
+- `GET /api/test-secure` - Test authentication
+- `POST /api/remote-upload` - Upload images (requires API key)
+- `GET /validate` - Interactive testing interface
+
+### Testing the Remote API
+
+1. **Start the server**: `node server.js`
+2. **Visit validation page**: http://localhost:3001/validate (or your configured port)
+3. **Use your API key** to test uploads and authentication
+4. **Upload images** via the beautiful web interface
+
+### Example: Remote Upload with curl
+```bash
+curl -X POST http://localhost:3001/api/remote-upload \
+  -H "X-API-Key: your-api-key" \
+  -F "image=@/path/to/your/image.jpg"
+```
+
+### Security Features
+- 🔐 **API Key Authentication** - Required for all remote operations  
+- ⏱️ **Rate Limiting** - 10 uploads per 15 minutes per client
+- 🛡️ **File Validation** - Only allowed image types and sizes
+- 🔒 **Production Warnings** - Alerts for insecure configurations
+- 📝 **Comprehensive Logging** - Track all upload activity
+
+For complete configuration documentation, see [`docs/config/README.md`](docs/config/README.md).
 
 
 ### 🚀 Testings
@@ -127,7 +242,6 @@ This application has been optimized for better performance with:
 - **Efficient State Management**: Grouped related state and optimized updates
 - **Lazy Loading**: Components load only when needed
 
-For detailed information about the optimizations, see [PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md).
 
 ## 🚀 Production Deployment
 
@@ -151,9 +265,25 @@ For detailed information about the optimizations, see [PERFORMANCE_OPTIMIZATION.
 
 2. **Run the container**
    ```bash
+   # Basic deployment
    podman run -d \
      --name photoframe \
      -p 3001:3001 \
+     -v C:\\git_clones\\photoframe\\public\\photos:/app/public/photos:Z \
+     --restart unless-stopped \
+     --health-cmd "curl -f http://localhost:3001/api/test || exit 1" \
+     --health-interval=30s \
+     --health-timeout=3s \
+     --health-retries=3 \
+     photoframe
+   
+   # Production deployment with API security
+   podman run -d \
+     --name photoframe \
+     -p 3001:3001 \
+     -e PHOTOFRAME_API_KEY="your-secure-api-key-here" \
+     -e NODE_ENV=production \
+     -e PHOTOFRAME_RATE_LIMIT=20 \
      -v C:\\git_clones\\photoframe\\public\\photos:/app/public/photos:Z \
      --restart unless-stopped \
      --health-cmd "curl -f http://localhost:3001/api/test || exit 1" \
@@ -188,11 +318,30 @@ For detailed information about the optimizations, see [PERFORMANCE_OPTIMIZATION.
    # Add images manually to photos directory
    ```
 
-2. **Start the production server**
+2. **Configure for production**
    ```bash
-   NODE_ENV=production node server.js
+   # Option A: Environment variables
+   export PHOTOFRAME_API_KEY="your-secure-api-key-here"
+   export NODE_ENV=production
+   export PHOTOFRAME_PORT=3001
+   
+   # Option B: Local configuration file
+   cp config/api.local.template.js config/api.local.js
+   # Edit the file with your production settings
    ```
-   The application will be available at `http://localhost:3001`
+
+3. **Start the production server**
+   ```bash
+   # Basic server
+   NODE_ENV=production node server.js
+   
+   # With custom API key
+   PHOTOFRAME_API_KEY="your-key" NODE_ENV=production node server.js
+   
+   # With PM2 (recommended)
+   pm2 start server.js --name photoframe --env production
+   ```
+   The application will be available at `http://localhost:3001` (or your configured port)
 
 ### Option 3: Apache Web Server
 
@@ -210,9 +359,51 @@ For detailed information about the optimizations, see [PERFORMANCE_OPTIMIZATION.
 
 ## 🔧 Configuration
 
+### Configuration System (NEW)
+
+PhotoFrame now uses a professional multi-source configuration system:
+
+**Priority Order:**
+1. Environment Variables (highest)
+2. Local Config File (`config/api.local.js`) 
+3. Default Values (fallback)
+
 ### Environment Variables
 
-Create a `.env` file in the project root with the following variables:
+The following environment variables are supported:
+
+```env
+# API Configuration
+PHOTOFRAME_API_KEY=your-secure-api-key-here
+PHOTOFRAME_PORT=3001
+PHOTOFRAME_RATE_LIMIT=10
+PHOTOFRAME_MAX_FILE_SIZE=10485760
+
+# Application Mode
+NODE_ENV=production
+```
+
+### Local Configuration File
+
+For development or when environment variables aren't suitable:
+
+```bash
+# Copy the template
+cp config/api.local.template.js config/api.local.js
+
+# Edit with your settings
+export default {
+  apiKey: 'your-secure-api-key-here',
+  port: 3001,
+  rateLimitMaxRequests: 10,
+  maxFileSize: 10 * 1024 * 1024,
+  isDevelopment: false
+};
+```
+
+### Legacy Environment Variables (Still Supported)
+
+For backwards compatibility:
 
 ```env
 PORT=3001
@@ -259,6 +450,45 @@ Access the configuration panel by clicking the gear icon (⚙️) in the top-rig
 - **Text Size**: Adjust text size (small to xxlarge)
 - **Position**: 7 different screen positions
 
+## 🧪 Testing Remote API
+
+### Interactive Validation Page
+
+PhotoFrame includes a beautiful, interactive validation page for testing the remote API:
+
+1. **Start the server**: `node server.js`
+2. **Visit**: http://localhost:3001/validate (or your configured port)
+3. **Features**:
+   - Test API connectivity with your API key
+   - Upload images through the web interface
+   - Real-time error reporting and success feedback
+   - File validation and progress indicators
+   - Modern, responsive design
+
+### API Testing with curl
+
+```bash
+# Test basic connectivity
+curl http://localhost:3001/api/test
+
+# Test secure endpoint
+curl -H "X-API-Key: your-api-key" http://localhost:3001/api/test-secure
+
+# Upload an image
+curl -X POST http://localhost:3001/api/remote-upload \
+  -H "X-API-Key: your-api-key" \
+  -F "image=@/path/to/your/image.jpg"
+```
+
+### API Documentation
+
+Visit `http://localhost:3001/api/info` for complete API documentation including:
+- Available endpoints
+- Authentication requirements  
+- Rate limiting information
+- File requirements and restrictions
+- Configuration status
+
 ## 🔍 Troubleshooting
 
 ### Common Issues
@@ -273,10 +503,27 @@ Access the configuration panel by clicking the gear icon (⚙️) in the top-rig
    - Check for CORS errors in the browser console
    - Verify the API URL in the frontend code
 
-3. **Apache deployment issues**
+3. **Remote API issues**
+   - **401 Unauthorized**: Check your API key configuration
+   - **403 Forbidden**: Verify the API key is correct
+   - **429 Rate Limited**: Wait 15 minutes or adjust rate limits
+   - **500 Server Error**: Check server logs and file permissions
+   - **Configuration not loading**: Verify file paths and syntax in `config/api.local.js`
+
+4. **Apache deployment issues**
    - Ensure `mod_rewrite` is enabled
    - Verify `.htaccess` file is present in the web root
    - Check Apache error logs for specific issues
+
+### Server Startup Messages
+
+Look for these messages when starting the server:
+```
+📋 Loaded local API configuration    # Config file found and loaded
+🔐 API Key: ✅ Custom key configured  # Secure API key in use
+⚠️  Using default key - CHANGE THIS!  # Security warning
+📏 Upload limits: 10MB, 10 per 15min  # Current limits displayed
+```
 
 ## 📝 License
 
@@ -287,7 +534,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), and [Express](https://expressjs.com/)
 - Styled with [Tailwind CSS](https://tailwindcss.com/)
 - Icons by [Heroicons](https://heroicons.com/)
+- Secure file uploads with [Multer](https://github.com/expressjs/multer)
+- Professional configuration system with multi-source support
 
+#
 ## 🎨 Customization
 
 ### Adding Custom Styles
