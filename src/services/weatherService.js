@@ -1,17 +1,19 @@
 import axios from 'axios';
+import defaultConfig from '../config/defaults.json';
 
-// OpenWeatherMap API key - This should be stored securely in production
-// For this example we're using a free API key with limited requests
-const API_KEY = '4ae2636d8dfbdc3044bede63951a019b'; // Replace with your own API key
+// OpenWeatherMap API key - Fetched from configuration
+// This provides more flexibility and easier maintenance
+const API_KEY = defaultConfig.weather.apiKey || '4ae2636d8dfbdc3044bede63951a019b'; // Fallback to default
 
 // Fetch current weather for a location
-const fetchCurrentWeather = async (location, unit = 'metric', language = 'en') => {
+const fetchCurrentWeather = async (location, unit = 'metric', language = 'en', customApiKey = null) => {
   try {
+    const apiKey = customApiKey || API_KEY;
     console.log(`API call: fetchCurrentWeather with language=${language}`);
     const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
       params: {
         q: location,
-        appid: API_KEY,
+        appid: apiKey,
         units: unit,
         lang: language
       }
@@ -24,13 +26,14 @@ const fetchCurrentWeather = async (location, unit = 'metric', language = 'en') =
 };
 
 // Fetch 5-day forecast for a location
-const fetchForecast = async (location, unit = 'metric', language = 'en') => {
+const fetchForecast = async (location, unit = 'metric', language = 'en', customApiKey = null) => {
   try {
+    const apiKey = customApiKey || API_KEY;
     console.log(`API call: fetchForecast with language=${language}`);
     const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast`, {
       params: {
         q: location,
-        appid: API_KEY,
+        appid: apiKey,
         units: unit,
         lang: language
       }
@@ -75,24 +78,24 @@ const mapLanguageToApiCode = (appLanguage) => {
 };
 
 // Get weather based on mode (today, tomorrow, smart)
-const getWeatherByMode = async (location, mode, unit = 'metric', language = 'en') => {
+const getWeatherByMode = async (location, mode, unit = 'metric', language = 'en', customApiKey = null) => {
   // Get the correct API language code
   const apiLanguage = mapLanguageToApiCode(language);
   
   console.log(`Weather API call with language: ${apiLanguage} (from app language: ${language})`);
-  const currentWeather = await fetchCurrentWeather(location, unit, apiLanguage);
+  const currentWeather = await fetchCurrentWeather(location, unit, apiLanguage, customApiKey);
   
   if (mode === 'today') {
     return { current: currentWeather, forecast: null };
   } else if (mode === 'tomorrow') {
     console.log(`Fetching forecast with language: ${apiLanguage}`);
-    const forecast = await fetchForecast(location, unit, apiLanguage);
+    const forecast = await fetchForecast(location, unit, apiLanguage, customApiKey);
     return { current: null, forecast };
   } else if (mode === 'smart') {
     // Smart mode: Show today's weather until noon, then tomorrow's
     const now = new Date();
     console.log(`Smart mode forecast with language: ${apiLanguage}`);
-    const forecast = await fetchForecast(location, unit, apiLanguage);
+    const forecast = await fetchForecast(location, unit, apiLanguage, customApiKey);
     
     if (now.getHours() < 12) {
       // Before noon, show today's weather
@@ -112,4 +115,33 @@ const getWeatherIconUrl = (iconCode) => {
   return `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
 };
 
-export { fetchCurrentWeather, fetchForecast, getWeatherByMode, getWeatherIconUrl, mapLanguageToApiCode };
+// Format location information with name and coordinates
+const formatLocationInfo = (weatherData) => {
+  if (!weatherData) return null;
+  
+  const locationName = weatherData.name;
+  const country = weatherData.sys?.country || '';
+  const lat = weatherData.coord?.lat;
+  const lon = weatherData.coord?.lon;
+  
+  let formattedName = locationName;
+  if (country) {
+    formattedName += `, ${country}`;
+  }
+  
+  let formattedCoordinates = '';
+  if (typeof lat === 'number' && typeof lon === 'number') {
+    // Format to 2 decimal places
+    const latFormatted = lat.toFixed(2);
+    const lonFormatted = lon.toFixed(2);
+    formattedCoordinates = `[${latFormatted}, ${lonFormatted}]`;
+  }
+  
+  return {
+    name: formattedName,
+    coordinates: formattedCoordinates,
+    formattedString: `${formattedName} ${formattedCoordinates}`
+  };
+};
+
+export { fetchCurrentWeather, fetchForecast, getWeatherByMode, getWeatherIconUrl, mapLanguageToApiCode, formatLocationInfo };

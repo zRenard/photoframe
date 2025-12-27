@@ -100,7 +100,13 @@ const translations = {
       imperial: 'Imperial (°F)'
     },
     currentWeather: 'Current Weather',
-    forecast: 'Forecast'
+    forecast: 'Forecast',
+    refreshInterval: 'Refresh Interval',
+    weatherRefreshInterval: 'Weather Refresh Interval',
+    showWeatherCountdown: 'Show Refresh Countdown',
+    refreshWeatherNow: 'Refresh Weather Now',
+    nextUpdate: 'Next update in',
+    lastUpdated: 'Last updated'
   },
   es: {
     settings: 'Configuración de Presentación',
@@ -195,7 +201,13 @@ const translations = {
       imperial: 'Imperial (°F)'
     },
     currentWeather: 'Clima Actual',
-    forecast: 'Pronóstico'
+    forecast: 'Pronóstico',
+    refreshInterval: 'Intervalo de Actualización',
+    weatherRefreshInterval: 'Intervalo de Actualización',
+    showWeatherCountdown: 'Mostrar Cuenta Regresiva',
+    refreshWeatherNow: 'Actualizar Clima Ahora',
+    nextUpdate: 'Próxima actualización en',
+    lastUpdated: 'Última actualización'
   },
   it: {
     settings: 'Impostazioni Presentazione',
@@ -287,7 +299,13 @@ const translations = {
       imperial: 'Imperiale (°F)'
     },
     currentWeather: 'Meteo Attuale',
-    forecast: 'Previsioni'
+    forecast: 'Previsioni',
+    refreshInterval: 'Intervallo di Aggiornamento',
+    weatherRefreshInterval: 'Intervallo di Aggiornamento',
+    showWeatherCountdown: 'Mostra Conto alla Rovescia',
+    refreshWeatherNow: 'Aggiorna Meteo Ora',
+    nextUpdate: 'Prossimo aggiornamento in',
+    lastUpdated: 'Ultimo aggiornamento'
   },
   de: {
     settings: 'Diashow-Einstellungen',
@@ -331,6 +349,12 @@ const translations = {
     },
     currentWeather: 'Aktuelles Wetter',
     forecast: 'Vorhersage',
+    refreshInterval: 'Aktualisierungsintervall',
+    weatherRefreshInterval: 'Aktualisierungsintervall',
+    showWeatherCountdown: 'Countdown anzeigen',
+    refreshWeatherNow: 'Wetter jetzt aktualisieren',
+    nextUpdate: 'Nächstes Update in',
+    lastUpdated: 'Zuletzt aktualisiert',
     sizes: {
       'size-1': 'Größe 1 (3rem)',
       'size-2': 'Größe 2 (4.7rem)',
@@ -415,6 +439,12 @@ const translations = {
     },
     currentWeather: '当前天气',
     forecast: '天气预报',
+    refreshInterval: '刷新间隔',
+    weatherRefreshInterval: '刷新间隔',
+    showWeatherCountdown: '显示刷新倒计时',
+    refreshWeatherNow: '立即刷新天气',
+    nextUpdate: '下次更新于',
+    lastUpdated: '上次更新',
     showTime: '显示时间',
     timeFormat: '时间格式',
     timeFormat12h: '12小时制',
@@ -507,6 +537,12 @@ const translations = {
     },
     currentWeather: '現在の天気',
     forecast: '天気予報',
+    refreshInterval: '更新間隔',
+    weatherRefreshInterval: '更新間隔',
+    showWeatherCountdown: '更新カウントダウン表示',
+    refreshWeatherNow: '今すぐ天気を更新',
+    nextUpdate: '次の更新まで',
+    lastUpdated: '最終更新',
     sunday: '日曜日',
     monday: '月曜日',
     timeSettings: '時間設定',
@@ -609,6 +645,12 @@ const translations = {
     },
     currentWeather: 'Météo Actuelle',
     forecast: 'Prévision',
+    refreshInterval: 'Intervalle de Rafraîchissement',
+    weatherRefreshInterval: 'Intervalle de Rafraîchissement',
+    showWeatherCountdown: 'Afficher le Compte à Rebours',
+    refreshWeatherNow: 'Actualiser la Météo Maintenant',
+    nextUpdate: 'Prochaine mise à jour dans',
+    lastUpdated: 'Dernière mise à jour',
     sizes: {
       'size-1': 'Taille 1 (3rem)',
       'size-2': 'Taille 2 (4.7rem)',
@@ -733,15 +775,27 @@ function App() {
   const [weatherPosition, setWeatherPosition] = useState(defaultConfig.weather?.position ?? "top-right");
   const [weatherUnit, setWeatherUnit] = useState(defaultConfig.weather?.unit ?? "metric");
   const [weatherSize, setWeatherSize] = useState(defaultConfig.weather?.size ?? "size-2");
+  const [weatherRefreshInterval, setWeatherRefreshInterval] = useState(defaultConfig.weather?.refreshInterval ?? 60);
+  const [showWeatherCountdown, setShowWeatherCountdown] = useState(defaultConfig.weather?.showCountdown ?? false);
+  // API key is now static from the configuration file, no longer user-editable
+  const weatherApiKey = defaultConfig.weather?.apiKey ?? "";
   
   // Get weather data using the hook at component top level (to avoid Rules of Hooks violations)
-  const { renderWeatherContent } = useWeatherData(
+  const { 
+    renderWeatherContent, 
+    refreshWeather, 
+    formattedTimeRemaining, 
+    timeRemaining, 
+    lastUpdated
+  } = useWeatherData(
     weatherLocation,
     forecastMode,
     weatherUnit,
     language, // This language parameter should be passed to the API for translations
     translations,
-    weatherSize
+    weatherSize,
+    weatherApiKey,
+    weatherRefreshInterval
   );
   
   // Log for debugging weather translation issues
@@ -1220,6 +1274,8 @@ function App() {
     setWeatherPosition(defaultConfig.weather?.position ?? "top-right");
     setWeatherUnit(defaultConfig.weather?.unit ?? "metric");
     setWeatherSize(defaultConfig.weather?.size ?? "size-2");
+    setWeatherRefreshInterval(defaultConfig.weather?.refreshInterval ?? 60);
+    setShowWeatherCountdown(defaultConfig.weather?.showCountdown ?? false);
   };
 
   // Save settings
@@ -1239,7 +1295,10 @@ function App() {
         forecastMode,
         position: weatherPosition, // Make sure this value is saved
         unit: weatherUnit,
-        size: weatherSize
+        size: weatherSize,
+        apiKey: defaultConfig.weather?.apiKey || '', // Use the default API key from the configuration
+        refreshInterval: weatherRefreshInterval,
+        showCountdown: showWeatherCountdown
       },
       timeDisplay: {
         show: showTime,
@@ -1530,6 +1589,9 @@ function App() {
             showTime={showTime}
             showDate={showDate}
             size={weatherSize}
+            apiKey={weatherApiKey}
+            refreshInterval={weatherRefreshInterval}
+            showRefreshCountdown={showWeatherCountdown}
           />
         )}
 
@@ -2230,6 +2292,135 @@ function App() {
                         <label className="block text-sm font-medium">
                           {t.position}
                         </label>
+                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
+                          <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
+                          {[
+                            { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
+                            { pos: 'top-right', x: 'right-4', y: 'top-4', transform: '' },
+                            { pos: 'top-center', x: 'left-1/2', y: 'top-4', transform: 'translateX(-50%)' },
+                            { pos: 'center-left', x: 'left-4', y: 'top-1/2', transform: 'translateY(-50%)' },
+                            { pos: 'center', x: 'left-1/2', y: 'top-1/2', transform: 'translate(-50%, -50%)' },
+                            { pos: 'center-right', x: 'right-4', y: 'top-1/2', transform: 'translateY(-50%)' },
+                            { pos: 'bottom-left', x: 'left-4', y: 'bottom-4', transform: '' },
+                            { pos: 'bottom-right', x: 'right-4', y: 'bottom-4', transform: '' },
+                            { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: 'translateX(-50%)' },
+                          ].map(({pos, x, y, transform}) => (
+                            <div 
+                              key={`weather-${pos}`} 
+                              className={`absolute ${x} ${y} flex items-center justify-center w-8 h-8`}
+                              style={{ transform }}
+                            >
+                              <button
+                                onClick={() => {
+                                  setWeatherPosition(pos);
+                                  // Update config immediately when position changes
+                                  const updatedConfig = {
+                                    ...config,
+                                    weather: {
+                                      ...config.weather,
+                                      position: pos
+                                    }
+                                  };
+                                  saveConfig(updatedConfig);
+                                }}
+                                className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
+                                  weatherPosition === pos 
+                                    ? 'bg-accent ring-2 ring-accent ring-opacity-70 shadow-md' 
+                                    : 'bg-panel-border hover:bg-panel-border-hover border-2 border-panel-border-hover'
+                                }`}
+                                aria-label={`Weather position ${pos}`}
+                                title={pos.replace('-', ' ')}
+                              >
+                                {weatherPosition === pos && (
+                                  <span className="w-2 h-2 bg-white rounded-full"></span>
+                                )}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {/* Weather Refresh Interval */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label htmlFor="weather-refresh-interval" className="block text-sm font-medium">
+                              {t.weatherRefreshInterval}: {weatherRefreshInterval} {t.minutes || 'minutes'}
+                            </label>
+                          </div>
+                          <input
+                            id="weather-refresh-interval"
+                            type="range"
+                            min="30"
+                            max="240"
+                            step="10"
+                            value={weatherRefreshInterval}
+                            onChange={(e) => {
+                              const newInterval = parseInt(e.target.value);
+                              setWeatherRefreshInterval(newInterval);
+                              // Force refresh weather data with new interval, but use setTimeout 
+                              // to avoid potential infinite refresh loops
+                              if (refreshWeather) {
+                                setTimeout(() => refreshWeather(true), 50);
+                              }
+                            }}
+                            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                          />
+                          <div className="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>30{t.minutes ? t.minutes.charAt(0) : 'm'}</span>
+                            <span>4h</span>
+                          </div>
+                        </div>
+                        
+                        {/* Show Weather Countdown Toggle */}
+                        <div className="mt-4 flex items-center justify-between">
+                          <label htmlFor="show-weather-countdown" className="text-sm">
+                            {t.showWeatherCountdown}
+                          </label>
+                          <input
+                            type="checkbox"
+                            id="show-weather-countdown"
+                            checked={showWeatherCountdown}
+                            onChange={(e) => setShowWeatherCountdown(e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-500 bg-panel-bg text-accent focus:ring-accent"
+                          />
+                        </div>
+                        
+                        {/* Weather Refresh Countdown Display */}
+                        <div className="mt-4 p-3 bg-panel-bg-hover rounded-md">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <span className="text-sm font-medium">{t.nextUpdate}: </span>
+                              <span className="text-sm text-accent font-bold">{formattedTimeRemaining}</span>
+                            </div>
+                            <div>
+                              {lastUpdated && (
+                                <span className="text-xs text-gray-400">
+                                  {t.lastUpdated || 'Last update'}: {lastUpdated.toLocaleTimeString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="mt-2 w-full bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                            <div 
+                              className="bg-accent h-2.5" 
+                              style={{ 
+                                width: `${Math.max(0, Math.min(100, (timeRemaining / (weatherRefreshInterval * 60)) * 100))}%`,
+                                transition: 'none'
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Manual Refresh Button */}
+                        <button
+                          onClick={() => refreshWeather ? refreshWeather() : null}
+                          className="mt-4 w-full py-2 px-4 bg-accent text-white rounded hover:bg-accent-hover transition-colors"
+                        >
+                          {t.refreshWeatherNow}
+                        </button>
+                        
                         <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
                           <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
                           {[

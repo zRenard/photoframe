@@ -28,6 +28,9 @@ const translations = {
 };
 
 const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek = 0, language = 'en' }) => {
+  // Store initialDate as a ref to avoid re-renders
+  const initialDateRef = React.useRef(initialDate);
+  
   const [currentMonth, setCurrentMonth] = useState(new Date(initialDate));
   const [selectedDate, setSelectedDate] = useState(new Date(initialDate));
   
@@ -36,10 +39,14 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
   // Get translations for the current language
   const t = translations[language] || translations.en;
   
+  // Only update state if initialDate has actually changed (compare timestamps)
   useEffect(() => {
-    // Update selected date when initialDate prop changes
-    setSelectedDate(new Date(initialDate));
-    setCurrentMonth(new Date(initialDate));
+    // Only update if the dates are different (by timestamp)
+    if (initialDateRef.current.getTime() !== initialDate.getTime()) {
+      initialDateRef.current = initialDate;
+      setSelectedDate(new Date(initialDate));
+      setCurrentMonth(new Date(initialDate));
+    }
   }, [initialDate]);
 
   const renderHeader = () => {

@@ -15,7 +15,9 @@
     "forecastMode": "smart",
     "position": "top-right",
     "unit": "metric",
-    "size": "size-2"
+    "size": "size-2",
+    "apiKey": "4ae2636d8dfbdc3044bede63951a019b",
+    "refreshInterval": 60
   },
   "timeDisplay": {
     "show": true,

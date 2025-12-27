@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { getWeatherByMode, getWeatherIconUrl } from '../services/weatherService';
+import { getWeatherByMode, getWeatherIconUrl, formatLocationInfo } from '../services/weatherService';
 
 // Weather sizes definition - shared between hook and component
 const weatherSizes = {
@@ -32,17 +32,22 @@ const weatherSizes = {
 };
 
 // Export a reusable hook for weather data to share across components
-export function useWeatherData(location, forecastMode, unit, language, translations, size = 'size-2') {
+export function useWeatherData(location, forecastMode, unit, language, translations, size = 'size-2', apiKey = null, refreshInterval = 60) {
   // Set default values within the function
   forecastMode = forecastMode || 'today';
   unit = unit || 'metric';
   language = language || 'en';
+  refreshInterval = refreshInterval || 60; // Default to 60 minutes if not provided
+  
   const [weatherData, setWeatherData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentLanguage, setCurrentLanguage] = useState(language);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [nextUpdate, setNextUpdate] = useState(null);
+  const [timeRemaining, setTimeRemaining] = useState(refreshInterval * 60);
   
-  // Force a refresh when language changes
+  // Force a refresh when language or refreshInterval changes
   useEffect(() => {
     if (currentLanguage !== language) {
       console.log(`Language changed from ${currentLanguage} to ${language}, forcing weather data refresh`);
@@ -51,29 +56,127 @@ export function useWeatherData(location, forecastMode, unit, language, translati
     }
   }, [language, currentLanguage]);
   
+  // Reset timeRemaining and recalculate nextUpdate when refreshInterval changes
   useEffect(() => {
-    const fetchWeather = async () => {
+    // Reset the countdown timer when refresh interval changes
+    setTimeRemaining(refreshInterval * 60);
+    
+    // Also update the nextUpdate time based on the new interval
+    if (lastUpdated) {
+      const newNextUpdate = new Date(lastUpdated);
+      newNextUpdate.setMinutes(newNextUpdate.getMinutes() + refreshInterval);
+      setNextUpdate(newNextUpdate);
+    }
+  }, [refreshInterval, lastUpdated]);
+  
+  // Create a function to manually trigger weather refresh
+  const fetchWeather = async (force = false) => {
+    try {
+      // Validate essential parameters to avoid unnecessary API calls
+      if (!location) {
+        console.log('Weather: Missing location, skipping fetch');
+        setError('Please enter a location');
+        return;
+      }
+      
+      // Check if we should refresh based on time elapsed or if forced
+      const now = new Date();
+      const shouldRefresh = force || 
+                           !lastUpdated || 
+                           !nextUpdate || 
+                           now >= nextUpdate;
+      
+      if (!shouldRefresh) {
+        console.log('Weather data still fresh, skipping fetch');
+        
+        // Even if we don't fetch new data, we should still update the nextUpdate time
+        // to reflect the current refreshInterval value - this handles interval changes
+        if (force && lastUpdated) {
+          const updatedNextTime = new Date(lastUpdated);
+          updatedNextTime.setMinutes(updatedNextTime.getMinutes() + refreshInterval);
+          setNextUpdate(updatedNextTime);
+          setTimeRemaining(refreshInterval * 60);
+          console.log(`Weather interval changed to ${refreshInterval} minutes, next update recalculated`);
+        }
+        
+        return;
+      }
+      
+      // Set loading state
+      setLoading(true);
+      console.log(`WeatherDisplay: Fetching weather for '${location}' with language: ${language}`);
+      
+      // Fetch weather data with proper error handling
       try {
-        setLoading(true);
-        console.log(`WeatherDisplay: Fetching weather with language: ${language}`);
-        const data = await getWeatherByMode(location, forecastMode, unit, language);
+        const data = await getWeatherByMode(location, forecastMode, unit, language, apiKey);
+        if (!data) throw new Error('No weather data received');
+        
         setWeatherData(data);
         setError(null);
-      } catch (err) {
-        console.error('Error fetching weather data:', err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        
+        // Set timestamps
+        const currentTime = new Date();
+        setLastUpdated(currentTime);
+        
+        // Calculate next update time
+        const nextUpdateTime = new Date(currentTime);
+        nextUpdateTime.setMinutes(nextUpdateTime.getMinutes() + refreshInterval);
+        setNextUpdate(nextUpdateTime);
+        
+        // Reset countdown
+        setTimeRemaining(refreshInterval * 60);
+      } catch (fetchError) {
+        console.error('Error fetching weather data:', fetchError);
+        setError(fetchError.message || 'Failed to fetch weather data');
       }
-    };
-
+      
+    } catch (err) {
+      console.error('Error in weather fetch process:', err);
+      setError(err.message || 'An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Expose the fetchWeather function for manual refresh
+  useEffect(() => {
+    // Use a memoized function to avoid recreation on each render
+    const refreshFunction = () => fetchWeather();
+    
+    // Initial fetch
     fetchWeather();
     
-    // Refresh weather data every 30 minutes
-    const intervalId = setInterval(fetchWeather, 30 * 60 * 1000);
+    // Set up the interval for auto-refresh based on the configured interval
+    // Use large intervals (minutes) to avoid excessive refreshes
+    const intervalId = setInterval(refreshFunction, refreshInterval * 60 * 1000);
     
     return () => clearInterval(intervalId);
-  }, [location, forecastMode, unit, language]);
+  }, [location, forecastMode, unit, language, apiKey, refreshInterval]);
+  
+  // Update countdown timer every second
+  useEffect(() => {
+    if (!nextUpdate) return;
+    
+    // Update immediately to ensure UI consistency
+    const updateTimeRemaining = () => {
+      const now = new Date();
+      const diffMs = nextUpdate - now;
+      const diffSec = Math.max(0, Math.floor(diffMs / 1000));
+      setTimeRemaining(diffSec);
+    };
+    
+    // Initial update
+    updateTimeRemaining();
+    
+    // Then update every second, but not too frequently
+    const countdownInterval = setInterval(updateTimeRemaining, 1000);
+    
+    return () => {
+      clearInterval(countdownInterval);
+    };
+    // nextUpdate is the only dependency we need
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nextUpdate]);
   
 
 
@@ -167,15 +270,77 @@ export function useWeatherData(location, forecastMode, unit, language, translati
             </div>
           )}
         </div>
+        
+        {/* Location footer with name and coordinates */}
+        {displayData && (
+          <div className="mt-2 text-xs text-center border-t border-white border-opacity-20 pt-1 font-light tracking-wide">
+            <span className="font-medium">{formatLocationInfo(displayData)?.name || displayData.name || 'Unknown location'}</span>
+            {formatLocationInfo(displayData)?.coordinates && (
+              <span className="text-white text-opacity-75 ml-1">{formatLocationInfo(displayData)?.coordinates}</span>
+            )}
+          </div>
+        )}
       </>
     );
   };
   
-  return { loading, error, weatherData, renderWeatherContent };
+  // Format the time remaining for display
+  const formatTimeRemaining = () => {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    
+    // If more than an hour, show hours and minutes
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      return `${hours}h ${remainingMinutes}m`;
+    }
+    
+    // If less than an hour but more than a minute, show minutes and seconds
+    if (minutes > 0) {
+      return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
+    }
+    
+    // If less than a minute, just show seconds
+    return `${seconds}s`;
+  };
+  
+  // Create a stable refreshWeather function using useCallback
+  const stableRefreshWeather = useCallback((force = true) => {
+    fetchWeather(force);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [/* fetchWeather changes on every render, so we intentionally omit it */]);
+  
+  return { 
+    loading, 
+    error, 
+    weatherData, 
+    renderWeatherContent,
+    lastUpdated,
+    nextUpdate,
+    timeRemaining,
+    formattedTimeRemaining: formatTimeRemaining(),
+    refreshWeather: stableRefreshWeather // Expose stable refresh function
+  };
 }
 
 // Main WeatherDisplay component
-function WeatherDisplay({ location, forecastMode = 'today', unit = 'metric', position = 'top-right', language = 'en', translations, timePosition, datePosition, showTime, showDate, size = 'size-2' }) {
+function WeatherDisplay({ 
+  location, 
+  forecastMode = 'today', 
+  unit = 'metric', 
+  position = 'top-right', 
+  language = 'en', 
+  translations, 
+  timePosition, 
+  datePosition, 
+  showTime, 
+  showDate, 
+  size = 'size-2', 
+  apiKey = null,
+  refreshInterval = 60, 
+  showRefreshCountdown = false
+}) {
   
   // Position classes mapping - same as in App.jsx
   const positionClasses = {
@@ -202,7 +367,28 @@ function WeatherDisplay({ location, forecastMode = 'today', unit = 'metric', pos
   }, [language, lastLanguage]);
   
   // Use the shared hook for weather data
-  const { renderWeatherContent } = useWeatherData(location, forecastMode, unit, language, translations, size);
+  const { 
+    renderWeatherContent, 
+    formattedTimeRemaining, 
+    refreshWeather,
+    nextUpdate
+  } = useWeatherData(location, forecastMode, unit, language, translations, size, apiKey, refreshInterval);
+  
+  // React to changes in refreshInterval from parent component - track previous value
+  const refreshIntervalRef = useRef(refreshInterval);
+  
+  useEffect(() => {
+    // Only refresh if the interval has actually changed
+    if (refreshIntervalRef.current !== refreshInterval && nextUpdate) {
+      refreshIntervalRef.current = refreshInterval;
+      // Use setTimeout to break potential circular updates
+      setTimeout(() => {
+        console.log('Refresh interval changed, updating weather countdown');
+        refreshWeather(true);
+      }, 100);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [refreshInterval]);
   
   // Check if we should render this as part of an existing time/date component
   const shouldRenderWithTimeComponent = showTime && timePosition === position;
@@ -220,12 +406,37 @@ function WeatherDisplay({ location, forecastMode = 'today', unit = 'metric', pos
   // If we're here, we need to render the weather on its own
   const validPosition = position && positionClasses[position] ? position : 'top-right';
   
+  // Create a custom version of renderWeatherContent that includes the countdown and refresh button
+  const renderCustomWeatherContent = () => {
+    return (
+      <>
+        {renderWeatherContent()}
+        
+        {/* Weather refresh countdown and button */}
+        {showRefreshCountdown && (
+          <div className="mt-2 pt-1 border-t border-white border-opacity-20 flex items-center justify-between text-xs">
+            <div className="text-white text-opacity-75">
+              {translations[language]?.nextUpdate || 'Next'}: {formattedTimeRemaining}
+            </div>
+            <button 
+              onClick={() => refreshWeather()} 
+              className="px-1 py-0.5 bg-accent bg-opacity-70 hover:bg-opacity-100 rounded text-white text-opacity-90 hover:text-opacity-100 transition-all"
+              title="Refresh weather now"
+            >
+              ↻
+            </button>
+          </div>
+        )}
+      </>
+    );
+  };
+  
   // Render standalone weather component
   return (
     <div 
       className={`weather-widget ${positionClasses[validPosition]} fixed z-10 bg-black bg-opacity-50 text-white p-3 rounded-lg transition-all duration-300`}
     >
-      {renderWeatherContent()}
+      {renderCustomWeatherContent()}
     </div>
   );
 }
@@ -251,7 +462,10 @@ WeatherDisplay.propTypes = {
   timePosition: PropTypes.string,
   datePosition: PropTypes.string,
   showTime: PropTypes.bool,
-  showDate: PropTypes.bool
+  showDate: PropTypes.bool,
+  apiKey: PropTypes.string,
+  refreshInterval: PropTypes.number,
+  showRefreshCountdown: PropTypes.bool
 };
 
 export default WeatherDisplay;
