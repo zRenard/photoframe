@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { getWeatherByMode, getWeatherIconUrl, formatLocationInfo } from '../services/weatherService';
+import { getWeatherByMode, getWeatherIconUrl, formatLocationInfo, fetchAirQuality, getAirQualityDescription } from '../services/weatherService';
+import defaultConfig from '../config/defaults.json';
 
 // Weather sizes definition - shared between hook and component
 const weatherSizes = {
@@ -31,8 +32,8 @@ const weatherSizes = {
   }
 };
 
-// Export a reusable hook for weather data to share across components
-export function useWeatherData(location, forecastMode, unit, language, translations, size = 'size-2', apiKey = null, refreshInterval = 60) {
+// Define a reusable hook for weather data to share across components
+function useWeatherData(location, forecastMode, unit, language, translations, size = 'size-2', apiKey = null, refreshInterval = 60, showAirQuality = false) {
   // Set default values within the function
   forecastMode = forecastMode || 'today';
   unit = unit || 'metric';
@@ -40,6 +41,7 @@ export function useWeatherData(location, forecastMode, unit, language, translati
   refreshInterval = refreshInterval || 60; // Default to 60 minutes if not provided
   
   const [weatherData, setWeatherData] = useState(null);
+  const [airQualityData, setAirQualityData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentLanguage, setCurrentLanguage] = useState(language);
@@ -50,7 +52,7 @@ export function useWeatherData(location, forecastMode, unit, language, translati
   // Force a refresh when language or refreshInterval changes
   useEffect(() => {
     if (currentLanguage !== language) {
-      console.log(`Language changed from ${currentLanguage} to ${language}, forcing weather data refresh`);
+      if (defaultConfig.debug) console.log(`Language changed from ${currentLanguage} to ${language}, forcing weather data refresh`);
       setCurrentLanguage(language);
       setLoading(true); // This will trigger a refetch
     }
@@ -74,7 +76,7 @@ export function useWeatherData(location, forecastMode, unit, language, translati
     try {
       // Validate essential parameters to avoid unnecessary API calls
       if (!location) {
-        console.log('Weather: Missing location, skipping fetch');
+        if (defaultConfig.debug) console.log('Weather: Missing location, skipping fetch');
         setError('Please enter a location');
         return;
       }
@@ -87,7 +89,7 @@ export function useWeatherData(location, forecastMode, unit, language, translati
                            now >= nextUpdate;
       
       if (!shouldRefresh) {
-        console.log('Weather data still fresh, skipping fetch');
+        if (defaultConfig.debug) console.log('Weather data still fresh, skipping fetch');
         
         // Even if we don't fetch new data, we should still update the nextUpdate time
         // to reflect the current refreshInterval value - this handles interval changes
@@ -96,7 +98,7 @@ export function useWeatherData(location, forecastMode, unit, language, translati
           updatedNextTime.setMinutes(updatedNextTime.getMinutes() + refreshInterval);
           setNextUpdate(updatedNextTime);
           setTimeRemaining(refreshInterval * 60);
-          console.log(`Weather interval changed to ${refreshInterval} minutes, next update recalculated`);
+          if (defaultConfig.debug) console.log(`Weather interval changed to ${refreshInterval} minutes, next update recalculated`);
         }
         
         return;
@@ -104,14 +106,48 @@ export function useWeatherData(location, forecastMode, unit, language, translati
       
       // Set loading state
       setLoading(true);
-      console.log(`WeatherDisplay: Fetching weather for '${location}' with language: ${language}`);
+      if (defaultConfig.debug) {
+        console.log(`WeatherDisplay: Fetching weather for '${location}' with language: ${language}`);
+        console.log(`Weather parameters: forecastMode=${forecastMode}, unit=${unit}, apiKey=${apiKey ? 'provided' : 'missing'}`);
+      }
       
       // Fetch weather data with proper error handling
       try {
-        const data = await getWeatherByMode(location, forecastMode, unit, language, apiKey);
+        const data = await getWeatherByMode(location, forecastMode, unit, language, apiKey, translations);
         if (!data) throw new Error('No weather data received');
         
         setWeatherData(data);
+        
+        // If air quality feature is enabled, fetch air quality data
+        if (showAirQuality) {
+          // Air quality requires coordinates, which we get from weather data
+          const displayData = data.current || data.forecast;
+          
+          if (displayData?.coord) {
+            const { lat, lon } = displayData.coord;
+            if (defaultConfig.debug) console.log(`Fetching air quality data for [${lat}, ${lon}], forecast mode: ${forecastMode}`);
+            try {
+              const airQuality = await fetchAirQuality(lat, lon, apiKey);
+              if (airQuality) {
+                setAirQualityData(airQuality);
+                if (defaultConfig.debug) console.log('Air quality data received:', airQuality);
+              } else {
+                if (defaultConfig.debug) console.log('No air quality data received');
+                setAirQualityData(null);
+              }
+            } catch (airQualityError) {
+              console.error('Error fetching air quality data:', airQualityError);
+              setAirQualityData(null);
+            }
+          } else {
+            if (defaultConfig.debug) console.log('Weather data does not contain coordinates for air quality lookup. Data:', displayData);
+            setAirQualityData(null);
+          }
+        } else {
+          // Reset air quality data if feature is disabled
+          setAirQualityData(null);
+        }
+        
         setError(null);
         
         // Set timestamps
@@ -151,7 +187,7 @@ export function useWeatherData(location, forecastMode, unit, language, translati
     const intervalId = setInterval(refreshFunction, refreshInterval * 60 * 1000);
     
     return () => clearInterval(intervalId);
-  }, [location, forecastMode, unit, language, apiKey, refreshInterval]);
+  }, [location, forecastMode, unit, language, apiKey, refreshInterval, showAirQuality]);
   
   // Update countdown timer every second
   useEffect(() => {
@@ -206,6 +242,26 @@ export function useWeatherData(location, forecastMode, unit, language, translati
       return `${roundedTemp}°${unit === 'metric' ? 'C' : 'F'}`;
     };
     
+    // Helper function to get location name for display
+    const getLocationDisplayName = (data) => {
+      // First try to use the formatted location info
+      const formattedLocation = formatLocationInfo(data)?.name;
+      if (formattedLocation) {
+        return formattedLocation;
+      }
+      
+      // Fallback to manually constructing the name
+      if (data.name) {
+        if (data.sys?.country) {
+          return `${data.name}, ${data.sys.country}`;
+        }
+        return data.name;
+      }
+      
+      // Last resort
+      return 'Unknown location';
+    };
+    
     // Extract weather data
     const temp = displayData.main?.temp;
     const weatherDescription = displayData.weather?.[0]?.description;
@@ -213,9 +269,11 @@ export function useWeatherData(location, forecastMode, unit, language, translati
     const windSpeed = displayData.wind?.speed;
     const humidity = displayData.main?.humidity;
     
-    // Debug info for translations
-    console.log(`Weather data received for language: ${language}`);
-    console.log(`Weather description: ${weatherDescription}`);
+    // Debug info for translations - only shown when debug mode is enabled
+    if (defaultConfig.debug) {
+      console.log(`Weather data received for language: ${language}`);
+      console.log(`Weather description: ${weatherDescription}`);
+    }
     
     const t = translations[language] || translations['en'];
     
@@ -238,6 +296,18 @@ export function useWeatherData(location, forecastMode, unit, language, translati
       }
       
       title = `${t.forecast} (${contextKey})`;
+    }
+    
+    // Extract air quality data if available
+    const airQualityIndex = airQualityData?.main?.aqi;
+    const airQualityInfo = airQualityIndex !== undefined 
+      ? getAirQualityDescription(airQualityIndex, language, translations) 
+      : null;
+    
+    // Debug logging for air quality translations
+    if (defaultConfig.debug && airQualityInfo) {
+      console.log(`Air quality level (${language}): ${airQualityInfo.level}`);
+      console.log(`Air quality translations available: ${translations?.[language]?.airQualityLevels ? 'yes' : 'no'}`);
     }
     
     return (
@@ -271,10 +341,33 @@ export function useWeatherData(location, forecastMode, unit, language, translati
           )}
         </div>
         
+        {/* Air Quality Display */}
+        {showAirQuality && airQualityInfo && (
+          <div className="mt-2 border-t border-white border-opacity-20 pt-2">
+            <div className="text-xs font-medium mb-1">
+              {t.airQuality || 'Air Quality'}: {airQualityInfo.level}
+            </div>
+            <div className="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
+              <div 
+                className={`${airQualityInfo.color} h-1.5`} 
+                style={{ width: `${airQualityIndex * 20}%` }} 
+              ></div>
+            </div>
+            {airQualityData?.components && (
+              <div className="mt-1 grid grid-cols-2 gap-x-2 gap-y-1 text-xs">
+                <div>PM2.5: {airQualityData.components.pm2_5} μg/m³</div>
+                <div>PM10: {airQualityData.components.pm10} μg/m³</div>
+              </div>
+            )}
+          </div>
+        )}
+        
         {/* Location footer with name and coordinates */}
         {displayData && (
           <div className="mt-2 text-xs text-center border-t border-white border-opacity-20 pt-1 font-light tracking-wide">
-            <span className="font-medium">{formatLocationInfo(displayData)?.name || displayData.name || 'Unknown location'}</span>
+            <span className="font-medium">
+              {getLocationDisplayName(displayData)}
+            </span>
             {formatLocationInfo(displayData)?.coordinates && (
               <span className="text-white text-opacity-75 ml-1">{formatLocationInfo(displayData)?.coordinates}</span>
             )}
@@ -309,12 +402,13 @@ export function useWeatherData(location, forecastMode, unit, language, translati
   const stableRefreshWeather = useCallback((force = true) => {
     fetchWeather(force);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [/* fetchWeather changes on every render, so we intentionally omit it */]);
+  }, [language, location, forecastMode, unit, apiKey]);
   
   return { 
     loading, 
     error, 
-    weatherData, 
+    weatherData,
+    airQualityData,
     renderWeatherContent,
     lastUpdated,
     nextUpdate,
@@ -339,7 +433,8 @@ function WeatherDisplay({
   size = 'size-2', 
   apiKey = null,
   refreshInterval = 60, 
-  showRefreshCountdown = false
+  showRefreshCountdown = false,
+  showAirQuality = false
 }) {
   
   // Position classes mapping - same as in App.jsx
@@ -361,7 +456,7 @@ function WeatherDisplay({
   // Check if language changed
   useEffect(() => {
     if (lastLanguage !== language) {
-      console.log(`Language changed from ${lastLanguage} to ${language}, weather data will refresh`);
+      if (defaultConfig.debug) console.log(`Language changed from ${lastLanguage} to ${language}, weather data will refresh`);
       setLastLanguage(language);
     }
   }, [language, lastLanguage]);
@@ -372,7 +467,7 @@ function WeatherDisplay({
     formattedTimeRemaining, 
     refreshWeather,
     nextUpdate
-  } = useWeatherData(location, forecastMode, unit, language, translations, size, apiKey, refreshInterval);
+  } = useWeatherData(location, forecastMode, unit, language, translations, size, apiKey, refreshInterval, showAirQuality);
   
   // React to changes in refreshInterval from parent component - track previous value
   const refreshIntervalRef = useRef(refreshInterval);
@@ -383,7 +478,7 @@ function WeatherDisplay({
       refreshIntervalRef.current = refreshInterval;
       // Use setTimeout to break potential circular updates
       setTimeout(() => {
-        console.log('Refresh interval changed, updating weather countdown');
+        if (defaultConfig.debug) console.log('Refresh interval changed, updating weather countdown');
         refreshWeather(true);
       }, 100);
     }
@@ -465,7 +560,9 @@ WeatherDisplay.propTypes = {
   showDate: PropTypes.bool,
   apiKey: PropTypes.string,
   refreshInterval: PropTypes.number,
-  showRefreshCountdown: PropTypes.bool
+  showRefreshCountdown: PropTypes.bool,
+  showAirQuality: PropTypes.bool
 };
 
 export default WeatherDisplay;
+export { useWeatherData };

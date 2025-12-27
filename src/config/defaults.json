@@ -1,4 +1,5 @@
 {
+  "debug": false,
   "language": "fr",
   "theme": "light",
   "imageDisplayMode": "fit",
@@ -11,13 +12,15 @@
   "rotationTime": 60,
   "weather": {
     "show": true,
-    "location": "Nice, city, France",
+    "location": "Nice,France",
     "forecastMode": "smart",
     "position": "top-right",
     "unit": "metric",
     "size": "size-2",
     "apiKey": "4ae2636d8dfbdc3044bede63951a019b",
-    "refreshInterval": 60
+    "refreshInterval": 60,
+    "showAirQuality": true,
+    "showCountdown": true
   },
   "timeDisplay": {
     "show": true,
@@ -60,27 +63,5 @@
         "description": "Joyeux Noël ! Réunion de famille prévue."
       }
     ]
-  },
-  "calendarEvents": [
-    {
-      "date": "2025-07-14",
-      "title": "Fête Nationale",
-      "description": "Jour férié national français - Prise de la Bastille"
-    },
-    {
-      "date": "2025-07-25",
-      "title": "Anniversaire",
-      "description": "N'oubliez pas l'anniversaire de Marie !"
-    },
-    {
-      "date": "2025-08-15",
-      "title": "Assomption",
-      "description": "Jour férié - Assomption de Marie"
-    },
-    {
-      "date": "2025-12-25",
-      "title": "Noël",
-      "description": "Joyeux Noël ! Réunion de famille prévue."
-    }
-  ]
+  }
 }

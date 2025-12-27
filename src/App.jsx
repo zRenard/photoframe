@@ -106,7 +106,17 @@ const translations = {
     showWeatherCountdown: 'Show Refresh Countdown',
     refreshWeatherNow: 'Refresh Weather Now',
     nextUpdate: 'Next update in',
-    lastUpdated: 'Last updated'
+    lastUpdated: 'Last updated',
+    showAirQuality: 'Show Air Quality',
+    airQuality: 'Air Quality',
+    airQualityLevels: {
+      good: 'Good',
+      fair: 'Fair',
+      moderate: 'Moderate',
+      poor: 'Poor',
+      veryPoor: 'Very Poor',
+      unknown: 'Unknown'
+    }
   },
   es: {
     settings: 'Configuración de Presentación',
@@ -207,7 +217,17 @@ const translations = {
     showWeatherCountdown: 'Mostrar Cuenta Regresiva',
     refreshWeatherNow: 'Actualizar Clima Ahora',
     nextUpdate: 'Próxima actualización en',
-    lastUpdated: 'Última actualización'
+    lastUpdated: 'Última actualización',
+    showAirQuality: 'Mostrar Calidad del Aire',
+    airQuality: 'Calidad del Aire',
+    airQualityLevels: {
+      good: 'Buena',
+      fair: 'Aceptable',
+      moderate: 'Moderada',
+      poor: 'Mala',
+      veryPoor: 'Muy Mala',
+      unknown: 'Desconocida'
+    }
   },
   it: {
     settings: 'Impostazioni Presentazione',
@@ -305,7 +325,17 @@ const translations = {
     showWeatherCountdown: 'Mostra Conto alla Rovescia',
     refreshWeatherNow: 'Aggiorna Meteo Ora',
     nextUpdate: 'Prossimo aggiornamento in',
-    lastUpdated: 'Ultimo aggiornamento'
+    lastUpdated: 'Ultimo aggiornamento',
+    showAirQuality: 'Mostra Qualità dell\'Aria',
+    airQuality: 'Qualità dell\'Aria',
+    airQualityLevels: {
+      good: 'Buona',
+      fair: 'Discreta',
+      moderate: 'Moderata',
+      poor: 'Scadente',
+      veryPoor: 'Molto Scadente',
+      unknown: 'Sconosciuta'
+    }
   },
   de: {
     settings: 'Diashow-Einstellungen',
@@ -355,6 +385,16 @@ const translations = {
     refreshWeatherNow: 'Wetter jetzt aktualisieren',
     nextUpdate: 'Nächstes Update in',
     lastUpdated: 'Zuletzt aktualisiert',
+    showAirQuality: 'Luftqualität anzeigen',
+    airQuality: 'Luftqualität',
+    airQualityLevels: {
+      good: 'Gut',
+      fair: 'Befriedigend',
+      moderate: 'Mäßig',
+      poor: 'Schlecht',
+      veryPoor: 'Sehr Schlecht',
+      unknown: 'Unbekannt'
+    },
     sizes: {
       'size-1': 'Größe 1 (3rem)',
       'size-2': 'Größe 2 (4.7rem)',
@@ -445,6 +485,16 @@ const translations = {
     refreshWeatherNow: '立即刷新天气',
     nextUpdate: '下次更新于',
     lastUpdated: '上次更新',
+    showAirQuality: '显示空气质量',
+    airQuality: '空气质量',
+    airQualityLevels: {
+      good: '良好',
+      fair: '一般',
+      moderate: '中等',
+      poor: '较差',
+      veryPoor: '很差',
+      unknown: '未知'
+    },
     showTime: '显示时间',
     timeFormat: '时间格式',
     timeFormat12h: '12小时制',
@@ -543,6 +593,16 @@ const translations = {
     refreshWeatherNow: '今すぐ天気を更新',
     nextUpdate: '次の更新まで',
     lastUpdated: '最終更新',
+    showAirQuality: '大気質を表示',
+    airQuality: '大気質',
+    airQualityLevels: {
+      good: '良好',
+      fair: '普通',
+      moderate: '中程度',
+      poor: '悪い',
+      veryPoor: '非常に悪い',
+      unknown: '不明'
+    },
     sunday: '日曜日',
     monday: '月曜日',
     timeSettings: '時間設定',
@@ -651,6 +711,16 @@ const translations = {
     refreshWeatherNow: 'Actualiser la Météo Maintenant',
     nextUpdate: 'Prochaine mise à jour dans',
     lastUpdated: 'Dernière mise à jour',
+    showAirQuality: 'Afficher la Qualité de l\'Air',
+    airQuality: 'Qualité de l\'Air',
+    airQualityLevels: {
+      good: 'Bonne',
+      fair: 'Correcte',
+      moderate: 'Modérée',
+      poor: 'Mauvaise',
+      veryPoor: 'Très Mauvaise',
+      unknown: 'Inconnue'
+    },
     sizes: {
       'size-1': 'Taille 1 (3rem)',
       'size-2': 'Taille 2 (4.7rem)',
@@ -777,6 +847,7 @@ function App() {
   const [weatherSize, setWeatherSize] = useState(defaultConfig.weather?.size ?? "size-2");
   const [weatherRefreshInterval, setWeatherRefreshInterval] = useState(defaultConfig.weather?.refreshInterval ?? 60);
   const [showWeatherCountdown, setShowWeatherCountdown] = useState(defaultConfig.weather?.showCountdown ?? false);
+  const [showAirQuality, setShowAirQuality] = useState(defaultConfig.weather?.showAirQuality ?? false);
   // API key is now static from the configuration file, no longer user-editable
   const weatherApiKey = defaultConfig.weather?.apiKey ?? "";
   
@@ -795,12 +866,15 @@ function App() {
     translations,
     weatherSize,
     weatherApiKey,
-    weatherRefreshInterval
+    weatherRefreshInterval,
+    showAirQuality
   );
   
   // Log for debugging weather translation issues
   useEffect(() => {
-    console.log(`App component language changed to: ${language}`);
+    if (defaultConfig.debug) {
+      console.log(`App component language changed to: ${language}`);
+    }
   }, [language]);
   
   // Initialize translations based on current language
@@ -1276,6 +1350,7 @@ function App() {
     setWeatherSize(defaultConfig.weather?.size ?? "size-2");
     setWeatherRefreshInterval(defaultConfig.weather?.refreshInterval ?? 60);
     setShowWeatherCountdown(defaultConfig.weather?.showCountdown ?? false);
+    setShowAirQuality(defaultConfig.weather?.showAirQuality ?? false);
   };
 
   // Save settings
@@ -1298,7 +1373,8 @@ function App() {
         size: weatherSize,
         apiKey: defaultConfig.weather?.apiKey || '', // Use the default API key from the configuration
         refreshInterval: weatherRefreshInterval,
-        showCountdown: showWeatherCountdown
+        showCountdown: showWeatherCountdown,
+        showAirQuality: showAirQuality
       },
       timeDisplay: {
         show: showTime,
@@ -1592,6 +1668,7 @@ function App() {
             apiKey={weatherApiKey}
             refreshInterval={weatherRefreshInterval}
             showRefreshCountdown={showWeatherCountdown}
+            showAirQuality={showAirQuality}
           />
         )}
 
@@ -2386,6 +2463,20 @@ function App() {
                           />
                         </div>
                         
+                        {/* Show Air Quality Toggle */}
+                        <div className="mt-4 flex items-center justify-between">
+                          <label htmlFor="show-air-quality" className="text-sm">
+                            {t.showAirQuality || 'Show Air Quality'}
+                          </label>
+                          <input
+                            type="checkbox"
+                            id="show-air-quality"
+                            checked={showAirQuality}
+                            onChange={(e) => setShowAirQuality(e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-500 bg-panel-bg text-accent focus:ring-accent"
+                          />
+                        </div>
+                        
                         {/* Weather Refresh Countdown Display */}
                         <div className="mt-4 p-3 bg-panel-bg-hover rounded-md">
                           <div className="flex justify-between items-center">
@@ -2542,4 +2633,11 @@ function App() {
   )
 }
 
-export default App
+
+
+
+
+
+
+
+export default App;
