@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Cog6ToothIcon, XMarkIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24/outline';
+import { Cog6ToothIcon, XMarkIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import './App.css';
 import defaultConfig from './config/defaults.json';
+import CalendarPopin from './components/CalendarPopin';
+import WeatherDisplay, { useWeatherData } from './components/WeatherDisplay';
 
 // Translation strings
 const translations = {
@@ -17,6 +19,11 @@ const translations = {
     showImageCounter: 'Show Image Counter',
     showCountdown: 'Show Countdown',
     rotationTime: 'Rotation Time',
+    enableCalendar: 'Enable Calendar Feature',
+    selectDate: 'Select a date',
+    firstDayOfWeek: 'First day of week',
+    sunday: 'Sunday',
+    monday: 'Monday',
     timeSettings: 'Time Settings',
     showTime: 'Show Time',
     timeFormat: 'Time Format',
@@ -62,7 +69,44 @@ const translations = {
     displayModeDescription: 'Controls how images are displayed',
     originalDescription: 'Show images at their original size',
     adjustDescription: 'Fit image to screen while maintaining aspect ratio',
-    fitDescription: 'Fill screen with image (may crop)'
+    fitDescription: 'Fill screen with image (may crop)',
+    transitionEffect: 'Transition Effect',
+    transitionDuration: 'Transition Duration',
+    transitions: {
+      fade: 'Fade',
+      'slide-right': 'Slide Right',
+      'slide-left': 'Slide Left',
+      'slide-up': 'Slide Up',
+      'slide-down': 'Slide Down',
+      'zoom-in': 'Zoom In',
+      'zoom-out': 'Zoom Out',
+      rotate: 'Rotate',
+      flip: 'Flip',
+      blur: 'Blur'
+    },
+    weather: 'Weather',
+    weatherSettings: 'Weather Settings',
+    showWeather: 'Show Weather',
+    location: 'Location',
+    forecastMode: 'Forecast Mode',
+    forecastModes: {
+      today: 'Today',
+      tomorrow: 'Tomorrow',
+      smart: 'Smart (Today until noon, then Tomorrow)'
+    },
+    unit: 'Unit',
+    units: {
+      metric: 'Metric (°C)',
+      imperial: 'Imperial (°F)'
+    },
+    currentWeather: 'Current Weather',
+    forecast: 'Forecast',
+    refreshInterval: 'Refresh Interval',
+    weatherRefreshInterval: 'Weather Refresh Interval',
+    showWeatherCountdown: 'Show Refresh Countdown',
+    refreshWeatherNow: 'Refresh Weather Now',
+    nextUpdate: 'Next update in',
+    lastUpdated: 'Last updated'
   },
   es: {
     settings: 'Configuración de Presentación',
@@ -76,6 +120,11 @@ const translations = {
     showImageCounter: 'Mostrar Contador',
     showCountdown: 'Mostrar Cuenta Atrás',
     rotationTime: 'Tiempo de Rotación',
+    enableCalendar: 'Habilitar Función de Calendario',
+    selectDate: 'Seleccionar una fecha',
+    firstDayOfWeek: 'Primer día de la semana',
+    sunday: 'Domingo',
+    monday: 'Lunes',
     timeSettings: 'Configuración de Hora',
     showTime: 'Mostrar Hora',
     timeFormat: 'Formato de Hora',
@@ -121,7 +170,44 @@ const translations = {
     displayModeDescription: 'Controla cómo se muestran las imágenes',
     originalDescription: 'Mostrar imágenes en su tamaño original',
     adjustDescription: 'Ajustar la imagen a la pantalla manteniendo la relación de aspecto',
-    fitDescription: 'Llenar la pantalla con la imagen (puede recortar)'
+    fitDescription: 'Llenar la pantalla con la imagen (puede recortar)',
+    transitionEffect: 'Efecto de Transición',
+    transitionDuration: 'Duración de la Transición',
+    transitions: {
+      fade: 'Desvanecer',
+      'slide-right': 'Deslizar a la Derecha',
+      'slide-left': 'Deslizar a la Izquierda',
+      'slide-up': 'Deslizar hacia Arriba',
+      'slide-down': 'Deslizar hacia Abajo',
+      'zoom-in': 'Acercar',
+      'zoom-out': 'Alejar',
+      rotate: 'Rotar',
+      flip: 'Voltear',
+      blur: 'Difuminar'
+    },
+    weather: 'Clima',
+    weatherSettings: 'Configuración del Clima',
+    showWeather: 'Mostrar Clima',
+    location: 'Ubicación',
+    forecastMode: 'Modo de Pronóstico',
+    forecastModes: {
+      today: 'Hoy',
+      tomorrow: 'Mañana',
+      smart: 'Inteligente (Hoy hasta el mediodía, luego Mañana)'
+    },
+    unit: 'Unidad',
+    units: {
+      metric: 'Métrico (°C)',
+      imperial: 'Imperial (°F)'
+    },
+    currentWeather: 'Clima Actual',
+    forecast: 'Pronóstico',
+    refreshInterval: 'Intervalo de Actualización',
+    weatherRefreshInterval: 'Intervalo de Actualización',
+    showWeatherCountdown: 'Mostrar Cuenta Regresiva',
+    refreshWeatherNow: 'Actualizar Clima Ahora',
+    nextUpdate: 'Próxima actualización en',
+    lastUpdated: 'Última actualización'
   },
   it: {
     settings: 'Impostazioni Presentazione',
@@ -135,6 +221,11 @@ const translations = {
     showImageCounter: 'Mostra Contatore',
     showCountdown: 'Mostra Conto alla Rovescia',
     rotationTime: 'Tempo di Rotazione',
+    enableCalendar: 'Abilita Funzione Calendario',
+    selectDate: 'Seleziona una data',
+    firstDayOfWeek: 'Primo giorno della settimana',
+    sunday: 'Domenica',
+    monday: 'Lunedì',
     timeSettings: 'Impostazioni Ora',
     showTime: 'Mostra Ora',
     timeFormat: 'Formato Ora',
@@ -177,7 +268,44 @@ const translations = {
     displayModeDescription: 'Controlla come vengono visualizzate le immagini',
     originalDescription: 'Mostra le immagini alla loro dimensione originale',
     adjustDescription: 'Adatta l\'immagine allo schermo mantenendo le proporzioni',
-    fitDescription: 'Riempi lo schermo con l\'immagine (potrebbe essere ritagliata)'
+    fitDescription: 'Riempi lo schermo con l\'immagine (potrebbe essere ritagliata)',
+    transitionEffect: 'Effetto di Transizione',
+    transitionDuration: 'Durata della Transizione',
+    transitions: {
+      fade: 'Dissolvenza',
+      'slide-right': 'Scorri a Destra',
+      'slide-left': 'Scorri a Sinistra',
+      'slide-up': 'Scorri Verso l\'Alto',
+      'slide-down': 'Scorri Verso il Basso',
+      'zoom-in': 'Zoom Avanti',
+      'zoom-out': 'Zoom Indietro',
+      rotate: 'Rotazione',
+      flip: 'Capovolgimento',
+      blur: 'Sfocatura'
+    },
+    weather: 'Meteo',
+    weatherSettings: 'Impostazioni Meteo',
+    showWeather: 'Mostra Meteo',
+    location: 'Località',
+    forecastMode: 'Modalità Previsioni',
+    forecastModes: {
+      today: 'Oggi',
+      tomorrow: 'Domani',
+      smart: 'Intelligente (Oggi fino a mezzogiorno, poi Domani)'
+    },
+    unit: 'Unità',
+    units: {
+      metric: 'Metrico (°C)',
+      imperial: 'Imperiale (°F)'
+    },
+    currentWeather: 'Meteo Attuale',
+    forecast: 'Previsioni',
+    refreshInterval: 'Intervallo di Aggiornamento',
+    weatherRefreshInterval: 'Intervallo di Aggiornamento',
+    showWeatherCountdown: 'Mostra Conto alla Rovescia',
+    refreshWeatherNow: 'Aggiorna Meteo Ora',
+    nextUpdate: 'Prossimo aggiornamento in',
+    lastUpdated: 'Ultimo aggiornamento'
   },
   de: {
     settings: 'Diashow-Einstellungen',
@@ -191,6 +319,11 @@ const translations = {
     showImageCounter: 'Bildzähler anzeigen',
     showCountdown: 'Countdown anzeigen',
     rotationTime: 'Wechselintervall',
+    enableCalendar: 'Kalenderfunktion aktivieren',
+    selectDate: 'Datum auswählen',
+    firstDayOfWeek: 'Erster Tag der Woche',
+    sunday: 'Sonntag',
+    monday: 'Montag',
     timeSettings: 'Uhrzeit-Einstellungen',
     showTime: 'Uhrzeit anzeigen',
     timeFormat: 'Uhrzeit-Format',
@@ -199,6 +332,29 @@ const translations = {
     showSeconds: 'Sekunden anzeigen',
     position: 'Position',
     size: 'Größe',
+    weather: 'Wetter',
+    weatherSettings: 'Wetter-Einstellungen',
+    showWeather: 'Wetter anzeigen',
+    location: 'Standort',
+    forecastMode: 'Vorhersage-Modus',
+    forecastModes: {
+      today: 'Heute',
+      tomorrow: 'Morgen',
+      smart: 'Intelligent (Heute bis Mittag, dann Morgen)'
+    },
+    unit: 'Einheit',
+    units: {
+      metric: 'Metrisch (°C)',
+      imperial: 'Imperial (°F)'
+    },
+    currentWeather: 'Aktuelles Wetter',
+    forecast: 'Vorhersage',
+    refreshInterval: 'Aktualisierungsintervall',
+    weatherRefreshInterval: 'Aktualisierungsintervall',
+    showWeatherCountdown: 'Countdown anzeigen',
+    refreshWeatherNow: 'Wetter jetzt aktualisieren',
+    nextUpdate: 'Nächstes Update in',
+    lastUpdated: 'Zuletzt aktualisiert',
     sizes: {
       'size-1': 'Größe 1 (3rem)',
       'size-2': 'Größe 2 (4.7rem)',
@@ -236,7 +392,21 @@ const translations = {
     displayModeDescription: 'Steuert die Bildanzeige',
     originalDescription: 'Bilder in Originalgröße anzeigen',
     adjustDescription: 'Bild an den Bildschirm anpassen, Seitenverhältnis beibehalten',
-    fitDescription: 'Bildschirm mit Bild füllen (kann zugeschnitten werden)'
+    fitDescription: 'Bildschirm mit Bild füllen (kann zugeschnitten werden)',
+    transitionEffect: 'Übergangseffekt',
+    transitionDuration: 'Übergangsdauer',
+    transitions: {
+      fade: 'Ausblenden',
+      'slide-right': 'Nach rechts schieben',
+      'slide-left': 'Nach links schieben',
+      'slide-up': 'Nach oben schieben',
+      'slide-down': 'Nach unten schieben',
+      'zoom-in': 'Heranzoomen',
+      'zoom-out': 'Herauszoomen',
+      rotate: 'Drehen',
+      flip: 'Umdrehen',
+      blur: 'Weichzeichnen'
+    }
   },
   zh: {
     settings: '幻灯片设置',
@@ -246,7 +416,35 @@ const translations = {
     showImageCounter: '显示图片计数',
     showCountdown: '显示倒计时',
     rotationTime: '切换时间',
+    enableCalendar: '启用日历功能',
+    selectDate: '选择日期',
+    firstDayOfWeek: '每周第一天',
+    sunday: '星期日',
+    monday: '星期一',
     timeSettings: '时间设置',
+    weather: '天气',
+    weatherSettings: '天气设置',
+    showWeather: '显示天气',
+    location: '位置',
+    forecastMode: '预报模式',
+    forecastModes: {
+      today: '今天',
+      tomorrow: '明天',
+      smart: '智能（中午前显示今天，之后显示明天）'
+    },
+    unit: '单位',
+    units: {
+      metric: '公制 (°C)',
+      imperial: '英制 (°F)'
+    },
+    currentWeather: '当前天气',
+    forecast: '天气预报',
+    refreshInterval: '刷新间隔',
+    weatherRefreshInterval: '刷新间隔',
+    showWeatherCountdown: '显示刷新倒计时',
+    refreshWeatherNow: '立即刷新天气',
+    nextUpdate: '下次更新于',
+    lastUpdated: '上次更新',
     showTime: '显示时间',
     timeFormat: '时间格式',
     timeFormat12h: '12小时制',
@@ -291,7 +489,21 @@ const translations = {
     displayModeDescription: '控制图像的显示方式',
     originalDescription: '以原始尺寸显示图像',
     adjustDescription: '调整图像大小以适合屏幕，保持宽高比',
-    fitDescription: '填充屏幕（可能会裁剪图像）'
+    fitDescription: '填充屏幕（可能会裁剪图像）',
+    transitionEffect: '过渡效果',
+    transitionDuration: '过渡时间',
+    transitions: {
+      fade: '淡入淡出',
+      'slide-right': '向右滑动',
+      'slide-left': '向左滑动',
+      'slide-up': '向上滑动',
+      'slide-down': '向下滑动',
+      'zoom-in': '放大',
+      'zoom-out': '缩小',
+      rotate: '旋转',
+      flip: '翻转',
+      blur: '模糊'
+    }
   },
   ja: {
     settings: 'スライドショー設定',
@@ -305,6 +517,34 @@ const translations = {
     showImageCounter: '画像カウンターを表示',
     showCountdown: 'カウントダウンを表示',
     rotationTime: '切り替え時間',
+    enableCalendar: 'カレンダー機能を有効にする',
+    selectDate: '日付を選択',
+    firstDayOfWeek: '週の最初の日',
+    weather: '天気',
+    weatherSettings: '天気設定',
+    showWeather: '天気を表示',
+    location: '場所',
+    forecastMode: '予報モード',
+    forecastModes: {
+      today: '今日',
+      tomorrow: '明日',
+      smart: 'スマート（正午まで今日、その後明日）'
+    },
+    unit: '単位',
+    units: {
+      metric: 'メートル法 (°C)',
+      imperial: 'ヤード・ポンド法 (°F)'
+    },
+    currentWeather: '現在の天気',
+    forecast: '天気予報',
+    refreshInterval: '更新間隔',
+    weatherRefreshInterval: '更新間隔',
+    showWeatherCountdown: '更新カウントダウン表示',
+    refreshWeatherNow: '今すぐ天気を更新',
+    nextUpdate: '次の更新まで',
+    lastUpdated: '最終更新',
+    sunday: '日曜日',
+    monday: '月曜日',
     timeSettings: '時間設定',
     showTime: '時間を表示',
     timeFormat: '時間形式',
@@ -347,7 +587,21 @@ const translations = {
     displayModeDescription: '画像の表示方法を制御します',
     originalDescription: '画像を元のサイズで表示します',
     adjustDescription: 'アスペクト比を維持しながら画像を画面に合わせます',
-    fitDescription: '画像で画面を埋めます（トリミングされる場合があります）'
+    fitDescription: '画像で画面を埋めます（トリミングされる場合があります）',
+    transitionEffect: 'トランジション効果',
+    transitionDuration: 'トランジション時間',
+    transitions: {
+      fade: 'フェード',
+      'slide-right': '右にスライド',
+      'slide-left': '左にスライド',
+      'slide-up': '上にスライド',
+      'slide-down': '下にスライド',
+      'zoom-in': 'ズームイン',
+      'zoom-out': 'ズームアウト',
+      rotate: '回転',
+      flip: '反転',
+      blur: 'ぼかし'
+    }
   },
   fr: {
     settings: 'Paramètres du Diaporama',
@@ -361,6 +615,11 @@ const translations = {
     showImageCounter: 'Afficher le compteur',
     showCountdown: 'Afficher le décompte',
     rotationTime: 'Temps de rotation',
+    enableCalendar: 'Activer la fonction calendrier',
+    selectDate: 'Sélectionner une date',
+    firstDayOfWeek: 'Premier jour de la semaine',
+    sunday: 'Dimanche',
+    monday: 'Lundi',
     timeSettings: 'Paramètres de l\'heure',
     showTime: 'Afficher l\'heure',
     timeFormat: 'Format de l\'heure',
@@ -369,6 +628,29 @@ const translations = {
     showSeconds: 'Afficher les secondes',
     position: 'Position',
     size: 'Taille',
+    weather: 'Météo',
+    weatherSettings: 'Paramètres de la Météo',
+    showWeather: 'Afficher la Météo',
+    location: 'Emplacement',
+    forecastMode: 'Mode de Prévision',
+    forecastModes: {
+      today: 'Aujourd\'hui',
+      tomorrow: 'Demain',
+      smart: 'Intelligent (Aujourd\'hui jusqu\'à midi, puis Demain)'
+    },
+    unit: 'Unité',
+    units: {
+      metric: 'Métrique (°C)',
+      imperial: 'Impérial (°F)'
+    },
+    currentWeather: 'Météo Actuelle',
+    forecast: 'Prévision',
+    refreshInterval: 'Intervalle de Rafraîchissement',
+    weatherRefreshInterval: 'Intervalle de Rafraîchissement',
+    showWeatherCountdown: 'Afficher le Compte à Rebours',
+    refreshWeatherNow: 'Actualiser la Météo Maintenant',
+    nextUpdate: 'Prochaine mise à jour dans',
+    lastUpdated: 'Dernière mise à jour',
     sizes: {
       'size-1': 'Taille 1 (3rem)',
       'size-2': 'Taille 2 (4.7rem)',
@@ -406,7 +688,21 @@ const translations = {
     displayModeDescription: 'Contrôle la façon dont les images sont affichées',
     originalDescription: 'Afficher les images à leur taille d\'origine',
     adjustDescription: 'Ajuster l\'image à l\'écran en conservant les proportions',
-    fitDescription: 'Remplir l\'écran avec l\'image (peut être rognée)'
+    fitDescription: 'Remplir l\'écran avec l\'image (peut être rognée)',
+    transitionEffect: 'Effet de transition',
+    transitionDuration: 'Durée de transition',
+    transitions: {
+      fade: 'Fondu',
+      'slide-right': 'Glisser à droite',
+      'slide-left': 'Glisser à gauche',
+      'slide-up': 'Glisser vers le haut',
+      'slide-down': 'Glisser vers le bas',
+      'zoom-in': 'Zoom avant',
+      'zoom-out': 'Zoom arrière',
+      rotate: 'Rotation',
+      flip: 'Retournement',
+      blur: 'Flou'
+    }
   }
 };
 
@@ -466,9 +762,47 @@ function App() {
   const configRef = useRef(null);
   const [showDate, setShowDate] = useState(defaultConfig.dateDisplay.show);
   const [showTime, setShowTime] = useState(defaultConfig.timeDisplay.show);
+  const [enableCalendar, setEnableCalendar] = useState(defaultConfig.dateDisplay.enableCalendar);
+  const [firstDayOfWeek, setFirstDayOfWeek] = useState(defaultConfig.dateDisplay.firstDayOfWeek || 0);
   const [showImageCounter, setShowImageCounter] = useState(defaultConfig.showImageCounter);
   const [showCountdown, setShowCountdown] = useState(defaultConfig.showCountdown);
   const [language, setLanguage] = useState(defaultConfig.language);
+  
+  // Weather settings
+  const [showWeather, setShowWeather] = useState(defaultConfig.weather?.show ?? true);
+  const [weatherLocation, setWeatherLocation] = useState(defaultConfig.weather?.location ?? "Nice, France");
+  const [forecastMode, setForecastMode] = useState(defaultConfig.weather?.forecastMode ?? "smart");
+  const [weatherPosition, setWeatherPosition] = useState(defaultConfig.weather?.position ?? "top-right");
+  const [weatherUnit, setWeatherUnit] = useState(defaultConfig.weather?.unit ?? "metric");
+  const [weatherSize, setWeatherSize] = useState(defaultConfig.weather?.size ?? "size-2");
+  const [weatherRefreshInterval, setWeatherRefreshInterval] = useState(defaultConfig.weather?.refreshInterval ?? 60);
+  const [showWeatherCountdown, setShowWeatherCountdown] = useState(defaultConfig.weather?.showCountdown ?? false);
+  // API key is now static from the configuration file, no longer user-editable
+  const weatherApiKey = defaultConfig.weather?.apiKey ?? "";
+  
+  // Get weather data using the hook at component top level (to avoid Rules of Hooks violations)
+  const { 
+    renderWeatherContent, 
+    refreshWeather, 
+    formattedTimeRemaining, 
+    timeRemaining, 
+    lastUpdated
+  } = useWeatherData(
+    weatherLocation,
+    forecastMode,
+    weatherUnit,
+    language, // This language parameter should be passed to the API for translations
+    translations,
+    weatherSize,
+    weatherApiKey,
+    weatherRefreshInterval
+  );
+  
+  // Log for debugging weather translation issues
+  useEffect(() => {
+    console.log(`App component language changed to: ${language}`);
+  }, [language]);
+  
   // Initialize translations based on current language
   const t = translations[language] || translations.en;
   const [theme, setTheme] = useState(defaultConfig.theme);
@@ -567,6 +901,35 @@ function App() {
     'size-8': 'text-[7.5rem]'    // 7.5rem
   };
   
+  // Weather display sizes (sizes for both icon and text)
+  const weatherSizes = {
+    'size-1': {
+      icon: 'w-8 h-8',
+      temp: 'text-lg',
+      text: 'text-xs'
+    },
+    'size-2': {
+      icon: 'w-12 h-12',
+      temp: 'text-xl',
+      text: 'text-sm'
+    },
+    'size-3': {
+      icon: 'w-16 h-16',
+      temp: 'text-2xl',
+      text: 'text-base'
+    },
+    'size-4': {
+      icon: 'w-20 h-20',
+      temp: 'text-3xl',
+      text: 'text-lg'
+    },
+    'size-5': {
+      icon: 'w-24 h-24',
+      temp: 'text-4xl',
+      text: 'text-xl'
+    }
+  };
+  
   // Initialize config state with default values first
   const [config, setConfig] = useState({
     ...defaultConfig,
@@ -597,17 +960,19 @@ function App() {
   
   // Available transitions
   const availableTransitions = [
-    { id: 'fade', name: 'Fade' },
-    { id: 'slide-right', name: 'Slide Right' },
-    { id: 'slide-left', name: 'Slide Left' },
-    { id: 'slide-up', name: 'Slide Up' },
-    { id: 'slide-down', name: 'Slide Down' },
-    { id: 'zoom-in', name: 'Zoom In' },
-    { id: 'zoom-out', name: 'Zoom Out' },
-    { id: 'rotate', name: 'Rotate' },
-    { id: 'flip', name: 'Flip' },
-    { id: 'blur', name: 'Blur' },
+    { id: 'fade', name: t.transitions?.fade || 'Fade' },
+    { id: 'slide-right', name: t.transitions?.['slide-right'] || 'Slide Right' },
+    { id: 'slide-left', name: t.transitions?.['slide-left'] || 'Slide Left' },
+    { id: 'slide-up', name: t.transitions?.['slide-up'] || 'Slide Up' },
+    { id: 'slide-down', name: t.transitions?.['slide-down'] || 'Slide Down' },
+    { id: 'zoom-in', name: t.transitions?.['zoom-in'] || 'Zoom In' },
+    { id: 'zoom-out', name: t.transitions?.['zoom-out'] || 'Zoom Out' },
+    { id: 'rotate', name: t.transitions?.rotate || 'Rotate' },
+    { id: 'flip', name: t.transitions?.flip || 'Flip' },
+    { id: 'blur', name: t.transitions?.blur || 'Blur' },
   ];
+  
+
 
   // Function to save config
   const saveConfig = (newConfig) => {
@@ -668,14 +1033,32 @@ function App() {
   const selectedDateFormat = dateFormats.find(f => f.id === dateDisplay.format) || dateFormats[0];
   const currentDate = selectedDateFormat.format(now);
   
-  const timeOptions = {
-    hour12: !timeFormat24h,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: showSeconds ? '2-digit' : undefined
-  };
+  // Initialize current time state
+  const [currentTime, setCurrentTime] = useState('');
 
-  const currentTime = new Date().toLocaleTimeString(undefined, timeOptions);
+  // Update time every second when seconds are shown, or every minute otherwise
+  useEffect(() => {
+    const updateTime = () => {
+      const options = {
+        hour12: !timeFormat24h,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: showSeconds ? '2-digit' : undefined
+      };
+      setCurrentTime(new Date().toLocaleTimeString(undefined, options));
+    };
+    
+    // Initial update
+    updateTime();
+    
+    // Set interval for updates
+    const interval = setInterval(
+      updateTime,
+      showSeconds ? 1000 : 60000 // Update every second when showing seconds, otherwise every minute
+    );
+    
+    return () => clearInterval(interval);
+  }, [timeFormat24h, showSeconds]); // Re-run effect when time format or seconds display changes
   
   // Time display sizes (8 levels from 3rem to 15rem)
   const timeSizes = {
@@ -691,13 +1074,15 @@ function App() {
   
   // Position classes mapping
   const positionClasses = {
-    'top-left': 'top-4 left-4',
-    'top-center': 'top-4 left-1/2 transform -translate-x-1/2',
-    'top-right': 'top-4 right-4',
-    'center': 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
-    'bottom-left': 'bottom-16 left-4',
-    'bottom-center': 'bottom-16 left-1/2 transform -translate-x-1/2',
-    'bottom-right': 'bottom-16 right-4'
+    'top-left': 'absolute top-4 left-4',
+    'top-center': 'absolute top-4 left-1/2 transform -translate-x-1/2',
+    'top-right': 'absolute top-4 right-4',
+    'center-left': 'absolute top-1/2 left-4 transform -translate-y-1/2',
+    'center': 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
+    'center-right': 'absolute top-1/2 right-4 transform -translate-y-1/2',
+    'bottom-left': 'absolute bottom-16 left-4',
+    'bottom-center': 'absolute bottom-16 left-1/2 transform -translate-x-1/2',
+    'bottom-right': 'absolute bottom-16 right-4'
   };
 
   // Function to get a random image index that's different from the current one
@@ -879,12 +1264,60 @@ function App() {
       size: defaultConfig.dateDisplay.size,
       format: defaultConfig.dateDisplay.format
     });
+    setEnableCalendar(defaultConfig.dateDisplay.enableCalendar);
+    setFirstDayOfWeek(defaultConfig.dateDisplay.firstDayOfWeek || 0); // Reset first day of week
+    
+    // Reset weather settings
+    setShowWeather(defaultConfig.weather?.show ?? true);
+    setWeatherLocation(defaultConfig.weather?.location ?? "Nice, France");
+    setForecastMode(defaultConfig.weather?.forecastMode ?? "smart");
+    setWeatherPosition(defaultConfig.weather?.position ?? "top-right");
+    setWeatherUnit(defaultConfig.weather?.unit ?? "metric");
+    setWeatherSize(defaultConfig.weather?.size ?? "size-2");
+    setWeatherRefreshInterval(defaultConfig.weather?.refreshInterval ?? 60);
+    setShowWeatherCountdown(defaultConfig.weather?.showCountdown ?? false);
   };
 
   // Save settings
   const handleSaveSettings = () => {
-    // In a real app, you would save these settings to a server or local storage
-    // For now, we'll just close the config panel
+    // Save settings to localStorage
+    const settings = {
+      language,
+      theme,
+      imageDisplayMode,
+      transition,
+      showImageCounter,
+      showCountdown,
+      rotationTime,
+      weather: {
+        show: showWeather,
+        location: weatherLocation,
+        forecastMode,
+        position: weatherPosition, // Make sure this value is saved
+        unit: weatherUnit,
+        size: weatherSize,
+        apiKey: defaultConfig.weather?.apiKey || '', // Use the default API key from the configuration
+        refreshInterval: weatherRefreshInterval,
+        showCountdown: showWeatherCountdown
+      },
+      timeDisplay: {
+        show: showTime,
+        format24h: timeFormat24h,
+        showSeconds,
+        position: timeDisplay.position,
+        size: timeDisplay.size
+      },
+      dateDisplay: {
+        show: showDate,
+        format: dateDisplay.format,
+        position: dateDisplay.position,
+        size: dateDisplay.size,
+        enableCalendar,
+        firstDayOfWeek
+      }
+    };
+    
+    localStorage.setItem('photoframeSettings', JSON.stringify(settings));
     setIsConfigOpen(false);
   };
 
@@ -915,6 +1348,8 @@ function App() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isConfigOpen]);
+
+  const [showCalendar, setShowCalendar] = useState(false);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gray-900" style={{ overflow: 'hidden' }}>
@@ -1036,31 +1471,128 @@ function App() {
           </button>
         </div>
 
-        {/* Time Display */}
-        {showTime && (
-          <div className={`time-display ${positionClasses[timeDisplay.position]} bg-black bg-opacity-50 text-white p-4 rounded-lg transition-all duration-300`}>
+        {/* Unified Time/Date/Weather Display when all three are at the same position */}
+        {showTime && showDate && showWeather && 
+         timeDisplay.position === dateDisplay.position && 
+         dateDisplay.position === weatherPosition && (
+          <div className={`unified-display ${positionClasses[timeDisplay.position]} fixed bg-black bg-opacity-50 text-white p-4 rounded-lg transition-all duration-300`}>
+            {/* Time */}
             <div className={`${timeSizes[timeDisplay.size]} font-bold text-center`}>
               {currentTime}
             </div>
             
-            {/* Date Display - When same position as time */}
-            {showDate && timeDisplay.position === dateDisplay.position && (
-              <div className="mt-2">
+            {/* Date */}
+            <div className="mt-2">
+              <div className="flex items-center justify-center">
                 <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
                   {currentDate}
                 </div>
+                {enableCalendar && (
+                  <button 
+                    className="ml-2 text-white hover:text-accent cursor-pointer p-1 rounded-full flex items-center justify-center" 
+                    onClick={() => setShowCalendar(true)}
+                    aria-label="Open calendar"
+                  >
+                    <CalendarIcon className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+            </div>
+            
+            {/* Weather */}
+            <div className="weather-unified mt-3 pt-3 border-t border-gray-500">
+              {renderWeatherContent()}
+            </div>
+          </div>
+        )}
+        
+        {/* Time Display - When not all three components are at the same position */}
+        {showTime && !(showDate && showWeather && timeDisplay.position === dateDisplay.position && dateDisplay.position === weatherPosition) && (
+          <div className={`time-display ${positionClasses[timeDisplay.position]} fixed bg-black bg-opacity-50 text-white p-4 rounded-lg transition-all duration-300`}>
+            <div className={`${timeSizes[timeDisplay.size]} font-bold text-center`}>
+              {currentTime}
+            </div>
+            
+            {/* Date Display - When same position as time but not weather */}
+            {showDate && timeDisplay.position === dateDisplay.position && 
+             !(showWeather && dateDisplay.position === weatherPosition) && (
+              <div className="mt-2">
+                <div className="flex items-center justify-center">
+                  <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
+                    {currentDate}
+                  </div>
+                  {enableCalendar && (
+                    <button 
+                      className="ml-2 text-white hover:text-accent cursor-pointer p-1 rounded-full flex items-center justify-center" 
+                      onClick={() => setShowCalendar(true)}
+                      aria-label="Open calendar"
+                    >
+                      <CalendarIcon className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Weather Display - When same position as time but not date */}
+            {showWeather && weatherPosition === timeDisplay.position && 
+             !(showDate && timeDisplay.position === dateDisplay.position) && (
+              <div className="weather-with-time mt-3 pt-3 border-t border-gray-500">
+                {renderWeatherContent()}
               </div>
             )}
           </div>
         )}
         
-        {/* Date Display - When different position than time */}
-        {showDate && (!showTime || timeDisplay.position !== dateDisplay.position) && (
-          <div className={`date-display ${positionClasses[dateDisplay.position]} bg-black bg-opacity-50 text-white p-3 rounded-lg transition-all duration-300`}>
-            <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
-              {currentDate}
-            </div>
+        {/* Date Display - When different position than time and not unified with weather */}
+        {showDate && (!showTime || timeDisplay.position !== dateDisplay.position) && 
+         !(showWeather && showTime && timeDisplay.position === dateDisplay.position && dateDisplay.position === weatherPosition) && (
+          <div className={`date-display ${positionClasses[dateDisplay.position]} fixed bg-black bg-opacity-50 text-white p-3 rounded-lg transition-all duration-300`}>
+                <div className="flex items-center justify-center">
+                  <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
+                    {currentDate}
+                  </div>
+                  {enableCalendar && (
+                    <button 
+                      className="ml-2 text-white hover:text-accent cursor-pointer p-1 rounded-full flex items-center justify-center" 
+                      onClick={() => setShowCalendar(true)}
+                      aria-label="Open calendar"
+                    >
+                      <CalendarIcon className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+                
+                {/* Weather Display - When same position as date but not time */}
+                {showWeather && weatherPosition === dateDisplay.position && 
+                 (!showTime || timeDisplay.position !== dateDisplay.position) && (
+                  <div className="weather-with-date mt-3 pt-3 border-t border-gray-500">
+                    {renderWeatherContent()}
+                  </div>
+                )}
           </div>
+        )}
+        
+        {/* Standalone Weather Display - Only when not sharing position with time or date */}
+        {showWeather && 
+         !(showTime && weatherPosition === timeDisplay.position) && 
+         !(showDate && weatherPosition === dateDisplay.position) && (
+          <WeatherDisplay
+            location={weatherLocation}
+            forecastMode={forecastMode}
+            unit={weatherUnit}
+            position={weatherPosition}
+            language={language}
+            translations={translations}
+            timePosition={timeDisplay.position}
+            datePosition={dateDisplay.position}
+            showTime={showTime}
+            showDate={showDate}
+            size={weatherSize}
+            apiKey={weatherApiKey}
+            refreshInterval={weatherRefreshInterval}
+            showRefreshCountdown={showWeatherCountdown}
+          />
         )}
 
         {/* Bottom Bar */}
@@ -1237,7 +1769,7 @@ function App() {
                   
                   {/* Transition Settings */}
                   <div className="space-y-4">
-                    <h4 className="text-sm font-medium">Transition Effect</h4>
+                    <h4 className="text-sm font-medium">{t.transitionEffect}</h4>
                     <div className="space-y-2">
                       <div className="grid grid-cols-2 gap-2">
                         {availableTransitions.map((tran) => (
@@ -1257,7 +1789,7 @@ function App() {
                       </div>
                       <div className="mt-4">
                         <label htmlFor="transition-duration" className="block text-sm font-medium mb-1">
-                          Transition Duration: {transition.duration}ms
+                          {t.transitionDuration}: {transition.duration}ms
                         </label>
                         <input
                           type="range"
@@ -1439,18 +1971,28 @@ function App() {
                         <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
                           <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
                           {[
-                            { pos: 'top-left', x: 'left-4', y: 'top-4' },
+                            { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
                             { pos: 'top-center', x: 'left-1/2', y: 'top-4', transform: '-translate-x-1/2' },
-                            { pos: 'top-right', x: 'right-4', y: 'top-4' },
+                            { pos: 'top-right', x: 'right-4', y: 'top-4', transform: '' },
+                            { pos: 'center-left', x: 'left-4', y: 'top-1/2', transform: '-translate-y-1/2' },
                             { pos: 'center', x: 'left-1/2', y: 'top-1/2', transform: '-translate-x-1/2 -translate-y-1/2' },
-                            { pos: 'bottom-left', x: 'left-4', y: 'bottom-4' },
+                            { pos: 'center-right', x: 'right-4', y: 'top-1/2', transform: '-translate-y-1/2' },
+                            { pos: 'bottom-left', x: 'left-4', y: 'bottom-4', transform: '' },
                             { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: '-translate-x-1/2' },
-                            { pos: 'bottom-right', x: 'right-4', y: 'bottom-4' },
+                            { pos: 'bottom-right', x: 'right-4', y: 'bottom-4', transform: '' },
                           ].map(({pos, x, y, transform = ''}) => (
                             <div 
                               key={`time-${pos}`} 
                               className={`absolute ${x} ${y} ${transform} flex items-center justify-center w-8 h-8`}
-                              style={{ transform: transform === '-translate-x-1/2 -translate-y-1/2' ? 'translate(-50%, -50%)' : transform === '-translate-x-1/2' ? 'translateX(-50%)' : 'none' }}
+                              style={{ 
+                                transform: transform === '-translate-x-1/2 -translate-y-1/2' 
+                                  ? 'translate(-50%, -50%)' 
+                                  : transform === '-translate-x-1/2' 
+                                    ? 'translateX(-50%)' 
+                                    : transform === '-translate-y-1/2'
+                                      ? 'translateY(-50%)'
+                                      : 'none' 
+                              }}
                             >
                               <button
                                 onClick={() => setTimeDisplay({...timeDisplay, position: pos})}
@@ -1496,7 +2038,7 @@ function App() {
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md bg-panel-bg text-white"
                         >
                           {Object.entries(t.sizes).map(([value, label]) => (
-                            <option key={`time-${value}`} value={value} className="bg-panel-bg">
+                            <option key={"date-size-" + value} value={value} className="bg-panel-bg">
                               {label}
                             </option>
                           ))}
@@ -1527,6 +2069,49 @@ function App() {
                   {showDate && (
                     <>
                       <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <label htmlFor="enableCalendar" className="text-sm">
+                            {t.enableCalendar}
+                          </label>
+                          <input
+                            type="checkbox"
+                            id="enableCalendar"
+                            checked={enableCalendar}
+                            onChange={(e) => setEnableCalendar(e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-500 bg-panel-bg text-accent focus:ring-accent"
+                          />
+                        </div>
+                      </div>
+
+                      {enableCalendar && (
+                        <div className="space-y-2">
+                          <label className="block text-sm font-medium">
+                            {t.firstDayOfWeek}
+                          </label>
+                          <div className="flex items-center space-x-4 mt-1">
+                            <label className="inline-flex items-center">
+                              <input
+                                type="radio"
+                                className="h-4 w-4 text-accent border-gray-500 focus:ring-accent"
+                                checked={firstDayOfWeek === 0}
+                                onChange={() => setFirstDayOfWeek(0)}
+                              />
+                              <span className="ml-2 text-sm">{t.sunday}</span>
+                            </label>
+                            <label className="inline-flex items-center">
+                              <input
+                                type="radio"
+                                className="h-4 w-4 text-accent border-gray-500 focus:ring-accent"
+                                checked={firstDayOfWeek === 1}
+                                onChange={() => setFirstDayOfWeek(1)}
+                              />
+                              <span className="ml-2 text-sm">{t.monday}</span>
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="space-y-2">
                         <label className="block text-sm font-medium">
                           {t.format}
                         </label>
@@ -1550,19 +2135,29 @@ function App() {
                         <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
                           <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
                           {[
-                            { pos: 'top-left', x: 'left-4', y: 'top-4' },
+                            { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
                             { pos: 'top-center', x: 'left-1/2', y: 'top-4', transform: '-translate-x-1/2' },
-                            { pos: 'top-right', x: 'right-4', y: 'top-4' },
+                            { pos: 'top-right', x: 'right-4', y: 'top-4', transform: '' },
+                            { pos: 'center-left', x: 'left-4', y: 'top-1/2', transform: '-translate-y-1/2' },
                             { pos: 'center', x: 'left-1/2', y: 'top-1/2', transform: '-translate-x-1/2 -translate-y-1/2' },
-                            { pos: 'bottom-left', x: 'left-4', y: 'bottom-4' },
+                            { pos: 'center-right', x: 'right-4', y: 'top-1/2', transform: '-translate-y-1/2' },
+                            { pos: 'bottom-left', x: 'left-4', y: 'bottom-4', transform: '' },
                             { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: '-translate-x-1/2' },
-                            { pos: 'bottom-right', x: 'right-4', y: 'bottom-4' },
+                            { pos: 'bottom-right', x: 'right-4', y: 'bottom-4', transform: '' },
                           ].map(({pos, x, y, transform = ''}) => (
                             <div 
                               key={`date-${pos}`} 
                               className={`absolute ${x} ${y} ${transform} flex items-center justify-center w-8 h-8`}
-                              style={{ transform: transform === '-translate-x-1/2 -translate-y-1/2' ? 'translate(-50%, -50%)' : transform === '-translate-x-1/2' ? 'translateX(-50%)' : 'none' }}
-                            >
+                              style={{ 
+                                transform: transform === '-translate-x-1/2 -translate-y-1/2' 
+                                  ? 'translate(-50%, -50%)' 
+                                  : transform === '-translate-x-1/2' 
+                                    ? 'translateX(-50%)' 
+                                    : transform === '-translate-y-1/2'
+                                      ? 'translateY(-50%)'
+                                      : 'none' 
+                              }}
+                                                       >
                               <button
                                 onClick={() => setDateDisplay({...dateDisplay, position: pos})}
                                 className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
@@ -1592,11 +2187,286 @@ function App() {
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md bg-panel-bg text-white"
                         >
                           {Object.entries(t.sizes || {}).map(([value, label]) => (
-                            <option key={`date-size-${value}`} value={value} className="bg-panel-bg">
+                            <option key={"date-size-" + value} value={value} className="bg-panel-bg">
                               {label}
                             </option>
                           ))}
                         </select>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Weather Settings Column */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between border-b border-panel-border pb-2">
+                    <h3 className="text-lg font-medium">{t.weatherSettings}</h3>
+                    <div className="flex items-center">
+                      <label htmlFor="showWeather" className="text-sm mr-2">
+                        {t.showWeather}
+                      </label>
+                      <input
+                        type="checkbox"
+                        id="showWeather"
+                        checked={showWeather}
+                        onChange={(e) => setShowWeather(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-500 bg-panel-bg text-accent focus:ring-accent"
+                      />
+                    </div>
+                  </div>
+                  
+                  {showWeather && (
+                    <>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          {t.location}
+                        </label>
+                        <input
+                          type="text"
+                          value={weatherLocation}
+                          onChange={(e) => setWeatherLocation(e.target.value)}
+                          placeholder="City, Country"
+                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md bg-panel-bg text-white"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          {t.forecastMode}
+                        </label>
+                        <select
+                          value={forecastMode}
+                          onChange={(e) => setForecastMode(e.target.value)}
+                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md bg-panel-bg text-white"
+                        >
+                          <option value="today" className="bg-panel-bg">{t.forecastModes?.today || 'Today'}</option>
+                          <option value="tomorrow" className="bg-panel-bg">{t.forecastModes?.tomorrow || 'Tomorrow'}</option>
+                          <option value="smart" className="bg-panel-bg">{t.forecastModes?.smart || 'Smart'}</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          {t.unit}
+                        </label>
+                        <div className="flex items-center space-x-4">
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              className="h-4 w-4 text-accent border-gray-500 focus:ring-accent"
+                              checked={weatherUnit === 'metric'}
+                              onChange={() => setWeatherUnit('metric')}
+                            />
+                            <span className="ml-2">{t.units?.metric || 'Metric (°C)'}</span>
+                          </label>
+                          <label className="inline-flex items-center">
+                            <input
+                              type="radio"
+                              className="h-4 w-4 text-accent border-gray-500 focus:ring-accent"
+                              checked={weatherUnit === 'imperial'}
+                              onChange={() => setWeatherUnit('imperial')}
+                            />
+                            <span className="ml-2">{t.units?.imperial || 'Imperial (°F)'}</span>
+                          </label>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          {t.size}
+                        </label>
+                        <select
+                          value={weatherSize}
+                          onChange={(e) => setWeatherSize(e.target.value)}
+                          className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md bg-panel-bg text-white"
+                        >
+                          {Object.entries(t.sizes || {}).slice(0, 5).map(([value, label]) => (
+                            <option key={`weather-size-${value}`} value={value} className="bg-panel-bg">
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          {t.position}
+                        </label>
+                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
+                          <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
+                          {[
+                            { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
+                            { pos: 'top-right', x: 'right-4', y: 'top-4', transform: '' },
+                            { pos: 'top-center', x: 'left-1/2', y: 'top-4', transform: 'translateX(-50%)' },
+                            { pos: 'center-left', x: 'left-4', y: 'top-1/2', transform: 'translateY(-50%)' },
+                            { pos: 'center', x: 'left-1/2', y: 'top-1/2', transform: 'translate(-50%, -50%)' },
+                            { pos: 'center-right', x: 'right-4', y: 'top-1/2', transform: 'translateY(-50%)' },
+                            { pos: 'bottom-left', x: 'left-4', y: 'bottom-4', transform: '' },
+                            { pos: 'bottom-right', x: 'right-4', y: 'bottom-4', transform: '' },
+                            { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: 'translateX(-50%)' },
+                          ].map(({pos, x, y, transform}) => (
+                            <div 
+                              key={`weather-${pos}`} 
+                              className={`absolute ${x} ${y} flex items-center justify-center w-8 h-8`}
+                              style={{ transform }}
+                            >
+                              <button
+                                onClick={() => {
+                                  setWeatherPosition(pos);
+                                  // Update config immediately when position changes
+                                  const updatedConfig = {
+                                    ...config,
+                                    weather: {
+                                      ...config.weather,
+                                      position: pos
+                                    }
+                                  };
+                                  saveConfig(updatedConfig);
+                                }}
+                                className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
+                                  weatherPosition === pos 
+                                    ? 'bg-accent ring-2 ring-accent ring-opacity-70 shadow-md' 
+                                    : 'bg-panel-border hover:bg-panel-border-hover border-2 border-panel-border-hover'
+                                }`}
+                                aria-label={`Weather position ${pos}`}
+                                title={pos.replace('-', ' ')}
+                              >
+                                {weatherPosition === pos && (
+                                  <span className="w-2 h-2 bg-white rounded-full"></span>
+                                )}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        {/* Weather Refresh Interval */}
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label htmlFor="weather-refresh-interval" className="block text-sm font-medium">
+                              {t.weatherRefreshInterval}: {weatherRefreshInterval} {t.minutes || 'minutes'}
+                            </label>
+                          </div>
+                          <input
+                            id="weather-refresh-interval"
+                            type="range"
+                            min="30"
+                            max="240"
+                            step="10"
+                            value={weatherRefreshInterval}
+                            onChange={(e) => {
+                              const newInterval = parseInt(e.target.value);
+                              setWeatherRefreshInterval(newInterval);
+                              // Force refresh weather data with new interval, but use setTimeout 
+                              // to avoid potential infinite refresh loops
+                              if (refreshWeather) {
+                                setTimeout(() => refreshWeather(true), 50);
+                              }
+                            }}
+                            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                          />
+                          <div className="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>30{t.minutes ? t.minutes.charAt(0) : 'm'}</span>
+                            <span>4h</span>
+                          </div>
+                        </div>
+                        
+                        {/* Show Weather Countdown Toggle */}
+                        <div className="mt-4 flex items-center justify-between">
+                          <label htmlFor="show-weather-countdown" className="text-sm">
+                            {t.showWeatherCountdown}
+                          </label>
+                          <input
+                            type="checkbox"
+                            id="show-weather-countdown"
+                            checked={showWeatherCountdown}
+                            onChange={(e) => setShowWeatherCountdown(e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-500 bg-panel-bg text-accent focus:ring-accent"
+                          />
+                        </div>
+                        
+                        {/* Weather Refresh Countdown Display */}
+                        <div className="mt-4 p-3 bg-panel-bg-hover rounded-md">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <span className="text-sm font-medium">{t.nextUpdate}: </span>
+                              <span className="text-sm text-accent font-bold">{formattedTimeRemaining}</span>
+                            </div>
+                            <div>
+                              {lastUpdated && (
+                                <span className="text-xs text-gray-400">
+                                  {t.lastUpdated || 'Last update'}: {lastUpdated.toLocaleTimeString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          <div className="mt-2 w-full bg-gray-700 rounded-full h-2.5 overflow-hidden">
+                            <div 
+                              className="bg-accent h-2.5" 
+                              style={{ 
+                                width: `${Math.max(0, Math.min(100, (timeRemaining / (weatherRefreshInterval * 60)) * 100))}%`,
+                                transition: 'none'
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+
+                        {/* Manual Refresh Button */}
+                        <button
+                          onClick={() => refreshWeather ? refreshWeather() : null}
+                          className="mt-4 w-full py-2 px-4 bg-accent text-white rounded hover:bg-accent-hover transition-colors"
+                        >
+                          {t.refreshWeatherNow}
+                        </button>
+                        
+                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
+                          <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
+                          {[
+                            { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
+                            { pos: 'top-right', x: 'right-4', y: 'top-4', transform: '' },
+                            { pos: 'top-center', x: 'left-1/2', y: 'top-4', transform: 'translateX(-50%)' },
+                            { pos: 'center-left', x: 'left-4', y: 'top-1/2', transform: 'translateY(-50%)' },
+                            { pos: 'center', x: 'left-1/2', y: 'top-1/2', transform: 'translate(-50%, -50%)' },
+                            { pos: 'center-right', x: 'right-4', y: 'top-1/2', transform: 'translateY(-50%)' },
+                            { pos: 'bottom-left', x: 'left-4', y: 'bottom-4', transform: '' },
+                            { pos: 'bottom-right', x: 'right-4', y: 'bottom-4', transform: '' },
+                            { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: 'translateX(-50%)' },
+                          ].map(({pos, x, y, transform}) => (
+                            <div 
+                              key={`weather-${pos}`} 
+                              className={`absolute ${x} ${y} flex items-center justify-center w-8 h-8`}
+                              style={{ transform }}
+                            >
+                              <button
+                                onClick={() => {
+                                  setWeatherPosition(pos);
+                                  // Update config immediately when position changes
+                                  const updatedConfig = {
+                                    ...config,
+                                    weather: {
+                                      ...config.weather,
+                                      position: pos
+                                    }
+                                  };
+                                  saveConfig(updatedConfig);
+                                }}
+                                className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
+                                  weatherPosition === pos 
+                                    ? 'bg-accent ring-2 ring-accent ring-opacity-70 shadow-md' 
+                                    : 'bg-panel-border hover:bg-panel-border-hover border-2 border-panel-border-hover'
+                                }`}
+                                aria-label={`Weather position ${pos}`}
+                                title={pos.replace('-', ' ')}
+                              >
+                                {weatherPosition === pos && (
+                                  <span className="w-2 h-2 bg-white rounded-full"></span>
+                                )}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </>
                   )}
@@ -1617,6 +2487,53 @@ function App() {
                   {t.saveChanges}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Calendar Popin - Date Picker */}
+      {showCalendar && enableCalendar && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">{translations[language].selectDate}</h3>
+              <button
+                onClick={() => setShowCalendar(false)}
+                className="text-gray-500 hover:text-gray-700"
+                aria-label={translations[language].close}
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+            
+            {/* Calendar Component */}
+            <div className="border-t border-gray-200 pt-4">
+              <CalendarPopin 
+                initialDate={new Date()} 
+                firstDayOfWeek={firstDayOfWeek}
+                language={language}
+                events={defaultConfig.dateDisplay?.calendarEvents || []}
+                onSelectDate={(date, event) => {
+                  // Store the selected date and close the calendar if no event
+                  localStorage.setItem('selectedDate', date.toISOString());
+                  
+                  // If there's no event, close the calendar
+                  // Otherwise keep it open to show the event details
+                  if (!event) {
+                    setShowCalendar(false);
+                  }
+                }} 
+              />
+            </div>
+            
+            <div className="mt-4 flex justify-end">
+              <button 
+                onClick={() => setShowCalendar(false)} 
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+              >
+                {translations[language].close}
+              </button>
             </div>
           </div>
         </div>

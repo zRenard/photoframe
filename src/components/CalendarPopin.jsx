@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay } from 'date-fns';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, parseISO } from 'date-fns';
 // Import date-fns locale for internationalization
 import { enUS, es, fr, de, it, zhCN, ja } from 'date-fns/locale';
+import defaultConfig from '../config/defaults.json';
 import './CalendarPopin.css';
 
 // Map of supported locales
@@ -27,17 +28,24 @@ const translations = {
   ja: { previous: '前月', next: '来月' },
 };
 
-const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek = 0, language = 'en' }) => {
+const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek = 0, language = 'en', events = defaultConfig.dateDisplay?.calendarEvents || [] }) => {
   // Store initialDate as a ref to avoid re-renders
   const initialDateRef = React.useRef(initialDate);
   
   const [currentMonth, setCurrentMonth] = useState(new Date(initialDate));
   const [selectedDate, setSelectedDate] = useState(new Date(initialDate));
+  const [selectedEvent, setSelectedEvent] = useState(null);
   
   // Get the appropriate locale for the current language
   const locale = locales[language] || locales.en;
   // Get translations for the current language
   const t = translations[language] || translations.en;
+  
+  // Process events and convert string dates to Date objects
+  const calendarEvents = events.map(event => ({
+    ...event,
+    dateObj: parseISO(event.date)
+  }));
   
   // Only update state if initialDate has actually changed (compare timestamps)
   useEffect(() => {
@@ -48,6 +56,16 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
       setCurrentMonth(new Date(initialDate));
     }
   }, [initialDate]);
+  
+  // Check if a day has an event
+  const hasEvent = (day) => {
+    return calendarEvents.some(event => isSameDay(event.dateObj, day));
+  };
+  
+  // Find event for a specific day
+  const getEventForDay = (day) => {
+    return calendarEvents.find(event => isSameDay(event.dateObj, day));
+  };
 
   const renderHeader = () => {
     return (
@@ -104,7 +122,11 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
         formattedDate = format(day, 'd', { locale });
-        const cloneDay = day;
+        const cloneDay = new Date(day);
+        
+        // Check if this day has an event
+        const dayEvent = calendarEvents.find(event => isSameDay(event.dateObj, cloneDay));
+        const hasEventToday = Boolean(dayEvent);
         
         // Determine cell class names
         let cellClassName = 'col cell';
@@ -120,19 +142,34 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
           cellClassName += ' today';
         }
         
+        // Add event class for days with events
+        if (hasEventToday && isSameMonth(day, monthStart)) {
+          cellClassName += ' has-event';
+        }
+        
         days.push(
           <button
             className={cellClassName}
             key={day.toString()}
             onClick={() => {
               setSelectedDate(cloneDay);
+              
+              // If the day has an event, set it as the selected event
+              if (hasEventToday) {
+                setSelectedEvent(dayEvent);
+              } else {
+                setSelectedEvent(null);
+              }
+              
               if (onSelectDate) {
-                onSelectDate(cloneDay);
+                onSelectDate(cloneDay, dayEvent);
               }
             }}
             disabled={!isSameMonth(day, monthStart)}
+            title={hasEventToday ? dayEvent.title : ''}
           >
             <span className="number">{formattedDate}</span>
+            {hasEventToday && <span className="event-dot"></span>}
           </button>
         );
         day = addDays(day, 1);
@@ -152,6 +189,14 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
       {renderHeader()}
       {renderDays()}
       {renderCells()}
+      
+      {/* Event Description Section */}
+      {selectedEvent && (
+        <div className="event-details">
+          <h3 className="event-title">{selectedEvent.title}</h3>
+          <p className="event-description">{selectedEvent.description}</p>
+        </div>
+      )}
     </div>
   );
 };
@@ -161,7 +206,12 @@ CalendarPopin.propTypes = {
   initialDate: PropTypes.instanceOf(Date),
   onSelectDate: PropTypes.func,
   firstDayOfWeek: PropTypes.oneOf([0, 1]), // 0 for Sunday, 1 for Monday
-  language: PropTypes.string // Language code (en, es, fr, de, it, zh, ja)
+  language: PropTypes.string, // Language code (en, es, fr, de, it, zh, ja)
+  events: PropTypes.arrayOf(PropTypes.shape({
+    date: PropTypes.string.isRequired, // ISO date string YYYY-MM-DD
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired
+  }))
 };
 
 export default CalendarPopin;

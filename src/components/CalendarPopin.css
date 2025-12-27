@@ -122,3 +122,46 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Style for days with events */
+.has-event {
+  position: relative;
+  font-weight: bold;
+  background-color: rgba(0, 123, 255, 0.1);
+}
+
+.has-event:hover {
+  background-color: rgba(0, 123, 255, 0.2);
+}
+
+.event-dot {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #007bff;
+}
+
+/* Event details section styling */
+.event-details {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+
+.event-title {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 8px;
+}
+
+.event-description {
+  font-size: 0.9rem;
+  color: #555;
+  margin: 0;
+  line-height: 1.4;
+}

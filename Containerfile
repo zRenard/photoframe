@@ -1,9 +1,5 @@
-# Build arguments that can be overridden from command line
-ARG NODE_VERSION=22.9.0
-ARG SKIP_NPM_UPDATE=false
-
 # Build stage
-FROM docker.io/node:${NODE_VERSION}-slim AS build
+FROM docker.io/node:22-slim AS build
 
 # Ensure all packages are up-to-date to reduce vulnerabilities
 RUN set -eux; \
@@ -44,12 +40,8 @@ RUN rm -rf node_modules package-lock.json
 # Install all dependencies including devDependencies for building
 RUN npm install --prefer-offline --no-audit
 
-# Conditionally upgrade npm based on build argument
-RUN if [ "$SKIP_NPM_UPDATE" = "false" ]; then \
-        npm install -g npm@latest; \
-    else \
-        echo "Skipping npm update as requested"; \
-    fi
+# Upgrade npm to the latest version to suppress update notices
+RUN npm install -g npm@latest
 
 # Copy source code
 COPY . .
@@ -57,7 +49,7 @@ COPY . .
 # Build the application
 RUN npm run build
 
-FROM docker.io/node:${NODE_VERSION}-slim
+FROM docker.io/node:22-slim
 
 WORKDIR /app
 

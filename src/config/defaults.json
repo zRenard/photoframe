@@ -9,6 +9,16 @@
   "showImageCounter": false,
   "showCountdown": false,
   "rotationTime": 60,
+  "weather": {
+    "show": true,
+    "location": "Nice, city, France",
+    "forecastMode": "smart",
+    "position": "top-right",
+    "unit": "metric",
+    "size": "size-2",
+    "apiKey": "4ae2636d8dfbdc3044bede63951a019b",
+    "refreshInterval": 60
+  },
   "timeDisplay": {
     "show": true,
     "format24h": true,
@@ -20,6 +30,57 @@
     "show": true,
     "format": "EEEE, MMMM d, yyyy",
     "position": "center",
-    "size": "size-1"
-  }
+    "size": "size-1",
+    "enableCalendar": true,
+    "firstDayOfWeek": 1,
+    "calendarEvents": [
+      {
+        "date": "2025-07-14",
+        "title": "Fête Nationale",
+        "description": "Jour férié national français - Prise de la Bastille"
+      },
+      {
+        "date": "2025-07-02",
+        "title": "Aujourd'hui",
+        "description": "C'est aujourd'hui ! Un jour spécial à noter."
+      },
+      {
+        "date": "2025-07-25",
+        "title": "Anniversaire",
+        "description": "N'oubliez pas l'anniversaire de Marie !"
+      },
+      {
+        "date": "2025-08-15",
+        "title": "Assomption",
+        "description": "Jour férié - Assomption de Marie"
+      },
+      {
+        "date": "2025-12-25",
+        "title": "Noël",
+        "description": "Joyeux Noël ! Réunion de famille prévue."
+      }
+    ]
+  },
+  "calendarEvents": [
+    {
+      "date": "2025-07-14",
+      "title": "Fête Nationale",
+      "description": "Jour férié national français - Prise de la Bastille"
+    },
+    {
+      "date": "2025-07-25",
+      "title": "Anniversaire",
+      "description": "N'oubliez pas l'anniversaire de Marie !"
+    },
+    {
+      "date": "2025-08-15",
+      "title": "Assomption",
+      "description": "Jour férié - Assomption de Marie"
+    },
+    {
+      "date": "2025-12-25",
+      "title": "Noël",
+      "description": "Joyeux Noël ! Réunion de famille prévue."
+    }
+  ]
 }

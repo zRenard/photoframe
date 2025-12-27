@@ -74,9 +74,16 @@ A modern, responsive photo frame application built with React, Vite, and Express
    ```bash
    # Build the image
    podman build -t photoframe .
-   
-   # Create a volume for persistent photo storage
-   podman volume create photoframe-photos
+      
+   # Alternative builds with different options:
+   # Skip npm update to avoid compatibility issues
+   # podman build -t photoframe --build-arg SKIP_NPM_UPDATE=true .
+   #  
+   # Use a specific Node.js version
+   # podman build -t photoframe --build-arg NODE_VERSION=20.15.0 .
+   #
+   # Use both options together
+   # podman build -t photoframe --build-arg NODE_VERSION=20.15.0 --build-arg SKIP_NPM_UPDATE=true .
    ```
 
 2. **Run the container**
@@ -84,7 +91,7 @@ A modern, responsive photo frame application built with React, Vite, and Express
    podman run -d \
      --name photoframe \
      -p 3001:3001 \
-     -v photoframe-photos:/app/public/photos:Z \
+     -v C:\\git_clones\\photoframe\\public\\photos:/app/public/photos:Z \
      --restart unless-stopped \
      --health-cmd "curl -f http://localhost:3001/api/test || exit 1" \
      --health-interval=30s \
@@ -310,6 +317,11 @@ The application is fully responsive and works on:
 - The app uses browser's localStorage to save settings
 - Clear your browser cache if you experience issues
 - Try a hard refresh (Ctrl+F5 or Cmd+Shift+R)
+
+### Container build issues?
+- If you encounter npm version compatibility errors, use `--build-arg SKIP_NPM_UPDATE=true`
+- For production environments, consider using a security-hardened base image
+- You can specify a different Node.js version with `--build-arg NODE_VERSION=x.y.z`
 
 ## 📚 Resources
 
