@@ -19,13 +19,13 @@ const locales = {
 
 // Map for translating month navigation buttons and screen reader labels
 const translations = {
-  en: { previous: 'Previous month', next: 'Next month' },
-  es: { previous: 'Mes anterior', next: 'Mes siguiente' },
-  fr: { previous: 'Mois précédent', next: 'Mois suivant' },
-  de: { previous: 'Vorheriger Monat', next: 'Nächster Monat' },
-  it: { previous: 'Mese precedente', next: 'Mese successivo' },
-  zh: { previous: '上个月', next: '下个月' },
-  ja: { previous: '前月', next: '来月' },
+  en: { previous: 'Previous month', next: 'Next month', today: 'Today', goToCurrentMonth: 'Go to current month' },
+  es: { previous: 'Mes anterior', next: 'Mes siguiente', today: 'Hoy', goToCurrentMonth: 'Ir al mes actual' },
+  fr: { previous: 'Mois précédent', next: 'Mois suivant', today: 'Aujourd\'hui', goToCurrentMonth: 'Aller au mois actuel' },
+  de: { previous: 'Vorheriger Monat', next: 'Nächster Monat', today: 'Heute', goToCurrentMonth: 'Zum aktuellen Monat gehen' },
+  it: { previous: 'Mese precedente', next: 'Mese successivo', today: 'Oggi', goToCurrentMonth: 'Vai al mese corrente' },
+  zh: { previous: '上个月', next: '下个月', today: '今天', goToCurrentMonth: '转到当前月份' },
+  ja: { previous: '前月', next: '来月', today: '今日', goToCurrentMonth: '今月に移動' },
 };
 
 const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek = 0, language = 'en', events = defaultConfig.dateDisplay?.calendarEvents || [] }) => {
@@ -56,38 +56,50 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
       setCurrentMonth(new Date(initialDate));
     }
   }, [initialDate]);
-  
-  // Check if a day has an event
-  const hasEvent = (day) => {
-    return calendarEvents.some(event => isSameDay(event.dateObj, day));
-  };
-  
-  // Find event for a specific day
-  const getEventForDay = (day) => {
-    return calendarEvents.find(event => isSameDay(event.dateObj, day));
-  };
 
   const renderHeader = () => {
+    const today = new Date();
+    const isCurrentMonth = format(currentMonth, 'yyyy-MM') === format(today, 'yyyy-MM');
+    
     return (
-      <div className="header row flex-middle">
-        <button 
-          className="col col-start" 
-          onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-          aria-label={t.previous}
-        >
-          <div className="icon">&lt;</div>
-        </button>
-        <div className="col col-center">
-          <span>{format(currentMonth, 'MMMM yyyy', { locale })}</span>
+      <>
+        <div className="header row flex-middle">
+          <button 
+            className="col col-start" 
+            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            aria-label={t.previous}
+          >
+            <div className="icon">&lt;</div>
+          </button>
+          <div className="col col-center">
+            <span>{format(currentMonth, 'MMMM yyyy', { locale })}</span>
+          </div>
+          <button 
+            className="col col-end" 
+            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            aria-label={t.next}
+          >
+            <div className="icon">&gt;</div>
+          </button>
         </div>
-        <button 
-          className="col col-end" 
-          onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-          aria-label={t.next}
-        >
-          <div className="icon">&gt;</div>
-        </button>
-      </div>
+        
+        {/* Today button - only show if not already viewing current month */}
+        {!isCurrentMonth && (
+          <div className="today-button-container">
+            <button 
+              className="today-button"
+              onClick={() => {
+                const now = new Date();
+                setCurrentMonth(now);
+                setSelectedDate(now);
+              }}
+              aria-label={t.goToCurrentMonth}
+            >
+              {t.today}
+            </button>
+          </div>
+        )}
+      </>
     );
   };
   

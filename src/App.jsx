@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Cog6ToothIcon, XMarkIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import './App.css';
 import defaultConfig from './config/defaults.json';
 import CalendarPopin from './components/CalendarPopin';
 import WeatherDisplay, { useWeatherData } from './components/WeatherDisplay';
+import TimerDisplay from './components/TimerDisplay';
 
 // Translation strings
 const translations = {
@@ -19,6 +20,8 @@ const translations = {
     showImageCounter: 'Show Image Counter',
     showCountdown: 'Show Countdown',
     rotationTime: 'Rotation Time',
+    coordinates: 'Coordinates',
+    coordinatesHelp: 'Used if location field is empty',
     enableCalendar: 'Enable Calendar Feature',
     selectDate: 'Select a date',
     firstDayOfWeek: 'First day of week',
@@ -30,6 +33,23 @@ const translations = {
     timeFormat12h: '12-hour',
     timeFormat24h: '24-hour',
     showSeconds: 'Show Seconds',
+    timer: 'Timer',
+    timerEnabled: 'Enable Timer',
+    timerType: 'Timer Type',
+    countdown: 'Countdown',
+    chronometer: 'Chronometer',
+    showTimerIcon: 'Show Timer Icon',
+    countdownSettings: 'Countdown Settings',
+    hoursLabel: 'Hours',
+    minutesLabel: 'Minutes',
+    secondsLabel: 'Seconds',
+    start: 'Start',
+    pause: 'Pause',
+    reset: 'Reset',
+    timeOut: 'Time Out',
+    timerComplete: 'Timer Complete!',
+    timerTimeoutDuration: 'Timeout Blink Duration (seconds)',
+    timerTimeoutDurationDescription: 'How long the timer blinks when it reaches zero',
     position: 'Position',
     size: 'Size',
     sizes: {
@@ -130,6 +150,8 @@ const translations = {
     showImageCounter: 'Mostrar Contador',
     showCountdown: 'Mostrar Cuenta Atrás',
     rotationTime: 'Tiempo de Rotación',
+    coordinates: 'Coordenadas',
+    coordinatesHelp: 'Se utiliza si el campo de ubicación está vacío',
     enableCalendar: 'Habilitar Función de Calendario',
     selectDate: 'Seleccionar una fecha',
     firstDayOfWeek: 'Primer día de la semana',
@@ -141,6 +163,23 @@ const translations = {
     timeFormat12h: '12 horas',
     timeFormat24h: '24 horas',
     showSeconds: 'Mostrar Segundos',
+    timer: 'Temporizador',
+    timerEnabled: 'Activar Temporizador',
+    timerType: 'Tipo de Temporizador',
+    countdown: 'Cuenta Regresiva',
+    chronometer: 'Cronómetro',
+    showTimerIcon: 'Mostrar Icono de Temporizador',
+    countdownSettings: 'Configuración de Cuenta Regresiva',
+    hoursLabel: 'Horas',
+    minutesLabel: 'Minutos',
+    secondsLabel: 'Segundos',
+    start: 'Iniciar',
+    pause: 'Pausar',
+    reset: 'Reiniciar',
+    timeOut: 'Tiempo Agotado',
+    timerComplete: '¡Temporizador Completado!',
+    timerTimeoutDuration: 'Duración del parpadeo de tiempo agotado (segundos)',
+    timerTimeoutDurationDescription: 'Cuánto tiempo parpadea el temporizador cuando llega a cero',
     position: 'Posición',
     size: 'Tamaño',
     sizes: {
@@ -210,7 +249,7 @@ const translations = {
       metric: 'Métrico (°C)',
       imperial: 'Imperial (°F)'
     },
-    currentWeather: 'Clima Actual',
+    currentWeather: 'Meteo Actual',
     forecast: 'Pronóstico',
     refreshInterval: 'Intervalo de Actualización',
     weatherRefreshInterval: 'Intervalo de Actualización',
@@ -570,39 +609,6 @@ const translations = {
     enableCalendar: 'カレンダー機能を有効にする',
     selectDate: '日付を選択',
     firstDayOfWeek: '週の最初の日',
-    weather: '天気',
-    weatherSettings: '天気設定',
-    showWeather: '天気を表示',
-    location: '場所',
-    forecastMode: '予報モード',
-    forecastModes: {
-      today: '今日',
-      tomorrow: '明日',
-      smart: 'スマート（正午まで今日、その後明日）'
-    },
-    unit: '単位',
-    units: {
-      metric: 'メートル法 (°C)',
-      imperial: 'ヤード・ポンド法 (°F)'
-    },
-    currentWeather: '現在の天気',
-    forecast: '天気予報',
-    refreshInterval: '更新間隔',
-    weatherRefreshInterval: '更新間隔',
-    showWeatherCountdown: '更新カウントダウン表示',
-    refreshWeatherNow: '今すぐ天気を更新',
-    nextUpdate: '次の更新まで',
-    lastUpdated: '最終更新',
-    showAirQuality: '大気質を表示',
-    airQuality: '大気質',
-    airQualityLevels: {
-      good: '良好',
-      fair: '普通',
-      moderate: '中程度',
-      poor: '悪い',
-      veryPoor: '非常に悪い',
-      unknown: '不明'
-    },
     sunday: '日曜日',
     monday: '月曜日',
     timeSettings: '時間設定',
@@ -686,12 +692,30 @@ const translations = {
     timeFormat12h: '12 heures',
     timeFormat24h: '24 heures',
     showSeconds: 'Afficher les secondes',
+    timer: 'Minuterie',
+    timerEnabled: 'Activer la Minuterie',
+    timerType: 'Type de Minuterie',
+    countdown: 'Compte à Rebours',
+    chronometer: 'Chronomètre',
+    showTimerIcon: 'Afficher l\'Icône de Minuterie',
+    countdownSettings: 'Réglages du Compte à Rebours',
+    hoursLabel: 'Heures',
+    minutesLabel: 'Minutes',
+    secondsLabel: 'Secondes',
+    start: 'Démarrer',
+    pause: 'Pause',
+    reset: 'Réinitialiser',
+    timerComplete: 'Minuterie Terminée !',
+    timerTimeoutDuration: 'Durée de transition',
+    timerTimeoutDurationDescription: 'Durée pendant laquelle le minuteur clignote lorsqu\'il atteint zéro',
     position: 'Position',
     size: 'Taille',
     weather: 'Météo',
     weatherSettings: 'Paramètres de la Météo',
     showWeather: 'Afficher la Météo',
     location: 'Emplacement',
+    coordinates: 'Coordonnées',
+    coordinatesHelp: 'Utilisées si le champ d\'emplacement est vide',
     forecastMode: 'Mode de Prévision',
     forecastModes: {
       today: 'Aujourd\'hui',
@@ -838,9 +862,51 @@ function App() {
   const [showCountdown, setShowCountdown] = useState(defaultConfig.showCountdown);
   const [language, setLanguage] = useState(defaultConfig.language);
   
+  // Timer settings
+  const [timerEnabled, setTimerEnabled] = useState(defaultConfig.timeDisplay?.timer?.enabled ?? false);
+  const [timerType, setTimerType] = useState(defaultConfig.timeDisplay?.timer?.type ?? 'countdown');
+  // No longer using showTimerIcon since it will always be shown when timer is enabled
+  const [countdownHours, setCountdownHours] = useState(defaultConfig.timeDisplay?.timer?.countdownHours ?? 0);
+  const [countdownMinutes, setCountdownMinutes] = useState(defaultConfig.timeDisplay?.timer?.countdownMinutes ?? 5);
+  const [countdownSeconds, setCountdownSeconds] = useState(defaultConfig.timeDisplay?.timer?.countdownSeconds ?? 0);
+  const [timerTimeoutBlinkDuration, setTimerTimeoutBlinkDuration] = useState(defaultConfig.timeDisplay?.timer?.timeoutBlinkDuration ?? 10);
+  // Timer position is always "below" - no longer configurable
+
+  // Timer state - shared between icon and below components
+  const [timerIsActive, setTimerIsActive] = useState(false);
+  const [timerIsPaused, setTimerIsPaused] = useState(false);
+  const [timerIsComplete, setTimerIsComplete] = useState(false);
+  const [timerBlinkClass, setTimerBlinkClass] = useState('');
+  const [timerTime, setTimerTime] = useState({
+    hours: countdownHours,
+    minutes: countdownMinutes,
+    seconds: countdownSeconds
+  });
+
+  // Update timer time when countdown settings change
+  useEffect(() => {
+    if (!timerIsActive && !timerIsPaused) {
+      if (timerType === 'countdown') {
+        setTimerTime({
+          hours: countdownHours,
+          minutes: countdownMinutes,
+          seconds: countdownSeconds
+        });
+      } else {
+        // For chronometer, start from 00:00:00
+        setTimerTime({
+          hours: 0,
+          minutes: 0,
+          seconds: 0
+        });
+      }
+    }
+  }, [countdownHours, countdownMinutes, countdownSeconds, timerType, timerIsActive, timerIsPaused]);
+  
   // Weather settings
   const [showWeather, setShowWeather] = useState(defaultConfig.weather?.show ?? true);
   const [weatherLocation, setWeatherLocation] = useState(defaultConfig.weather?.location ?? "Nice, France");
+  const [weatherCoordinates, setWeatherCoordinates] = useState(defaultConfig.weather?.coordinates ?? { lat: 43.7, lon: 7.25 });
   const [forecastMode, setForecastMode] = useState(defaultConfig.weather?.forecastMode ?? "smart");
   const [weatherPosition, setWeatherPosition] = useState(defaultConfig.weather?.position ?? "top-right");
   const [weatherUnit, setWeatherUnit] = useState(defaultConfig.weather?.unit ?? "metric");
@@ -956,7 +1022,7 @@ function App() {
         const day = date.getDate();
         const month = date.toLocaleString(language, { month: 'long' });
         const year = date.getFullYear();
-        return `${day} ${month} ${date.getFullYear()}`;
+        return `${day} ${month} ${year}`;
       }
     }
   ];
@@ -1173,38 +1239,8 @@ function App() {
     setCurrentImageIndex(getRandomImageIndex());
   };
 
-  // Countdown timer and auto-advance slides
-  useEffect(() => {
-    if (images.length <= 1) return;
-    
-    let countdownInterval;
-    const slideInterval = setInterval(() => {
-      if (!isTransitioning) {
-        navigateImage('next');
-      }
-    }, rotationTime * 1000);
-    
-    // Update countdown every second
-    if (showCountdown) {
-      setTimeLeft(rotationTime); // Reset countdown when rotation time changes
-      countdownInterval = setInterval(() => {
-        setTimeLeft(prevTimeLeft => {
-          if (prevTimeLeft <= 1) {
-            return rotationTime; // Reset to full rotation time when it reaches 0
-          }
-          return prevTimeLeft - 1; // Decrement by 1 second
-        });
-      }, 1000);
-    }
-    
-    return () => {
-      clearInterval(slideInterval);
-      if (countdownInterval) clearInterval(countdownInterval);
-    };
-  }, [rotationTime, images.length, isTransitioning, showCountdown]);
-
   // Navigate to next or previous image with transition
-  const navigateImage = (direction) => {
+  const navigateImage = useCallback((direction) => {
     if (images.length <= 1 || isTransitioning) return;
     
     setIsTransitioning(true);
@@ -1224,7 +1260,35 @@ function App() {
       }, transition.duration);
       
     }, 50); // Small delay to start the transition
-  };
+  }, [images.length, isTransitioning, currentImageIndex, transition.duration]);
+
+  // Countdown timer and auto-advance slides
+  useEffect(() => {
+    if (images.length <= 1) return;
+    
+    let countdownInterval;
+    const slideInterval = setInterval(() => {
+      navigateImage('next');
+    }, rotationTime * 1000);
+    
+    // Update countdown every second
+    if (showCountdown) {
+      setTimeLeft(rotationTime); // Reset countdown when rotation time changes
+      countdownInterval = setInterval(() => {
+        setTimeLeft(prevTimeLeft => {
+          if (prevTimeLeft <= 1) {
+            return rotationTime; // Reset to full rotation time when it reaches 0
+          }
+          return prevTimeLeft - 1; // Decrement by 1 second
+        });
+      }, 1000);
+    }
+    
+    return () => {
+      clearInterval(slideInterval);
+      if (countdownInterval) clearInterval(countdownInterval);
+    };
+  }, [rotationTime, images.length, isTransitioning, showCountdown, navigateImage]);
   
   // Reset countdown when rotation time changes
   useEffect(() => {
@@ -1344,6 +1408,7 @@ function App() {
     // Reset weather settings
     setShowWeather(defaultConfig.weather?.show ?? true);
     setWeatherLocation(defaultConfig.weather?.location ?? "Nice, France");
+    setWeatherCoordinates(defaultConfig.weather?.coordinates ?? { lat: 43.7, lon: 7.25 });
     setForecastMode(defaultConfig.weather?.forecastMode ?? "smart");
     setWeatherPosition(defaultConfig.weather?.position ?? "top-right");
     setWeatherUnit(defaultConfig.weather?.unit ?? "metric");
@@ -1351,6 +1416,16 @@ function App() {
     setWeatherRefreshInterval(defaultConfig.weather?.refreshInterval ?? 60);
     setShowWeatherCountdown(defaultConfig.weather?.showCountdown ?? false);
     setShowAirQuality(defaultConfig.weather?.showAirQuality ?? false);
+    
+    // Reset timer settings
+    setTimerEnabled(defaultConfig.timeDisplay?.timer?.enabled ?? false);
+    setTimerType(defaultConfig.timeDisplay?.timer?.type ?? 'countdown');
+    // No longer using showTimerIcon
+    setCountdownHours(defaultConfig.timeDisplay?.timer?.countdownHours ?? 0);
+    setCountdownMinutes(defaultConfig.timeDisplay?.timer?.countdownMinutes ?? 5);
+    setCountdownSeconds(defaultConfig.timeDisplay?.timer?.countdownSeconds ?? 0);
+    setTimerTimeoutBlinkDuration(defaultConfig.timeDisplay?.timer?.timeoutBlinkDuration ?? 10);
+    // Timer position is always "below" - no setter needed
   };
 
   // Save settings
@@ -1367,6 +1442,7 @@ function App() {
       weather: {
         show: showWeather,
         location: weatherLocation,
+        coordinates: weatherCoordinates,
         forecastMode,
         position: weatherPosition, // Make sure this value is saved
         unit: weatherUnit,
@@ -1381,7 +1457,16 @@ function App() {
         format24h: timeFormat24h,
         showSeconds,
         position: timeDisplay.position,
-        size: timeDisplay.size
+        size: timeDisplay.size,
+        timer: {
+          enabled: timerEnabled,
+          type: timerType,
+          countdownHours,
+          countdownMinutes,
+          countdownSeconds,
+          timeoutBlinkDuration: timerTimeoutBlinkDuration,
+          position: "below"
+        }
       },
       dateDisplay: {
         show: showDate,
@@ -1426,6 +1511,9 @@ function App() {
   }, [isConfigOpen]);
 
   const [showCalendar, setShowCalendar] = useState(false);
+  
+  // Memoize the initial date to prevent unnecessary re-renders of CalendarPopin
+  const calendarInitialDate = useMemo(() => new Date(), []);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gray-900" style={{ overflow: 'hidden' }}>
@@ -1553,9 +1641,74 @@ function App() {
          dateDisplay.position === weatherPosition && (
           <div className={`unified-display ${positionClasses[timeDisplay.position]} fixed bg-black bg-opacity-50 text-white p-4 rounded-lg transition-all duration-300`}>
             {/* Time */}
-            <div className={`${timeSizes[timeDisplay.size]} font-bold text-center`}>
+            <div className={`${timeSizes[timeDisplay.size]} font-bold text-center relative`}>
               {currentTime}
+              
+              {/* Timer Icon - Show when timer is enabled OR when timer is active/paused/complete */}
+              {(timerEnabled || timerIsActive || timerIsPaused || timerIsComplete) && (
+                <div className="absolute right-[-30px] top-1/2 transform -translate-y-1/2">
+                  <TimerDisplay 
+                    enabled={timerEnabled}
+                    type={timerType}
+                    initialHours={countdownHours}
+                    initialMinutes={countdownMinutes}
+                    initialSeconds={countdownSeconds}
+                    position="icon"
+                    language={language}
+                    translations={translations}
+                    showIconButton={true}
+                    onTimerTypeChange={setTimerType}
+                    timeoutBlinkDuration={timerTimeoutBlinkDuration}
+                    debug={defaultConfig.debug}
+                    // Shared timer state
+                    isActive={timerIsActive}
+                    isPaused={timerIsPaused}
+                    isComplete={timerIsComplete}
+                    timerTime={timerTime}
+                    timerBlinkClass={timerBlinkClass}
+                    onTimerStateChange={{
+                      setIsActive: setTimerIsActive,
+                      setIsPaused: setTimerIsPaused,
+                      setIsComplete: setTimerIsComplete,
+                      setTime: setTimerTime,
+                      setBlinkClass: setTimerBlinkClass
+                    }}
+                  />
+                </div>
+              )}
             </div>
+            
+            {/* Timer Display (when active) - Show when timer is enabled OR when timer is active/paused/complete */}
+            {(timerEnabled || timerIsActive || timerIsPaused || timerIsComplete) && (
+              <div className="timer-container mt-4">
+                <TimerDisplay 
+                  enabled={timerEnabled}
+                  type={timerType}
+                  initialHours={countdownHours}
+                  initialMinutes={countdownMinutes}
+                  initialSeconds={countdownSeconds}
+                  position="below"
+                  language={language}
+                  translations={translations}
+                  showIconButton={false}
+                  timeoutBlinkDuration={timerTimeoutBlinkDuration}
+                  debug={defaultConfig.debug}
+                  // Shared timer state
+                  isActive={timerIsActive}
+                  isPaused={timerIsPaused}
+                  isComplete={timerIsComplete}
+                  timerTime={timerTime}
+                  timerBlinkClass={timerBlinkClass}
+                  onTimerStateChange={{
+                    setIsActive: setTimerIsActive,
+                    setIsPaused: setTimerIsPaused,
+                    setIsComplete: setTimerIsComplete,
+                    setTime: setTimerTime,
+                    setBlinkClass: setTimerBlinkClass
+                  }}
+                />
+              </div>
+            )}
             
             {/* Date */}
             <div className="mt-2">
@@ -1585,9 +1738,75 @@ function App() {
         {/* Time Display - When not all three components are at the same position */}
         {showTime && !(showDate && showWeather && timeDisplay.position === dateDisplay.position && dateDisplay.position === weatherPosition) && (
           <div className={`time-display ${positionClasses[timeDisplay.position]} fixed bg-black bg-opacity-50 text-white p-4 rounded-lg transition-all duration-300`}>
-            <div className={`${timeSizes[timeDisplay.size]} font-bold text-center`}>
+            <div className={`${timeSizes[timeDisplay.size]} font-bold text-center relative`}>
               {currentTime}
+              
+              {/* Timer Icon - Show when timer is enabled OR when timer is active/paused/complete */}
+              {(timerEnabled || timerIsActive || timerIsPaused || timerIsComplete) && (
+                <div className="absolute right-[-30px] top-1/2 transform -translate-y-1/2">
+                  <TimerDisplay 
+                    enabled={timerEnabled}
+                    type={timerType}
+                    initialHours={countdownHours}
+                    initialMinutes={countdownMinutes}
+                    initialSeconds={countdownSeconds}
+                    position="icon"
+                    language={language}
+                    translations={translations}
+                    showIconButton={true}
+                    onTimerTypeChange={setTimerType}
+                    timeoutBlinkDuration={timerTimeoutBlinkDuration}
+                    debug={defaultConfig.debug}
+                    // Shared timer state
+                    isActive={timerIsActive}
+                    isPaused={timerIsPaused}
+                    isComplete={timerIsComplete}
+                    timerTime={timerTime}
+                    timerBlinkClass={timerBlinkClass}
+                    onTimerStateChange={{
+                      setIsActive: setTimerIsActive,
+                      setIsPaused: setTimerIsPaused,
+                      setIsComplete: setTimerIsComplete,
+                      setTime: setTimerTime,
+                      setBlinkClass: setTimerBlinkClass
+                    }}
+                  />
+                </div>
+              )}
             </div>
+            
+            {/* Timer Display (when active) - Show when timer is enabled OR when timer is active/paused/complete */}
+            {(timerEnabled || timerIsActive || timerIsPaused || timerIsComplete) && (
+              <div className="timer-container mt-4">
+                <TimerDisplay 
+                  enabled={timerEnabled}
+                  type={timerType}
+                  initialHours={countdownHours}
+                  initialMinutes={countdownMinutes}
+                  initialSeconds={countdownSeconds}
+                  position="below"
+                  language={language}
+                  translations={translations}
+                  showIconButton={false}
+                  timeoutBlinkDuration={timerTimeoutBlinkDuration}
+                  debug={defaultConfig.debug}
+                  // Shared timer state
+                  isActive={timerIsActive}
+                  isPaused={timerIsPaused}
+                  isComplete={timerIsComplete}
+                  timerTime={timerTime}
+                  timerBlinkClass={timerBlinkClass}
+                  onTimerStateChange={{
+                    setIsActive: setTimerIsActive,
+                    setIsPaused: setTimerIsPaused,
+                    setIsComplete: setTimerIsComplete,
+                    setTime: setTimerTime,
+                    setBlinkClass: setTimerBlinkClass
+                  }}
+                />
+              </div>
+            )}
+            
             
             {/* Date Display - When same position as time but not weather */}
             {showDate && timeDisplay.position === dateDisplay.position && 
@@ -1655,6 +1874,7 @@ function App() {
          !(showDate && weatherPosition === dateDisplay.position) && (
           <WeatherDisplay
             location={weatherLocation}
+            coordinates={weatherCoordinates}
             forecastMode={forecastMode}
             unit={weatherUnit}
             position={weatherPosition}
@@ -1686,7 +1906,7 @@ function App() {
           {images.length === 0 && (
             <div className="no-images-message absolute inset-0 flex items-center justify-center">
               <div className="text-center p-4 bg-panel-bg bg-opacity-80 text-text rounded-lg border border-panel-border">
-                <p className="text-lg font-medium">{t.noImagesFound}</p>
+                <p className="text-lg fontmedium">{t.noImagesFound}</p>
                 <p className="text-sm mt-1">{t.addImagesToFolder}</p>
               </div>
             </div>
@@ -1747,6 +1967,7 @@ function App() {
                   </div>
                   <button 
                     onClick={toggleConfig}
+
                     className="p-1 rounded-full hover:bg-panel-bg-hover transition-colors"
                     aria-label={t.close}
                   >
@@ -2055,7 +2276,7 @@ function App() {
                             { pos: 'center', x: 'left-1/2', y: 'top-1/2', transform: '-translate-x-1/2 -translate-y-1/2' },
                             { pos: 'center-right', x: 'right-4', y: 'top-1/2', transform: '-translate-y-1/2' },
                             { pos: 'bottom-left', x: 'left-4', y: 'bottom-4', transform: '' },
-                            { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: '-translate-x-1/2' },
+                            { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: 'translateX(-50%)' },
                             { pos: 'bottom-right', x: 'right-4', y: 'bottom-4', transform: '' },
                           ].map(({pos, x, y, transform = ''}) => (
                             <div 
@@ -2120,6 +2341,40 @@ function App() {
                             </option>
                           ))}
                         </select>
+                      </div>
+                      
+                      {/* Timer Settings */}
+                      <div className="mt-6 space-y-3 border-t border-panel-border pt-3">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-md font-medium">{t.timer || 'Timer'}</h4>
+                          <div className="flex items-center">
+                            <label htmlFor="timerEnabled" className="text-sm mr-2">
+                              {t.timerEnabled || 'Enable Timer'}
+                            </label>
+                            <input
+                              type="checkbox"
+                              id="timerEnabled"
+                              checked={timerEnabled}
+                              onChange={(e) => setTimerEnabled(e.target.checked)}
+                              className="h-4 w-4 rounded border-gray-500 bg-panel-bg text-accent focus:ring-accent"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center mt-2">
+                          <label htmlFor="timerTimeoutBlinkDuration" className="text-sm mr-2">
+                            {t.timerTimeoutDuration || 'Timeout Blink Duration (seconds)'}
+                          </label>
+                          <input
+                            type="number"
+                            id="timerTimeoutBlinkDuration"
+                            min={1}
+                            max={60}
+                            value={timerTimeoutBlinkDuration}
+                            onChange={e => setTimerTimeoutBlinkDuration(Number(e.target.value))}
+                            className="w-16 ml-2 rounded border-gray-500 bg-panel-bg text-accent focus:ring-accent px-2 py-1"
+                          />
+                          <span className="ml-2 text-xs text-gray-400">{t.timerTimeoutDurationDescription}</span>
+                        </div>
                       </div>
                     </>
                   )}
@@ -2213,28 +2468,20 @@ function App() {
                           <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
                           {[
                             { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
-                            { pos: 'top-center', x: 'left-1/2', y: 'top-4', transform: '-translate-x-1/2' },
                             { pos: 'top-right', x: 'right-4', y: 'top-4', transform: '' },
-                            { pos: 'center-left', x: 'left-4', y: 'top-1/2', transform: '-translate-y-1/2' },
-                            { pos: 'center', x: 'left-1/2', y: 'top-1/2', transform: '-translate-x-1/2 -translate-y-1/2' },
-                            { pos: 'center-right', x: 'right-4', y: 'top-1/2', transform: '-translate-y-1/2' },
+                            { pos: 'top-center', x: 'left-1/2', y: 'top-4', transform: 'translateX(-50%)' },
+                            { pos: 'center-left', x: 'left-4', y: 'top-1/2', transform: 'translateY(-50%)' },
+                            { pos: 'center', x: 'left-1/2', y: 'top-1/2', transform: 'translate(-50%, -50%)' },
+                            { pos: 'center-right', x: 'right-4', y: 'top-1/2', transform: 'translateY(-50%)' },
                             { pos: 'bottom-left', x: 'left-4', y: 'bottom-4', transform: '' },
-                            { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: '-translate-x-1/2' },
                             { pos: 'bottom-right', x: 'right-4', y: 'bottom-4', transform: '' },
-                          ].map(({pos, x, y, transform = ''}) => (
+                            { pos: 'bottom-center', x: 'left-1/2', y: 'bottom-4', transform: 'translateX(-50%)' },
+                          ].map(({pos, x, y, transform}) => (
                             <div 
                               key={`date-${pos}`} 
                               className={`absolute ${x} ${y} ${transform} flex items-center justify-center w-8 h-8`}
-                              style={{ 
-                                transform: transform === '-translate-x-1/2 -translate-y-1/2' 
-                                  ? 'translate(-50%, -50%)' 
-                                  : transform === '-translate-x-1/2' 
-                                    ? 'translateX(-50%)' 
-                                    : transform === '-translate-y-1/2'
-                                      ? 'translateY(-50%)'
-                                      : 'none' 
-                              }}
-                                                       >
+                              style={{ transform }}
+                            >
                               <button
                                 onClick={() => setDateDisplay({...dateDisplay, position: pos})}
                                 className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
@@ -2302,9 +2549,38 @@ function App() {
                           type="text"
                           value={weatherLocation}
                           onChange={(e) => setWeatherLocation(e.target.value)}
-                          placeholder="City, Country"
+                          placeholder="City, Country (leave blank to use coordinates)"
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-600 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md bg-panel-bg text-white"
                         />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium">
+                          {t.coordinates}
+                        </label>
+                        <div className="flex space-x-2">
+                          <div className="flex-1">
+                            <input
+                              type="number"
+                              value={weatherCoordinates.lat}
+                              onChange={(e) => setWeatherCoordinates({...weatherCoordinates, lat: parseFloat(e.target.value)})}
+                              step="0.01"
+                              placeholder="Latitude"
+                              className="mt-1 block w-full pl-3 pr-3 py-2 text-base border-gray-600 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md bg-panel-bg text-white"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <input
+                              type="number"
+                              value={weatherCoordinates.lon}
+                              onChange={(e) => setWeatherCoordinates({...weatherCoordinates, lon: parseFloat(e.target.value)})}
+                              step="0.01"
+                              placeholder="Longitude"
+                              className="mt-1 block w-full pl-3 pr-3 py-2 text-base border-gray-600 focus:outline-none focus:ring-accent focus:border-accent sm:text-sm rounded-md bg-panel-bg text-white"
+                            />
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">{t.coordinatesHelp}</p>
                       </div>
                       
                       <div className="space-y-2">
@@ -2601,7 +2877,7 @@ function App() {
             {/* Calendar Component */}
             <div className="border-t border-gray-200 pt-4">
               <CalendarPopin 
-                initialDate={new Date()} 
+                initialDate={calendarInitialDate} 
                 firstDayOfWeek={firstDayOfWeek}
                 language={language}
                 events={defaultConfig.dateDisplay?.calendarEvents || []}
@@ -2632,12 +2908,5 @@ function App() {
     </div>
   )
 }
-
-
-
-
-
-
-
 
 export default App;

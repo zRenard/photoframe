@@ -12,19 +12,35 @@ const debugLog = (message, ...args) => {
 // This provides more flexibility and easier maintenance
 const API_KEY = defaultConfig.weather.apiKey || '4ae2636d8dfbdc3044bede63951a019b'; // Fallback to default
 
-// Fetch current weather for a location
+// Helper function to check if location is coordinates or city name
+const isCoordinates = (location) => {
+  return typeof location === 'object' && location !== null && 'lat' in location && 'lon' in location;
+};
+
+// Fetch current weather for a location (can be city name or coordinates)
 const fetchCurrentWeather = async (location, unit = 'metric', language = 'en', customApiKey = null) => {
   try {
     const apiKey = customApiKey || API_KEY;
-    debugLog(`API call: fetchCurrentWeather with language=${language}`);
-    const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, {
-      params: {
-        q: location,
-        appid: apiKey,
-        units: unit,
-        lang: language
-      }
-    });
+    
+    // Prepare params based on location type
+    const params = {
+      appid: apiKey,
+      units: unit,
+      lang: language
+    };
+    
+    // If location is coordinates object, use lat/lon params
+    if (isCoordinates(location)) {
+      debugLog(`API call: fetchCurrentWeather using coordinates [${location.lat}, ${location.lon}] with language=${language}`);
+      params.lat = location.lat;
+      params.lon = location.lon;
+    } else {
+      // Otherwise use city name
+      debugLog(`API call: fetchCurrentWeather using city name "${location}" with language=${language}`);
+      params.q = location;
+    }
+    
+    const response = await axios.get(`https://api.openweathermap.org/data/2.5/weather`, { params });
     return response.data;
   } catch (error) {
     console.error('Error fetching current weather:', error);
@@ -32,19 +48,30 @@ const fetchCurrentWeather = async (location, unit = 'metric', language = 'en', c
   }
 };
 
-// Fetch 5-day forecast for a location
+// Fetch 5-day forecast for a location (can be city name or coordinates)
 const fetchForecast = async (location, unit = 'metric', language = 'en', customApiKey = null) => {
   try {
     const apiKey = customApiKey || API_KEY;
-    debugLog(`API call: fetchForecast with language=${language}`);
-    const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast`, {
-      params: {
-        q: location,
-        appid: apiKey,
-        units: unit,
-        lang: language
-      }
-    });
+    
+    // Prepare params based on location type
+    const params = {
+      appid: apiKey,
+      units: unit,
+      lang: language
+    };
+    
+    // If location is coordinates object, use lat/lon params
+    if (isCoordinates(location)) {
+      debugLog(`API call: fetchForecast using coordinates [${location.lat}, ${location.lon}] with language=${language}`);
+      params.lat = location.lat;
+      params.lon = location.lon;
+    } else {
+      // Otherwise use city name
+      debugLog(`API call: fetchForecast using city name "${location}" with language=${language}`);
+      params.q = location;
+    }
+    
+    const response = await axios.get(`https://api.openweathermap.org/data/2.5/forecast`, { params });
     
     // Filter for tomorrow's forecast (assuming data points are 3 hours apart)
     const tomorrowDate = new Date();
@@ -125,20 +152,43 @@ const mapLanguageToApiCode = (appLanguage) => {
   return apiLanguage;
 };
 
+// Helper function to determine which location format to use
+const getEffectiveLocation = (location, coordinates) => {
+  // If location (city name) is provided and not empty, use it
+  if (location && typeof location === 'string' && location.trim() !== '') {
+    debugLog(`Using city name for weather: "${location}"`);
+    return location.trim();
+  }
+  // Otherwise fall back to coordinates if they're valid
+  else if (coordinates && typeof coordinates === 'object' && 
+           typeof coordinates.lat === 'number' && typeof coordinates.lon === 'number') {
+    debugLog(`City name is empty, using coordinates: [${coordinates.lat}, ${coordinates.lon}]`);
+    return coordinates;
+  }
+  // Last resort fallback to a default location
+  debugLog(`Neither city name nor valid coordinates provided, using default location`);
+  return "Nice,France";
+};
+
 // Get weather based on mode (today, tomorrow, smart)
-const getWeatherByMode = async (location, mode, unit = 'metric', language = 'en', customApiKey = null, translations = null) => {
+const getWeatherByMode = async (location, mode, unit = 'metric', language = 'en', customApiKey = null, translations = null, coordinates = null) => {
   // Get the correct API language code
   const apiLanguage = mapLanguageToApiCode(language);
   
-  debugLog(`Weather API call with language: ${apiLanguage} (from app language: ${language}), mode: ${mode}`);
+  // Determine whether to use city name or coordinates
+  const effectiveLocation = getEffectiveLocation(location, coordinates);
+  
+  const locationType = isCoordinates(effectiveLocation) ? 'coordinates' : 'city name';
+  debugLog(`Weather API call with language: ${apiLanguage} (from app language: ${language}), mode: ${mode}, using ${locationType}`);
   debugLog(`Weather translations available: ${translations ? 'yes' : 'no'}`);
-  const currentWeather = await fetchCurrentWeather(location, unit, apiLanguage, customApiKey);
+  
+  const currentWeather = await fetchCurrentWeather(effectiveLocation, unit, apiLanguage, customApiKey);
   
   if (mode === 'today') {
     return { current: currentWeather, forecast: null };
   } else if (mode === 'tomorrow') {
     debugLog(`Fetching forecast with language: ${apiLanguage}`);
-    const forecast = await fetchForecast(location, unit, apiLanguage, customApiKey);
+    const forecast = await fetchForecast(effectiveLocation, unit, apiLanguage, customApiKey);
     
     // Log detailed information about the forecast data for debugging
     if (defaultConfig.debug) {
@@ -156,7 +206,7 @@ const getWeatherByMode = async (location, mode, unit = 'metric', language = 'en'
     // Smart mode: Show today's weather until noon, then tomorrow's
     const now = new Date();
     debugLog(`Smart mode forecast with language: ${apiLanguage}`);
-    const forecast = await fetchForecast(location, unit, apiLanguage, customApiKey);
+    const forecast = await fetchForecast(effectiveLocation, unit, apiLanguage, customApiKey);
     
     if (now.getHours() < 12) {
       // Before noon, show today's weather
@@ -285,5 +335,7 @@ export {
   getWeatherIconUrl, 
   mapLanguageToApiCode, 
   formatLocationInfo,
-  getAirQualityDescription
+  getAirQualityDescription,
+  isCoordinates,
+  getEffectiveLocation
 };

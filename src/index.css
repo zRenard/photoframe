@@ -807,6 +807,34 @@ body {
   animation: fadeIn 0.2s ease-out forwards;
 }
 
+@keyframes timerBlink {
+  0%, 50% { 
+    background-color: rgba(0, 0, 0, 0.95);
+    color: white;
+    border: 4px solid #ff0000;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.9);
+    transform: scale(1.1);
+    border-radius: 0.5rem;
+  }
+  51%, 100% { 
+    background-color: rgba(255, 255, 255, 0.98);
+    color: black;
+    border: 4px solid #00ff00;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.9);
+    transform: scale(1.1);
+    border-radius: 0.5rem;
+  }
+}
+
+/* More specific selector to override Tailwind classes */
+.timer-content.timer-blink {
+  animation: timerBlink 0.6s infinite;
+}
+
+.timer-content.timer-blink * {
+  color: inherit;
+}
+
 .date-below-time {
   position: relative;
   top: 100%;

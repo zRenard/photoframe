@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { getWeatherByMode, getWeatherIconUrl, formatLocationInfo, fetchAirQuality, getAirQualityDescription } from '../services/weatherService';
+import { getWeatherByMode, getWeatherIconUrl, formatLocationInfo, fetchAirQuality, getAirQualityDescription, getEffectiveLocation } from '../services/weatherService';
 import defaultConfig from '../config/defaults.json';
 
 // Weather sizes definition - shared between hook and component
@@ -33,7 +33,7 @@ const weatherSizes = {
 };
 
 // Define a reusable hook for weather data to share across components
-function useWeatherData(location, forecastMode, unit, language, translations, size = 'size-2', apiKey = null, refreshInterval = 60, showAirQuality = false) {
+function useWeatherData(location, forecastMode, unit, language, translations, size = 'size-2', apiKey = null, refreshInterval = 60, showAirQuality = false, coordinates = null) {
   // Set default values within the function
   forecastMode = forecastMode || 'today';
   unit = unit || 'metric';
@@ -75,9 +75,10 @@ function useWeatherData(location, forecastMode, unit, language, translations, si
   const fetchWeather = async (force = false) => {
     try {
       // Validate essential parameters to avoid unnecessary API calls
-      if (!location) {
-        if (defaultConfig.debug) console.log('Weather: Missing location, skipping fetch');
-        setError('Please enter a location');
+      const effectiveLocation = getEffectiveLocation(location, coordinates);
+      if (!effectiveLocation) {
+        if (defaultConfig.debug) console.log('Weather: Missing location and coordinates, skipping fetch');
+        setError('Please enter a location or coordinates');
         return;
       }
       
@@ -107,13 +108,19 @@ function useWeatherData(location, forecastMode, unit, language, translations, si
       // Set loading state
       setLoading(true);
       if (defaultConfig.debug) {
-        console.log(`WeatherDisplay: Fetching weather for '${location}' with language: ${language}`);
-        console.log(`Weather parameters: forecastMode=${forecastMode}, unit=${unit}, apiKey=${apiKey ? 'provided' : 'missing'}`);
+        const effectiveLocationForDebug = getEffectiveLocation(location, coordinates);
+        const isUsingCoords = typeof effectiveLocationForDebug === 'object';
+        if (isUsingCoords) {
+          console.log(`WeatherDisplay: Fetching weather using coordinates: [${effectiveLocationForDebug.lat}, ${effectiveLocationForDebug.lon}]`);
+        } else {
+          console.log(`WeatherDisplay: Fetching weather using city name: ${effectiveLocationForDebug}`);
+        }
+        console.log(`Weather parameters: forecastMode=${forecastMode}, unit=${unit}, language=${language}, apiKey=${apiKey ? 'provided' : 'missing'}`);
       }
       
       // Fetch weather data with proper error handling
       try {
-        const data = await getWeatherByMode(location, forecastMode, unit, language, apiKey, translations);
+        const data = await getWeatherByMode(location, forecastMode, unit, language, apiKey, translations, coordinates);
         if (!data) throw new Error('No weather data received');
         
         setWeatherData(data);
@@ -136,7 +143,7 @@ function useWeatherData(location, forecastMode, unit, language, translations, si
                 setAirQualityData(null);
               }
             } catch (airQualityError) {
-              console.error('Error fetching air quality data:', airQualityError);
+              if (defaultConfig.debug) console.error('Error fetching air quality data:', airQualityError);
               setAirQualityData(null);
             }
           } else {
@@ -162,12 +169,12 @@ function useWeatherData(location, forecastMode, unit, language, translations, si
         // Reset countdown
         setTimeRemaining(refreshInterval * 60);
       } catch (fetchError) {
-        console.error('Error fetching weather data:', fetchError);
+        if (defaultConfig.debug) console.error('Error fetching weather data:', fetchError);
         setError(fetchError.message || 'Failed to fetch weather data');
       }
       
     } catch (err) {
-      console.error('Error in weather fetch process:', err);
+      if (defaultConfig.debug) console.error('Error in weather fetch process:', err);
       setError(err.message || 'An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -421,6 +428,7 @@ function useWeatherData(location, forecastMode, unit, language, translations, si
 // Main WeatherDisplay component
 function WeatherDisplay({ 
   location, 
+  coordinates = null,
   forecastMode = 'today', 
   unit = 'metric', 
   position = 'top-right', 
@@ -461,13 +469,36 @@ function WeatherDisplay({
     }
   }, [language, lastLanguage]);
   
+  // Keep track of location and coordinates to detect changes
+  const [lastLocation, setLastLocation] = useState(location);
+  const [lastCoordinates, setLastCoordinates] = useState(coordinates);
+  
   // Use the shared hook for weather data
   const { 
     renderWeatherContent, 
     formattedTimeRemaining, 
     refreshWeather,
     nextUpdate
-  } = useWeatherData(location, forecastMode, unit, language, translations, size, apiKey, refreshInterval, showAirQuality);
+  } = useWeatherData(location, forecastMode, unit, language, translations, size, apiKey, refreshInterval, showAirQuality, coordinates);
+  
+  // Check if location or coordinates changed (moved after useWeatherData to avoid reference error)
+  useEffect(() => {
+    const locationChanged = lastLocation !== location;
+    const coordinatesChanged = coordinates && lastCoordinates && 
+      (coordinates.lat !== lastCoordinates.lat || coordinates.lon !== lastCoordinates.lon);
+    
+    if (locationChanged) {
+      if (defaultConfig.debug) console.log(`Location changed from "${lastLocation}" to "${location}", refreshing weather`);
+      setLastLocation(location);
+      refreshWeather(true);
+    }
+    
+    if (coordinatesChanged) {
+      if (defaultConfig.debug) console.log(`Coordinates changed from [${lastCoordinates.lat}, ${lastCoordinates.lon}] to [${coordinates.lat}, ${coordinates.lon}], refreshing weather`);
+      setLastCoordinates(coordinates);
+      refreshWeather(true);
+    }
+  }, [location, coordinates, lastLocation, lastCoordinates, refreshWeather]);
   
   // React to changes in refreshInterval from parent component - track previous value
   const refreshIntervalRef = useRef(refreshInterval);
@@ -538,6 +569,10 @@ function WeatherDisplay({
 
 WeatherDisplay.propTypes = {
   location: PropTypes.string.isRequired,
+  coordinates: PropTypes.shape({
+    lat: PropTypes.number,
+    lon: PropTypes.number
+  }),
   forecastMode: PropTypes.oneOf(['today', 'tomorrow', 'smart']),
   unit: PropTypes.oneOf(['metric', 'imperial']),
   position: PropTypes.oneOf([

@@ -12,7 +12,11 @@
   "rotationTime": 60,
   "weather": {
     "show": true,
-    "location": "Nice,France",
+    "location": "",
+    "coordinates": {
+      "lat": 43.7031,
+      "lon": 7.2661
+    },
     "forecastMode": "smart",
     "position": "top-right",
     "unit": "metric",
@@ -27,7 +31,16 @@
     "format24h": true,
     "showSeconds": false,
     "position": "center",
-    "size": "size-8"
+    "size": "size-8",
+    "timer": {
+      "enabled": true,
+      "type": "countdown", 
+      "countdownHours": 0,
+      "countdownMinutes": 0,
+      "countdownSeconds": 3,
+      "position": "below",
+      "timeoutBlinkDuration": 10
+    }
   },
   "dateDisplay": {
     "show": true,
@@ -43,19 +56,9 @@
         "description": "Jour férié national français - Prise de la Bastille"
       },
       {
-        "date": "2025-07-02",
-        "title": "Aujourd'hui",
-        "description": "C'est aujourd'hui ! Un jour spécial à noter."
-      },
-      {
-        "date": "2025-07-25",
-        "title": "Anniversaire",
-        "description": "N'oubliez pas l'anniversaire de Marie !"
-      },
-      {
         "date": "2025-08-15",
         "title": "Assomption",
-        "description": "Jour férié - Assomption de Marie"
+        "description": "Jour férié - Assomption"
       },
       {
         "date": "2025-12-25",
