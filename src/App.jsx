@@ -3,7 +3,8 @@ import { Cog6ToothIcon, XMarkIcon, ArrowsPointingOutIcon, ArrowsPointingInIcon, 
 import './App.css';
 import defaultConfig from './config/defaults.json';
 import CalendarPopin from './components/CalendarPopin';
-import WeatherDisplay, { useWeatherData } from './components/WeatherDisplay';
+import WeatherDisplay from './components/WeatherDisplay';
+import { useWeatherData } from './hooks/useWeatherData';
 import TimerDisplay from './components/TimerDisplay';
 
 // Translation strings
@@ -851,6 +852,14 @@ const fetchImages = async () => {
 };
 
 function App() {
+  // PERFORMANCE NOTICE: This is the original App component
+  // For better performance, use ModularApp.jsx instead
+  // You can switch by changing imports in main.jsx or using AppWrapper.jsx
+  
+  useEffect(() => {
+    console.warn('⚠️ PERFORMANCE NOTICE: You are using the original App component. For better performance, consider switching to ModularApp by changing the import in main.jsx or using AppWrapper.jsx');
+  }, []);
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const configRef = useRef(null);
@@ -919,29 +928,35 @@ function App() {
   
   // Get weather data using the hook at component top level (to avoid Rules of Hooks violations)
   const { 
-    renderWeatherContent, 
-    refreshWeather, 
-    formattedTimeRemaining, 
+    weatherData,
+    airQualityData,
+    loading: weatherLoading,
+    error: weatherError,
     timeRemaining, 
-    lastUpdated
-  } = useWeatherData(
-    weatherLocation,
+    lastUpdated,
+    refreshWeather
+  } = useWeatherData({
+    location: weatherLocation,
     forecastMode,
-    weatherUnit,
+    unit: weatherUnit,
     language, // This language parameter should be passed to the API for translations
     translations,
-    weatherSize,
-    weatherApiKey,
-    weatherRefreshInterval,
-    showAirQuality
-  );
+    apiKey: weatherApiKey,
+    refreshInterval: weatherRefreshInterval,
+    showAirQuality,
+    coordinates: weatherCoordinates
+  });
   
   // Log for debugging weather translation issues
   useEffect(() => {
     if (defaultConfig.debug) {
       console.log(`App component language changed to: ${language}`);
     }
-  }, [language]);
+    // Force weather refresh on language change
+    if (typeof refreshWeather === 'function') {
+      refreshWeather(true);
+    }
+  }, [language, refreshWeather]);
   
   // Initialize translations based on current language
   const t = translations[language] || translations.en;
@@ -2773,7 +2788,7 @@ function App() {
                             <div 
                               className="bg-accent h-2.5" 
                               style={{ 
-                                width: `${Math.max(0, Math.min(100, (timeRemaining / (weatherRefreshInterval * 60)) * 100))}%`,
+                                width: `${Math.max(0, 100)}%`,
                                 transition: 'none'
                               }}
                             ></div>

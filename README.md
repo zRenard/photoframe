@@ -23,6 +23,14 @@ A modern, responsive photo frame application built with React, Vite, and Express
   - Real-time preview of changes
   - Responsive design for all screen sizes
   - Dark mode optimized UI
+  - Image management (upload/delete in dev mode)
+
+- 🖼️ **Image Management**
+  - Built-in image browser with thumbnails
+  - Upload images directly from browser (dev mode)
+  - Delete images with confirmation (dev mode)
+  - Automatic image detection and caching
+  - Support for JPG, JPEG, PNG, GIF, WebP formats
 
 - 🚀 **Deployment Options**
   - Development server with hot-reload
@@ -52,19 +60,74 @@ A modern, responsive photo frame application built with React, Vite, and Express
 
 ## 🖥️ Development
 
-1. **Start the development environment**
-   ```bash
-   npm run dev:full
-   ```
-   This will start:
-   - Vite dev server: http://localhost:5173
-   - Express API server: http://localhost:3001
+### 🎯 Quick Start Modes
 
-2. **Add your images**
-   - Create a `public/photos` directory in the project root
-   - Add your images to this directory
-   - Supported formats: JPG, JPEG, PNG, GIF, WebP
-   - The application will automatically detect and display all images
+#### Mode 1: Simple Static Mode (Default)
+```bash
+npm run dev
+```
+- **Port**: http://localhost:5173
+- **Image Management**: Manual file system only
+- **Features**: View images, automatic detection
+- **Best for**: Quick setup, production deployment
+
+#### Mode 2: Full Development Mode  
+```bash
+npm run dev:full
+```
+- **Ports**: http://localhost:5173 (Vite) + http://localhost:3001 (Express)
+- **Image Management**: Upload/delete from browser + file system
+- **Features**: All features including browser-based image management
+- **Best for**: Development, content management
+
+### 🖼️ Managing Images
+
+#### Static Mode (Simple)
+1. Add images to `public/photos/` directory
+2. Open Settings → General → Images tab
+3. Click "Scan for Images" to refresh
+4. Delete files manually from `public/photos/`
+
+#### Full Mode (Express API)
+1. Open Settings → General → Images tab  
+2. Use "Upload Image" button to add files
+3. Click red ❌ button on thumbnails to delete
+4. Files are automatically synced
+
+### 📋 Feature Comparison
+
+| Feature | Static Mode | Full Mode |
+|---------|-------------|-----------|
+| View thumbnails | ✅ | ✅ |
+| Auto-detect images | ✅ | ✅ |
+| Browser upload | ❌ | ✅ |
+| Browser delete | ❌ | ✅ |
+| File validation | ❌ | ✅ |
+| Duplicate handling | ❌ | ✅ |
+| Real-time sync | ❌ | ✅ |
+| Memory usage | Low | Medium |
+| Setup complexity | Simple | Medium |
+| Production ready | ✅ | ❌ (dev only) |
+
+
+### 🚀 Testings
+
+- **Test**
+   ```npm test```
+- **Run tests with coverage**
+   ```npm test -- --coverage```
+
+### 🚀 Performance Optimizations
+
+This application has been optimized for better performance with:
+
+- **Modular Architecture**: Custom hooks separate business logic from UI components
+- **Memoized Components**: Strategic use of React.memo to prevent unnecessary re-renders
+- **Optimized Event Handlers**: useCallback for stable function references
+- **Efficient State Management**: Grouped related state and optimized updates
+- **Lazy Loading**: Components load only when needed
+
+For detailed information about the optimizations, see [PERFORMANCE_OPTIMIZATION.md](PERFORMANCE_OPTIMIZATION.md).
 
 ## 🚀 Production Deployment
 
@@ -121,6 +184,8 @@ A modern, responsive photo frame application built with React, Vite, and Express
 1. **Build the application**
    ```bash
    npm run build
+   # Deploy 'dist' folder to any static host
+   # Add images manually to photos directory
    ```
 
 2. **Start the production server**
@@ -174,6 +239,8 @@ NODE_ENV=development
 
 - `GET /api/test` - Test endpoint to verify the API is running
 - `GET /api/images` - Get list of available images
+- `POST /api/upload-image` - Upload a new image (dev mode only)
+- `DELETE /api/delete-image?name=filename` - Delete an image (dev mode only)
 - `GET /photos/:filename` - Serve an image file
 
 ## 🛠️ Configuration Panel

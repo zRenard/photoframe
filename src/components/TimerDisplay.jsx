@@ -2,6 +2,18 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { ClockIcon, PauseIcon, PlayIcon, StopIcon } from '@heroicons/react/24/outline';
 
+// Timer font sizes definition - maps size keys to CSS classes
+const timerFontSizes = {
+  'size-1': 'text-sm',
+  'size-2': 'text-base',
+  'size-3': 'text-lg',
+  'size-4': 'text-xl',
+  'size-5': 'text-2xl',
+  'size-6': 'text-3xl',
+  'size-7': 'text-4xl',
+  'size-8': 'text-5xl'
+};
+
 const TimerDisplay = ({ 
   enabled = false, 
   type = 'countdown', // 'countdown' or 'chronometer'
@@ -11,15 +23,17 @@ const TimerDisplay = ({
   position = 'below',
   language = 'en',
   translations,
-  onComplete = null,
+  _onComplete = null,
   showIconButton = true,
   onTimerTypeChange = null,
-  timeoutBlinkDuration = 10, // Default to 10 seconds if not provided
-  debug = false, // Debug mode flag
+  _timeoutBlinkDuration = 10, // Default to 10 seconds if not provided
+  countdownFontSize = 'size-4', // Font size for countdown timer
+  chronometerFontSize = 'size-4', // Font size for chronometer timer
   // Shared timer state props
   isActive: externalIsActive,
   isPaused: externalIsPaused,
   isComplete: externalIsComplete,
+  isHidden: externalIsHidden,
   timerTime: externalTimerTime,
   timerBlinkClass: externalBlinkClass,
   onTimerStateChange = null
@@ -41,6 +55,8 @@ const TimerDisplay = ({
   const isActive = hasExternalState ? externalIsActive : internalIsActive;
   const isPaused = hasExternalState ? externalIsPaused : internalIsPaused;
   const isComplete = hasExternalState ? externalIsComplete : internalIsComplete;
+  const isHidden = hasExternalState ? externalIsHidden : false; // Default to false for internal state
+  // Always use externalTimerTime for display and logic when in external state mode
   const time = hasExternalState ? externalTimerTime : internalTime;
   
   // State setters
@@ -50,6 +66,23 @@ const TimerDisplay = ({
   const setTime = hasExternalState ? onTimerStateChange.setTime : setInternalTime;
   // Other state variables that are not shared
   const [showSettings, setShowSettings] = useState(false);
+  const [configTimeManuallySet, setConfigTimeManuallySet] = useState(false);
+  const [isFirstTimeOpeningPopup, setIsFirstTimeOpeningPopup] = useState(true);
+  
+  // Use shared popup values if external state is available, otherwise use local state
+  const [localLastPopupValues, setLocalLastPopupValues] = useState({
+    hours: 0,
+    minutes: 5,
+    seconds: 0
+  });
+  
+  const getLastPopupValues = hasExternalState && onTimerStateChange?.getLastPopupValues 
+    ? onTimerStateChange.getLastPopupValues 
+    : () => localLastPopupValues;
+  
+  const updateLastPopupValues = hasExternalState && onTimerStateChange?.updateLastPopupValues 
+    ? onTimerStateChange.updateLastPopupValues 
+    : setLocalLastPopupValues;
   
   // For countdown configuration
   const [configTime, setConfigTime] = useState({
@@ -68,118 +101,46 @@ const TimerDisplay = ({
   
   // Translation helper
   const t = translations?.[language] || translations.en;
-  
-  // Start blinking effect when countdown completes
-  const startBlinking = useCallback(() => {
-    if (debug) {
-      console.log('Starting timer blink effect');
-      console.log(`Timeout blink duration: ${timeoutBlinkDuration} seconds`);
-    }
-    
-    // Use CSS class for blinking instead of JavaScript intervals
-    setActualBlinkClass('timer-blink');
-    if (debug) {
-      console.log('Set blinkClass to: timer-blink');
-    }
-    
-    // Stop blinking after the configured duration (in seconds, converted to ms)
-    setTimeout(() => {
-      if (debug) {
-        console.log(`Stopping timer blink effect after ${timeoutBlinkDuration} seconds`);
-      }
-      setActualBlinkClass('');
-      if (debug) {
-        console.log('Set blinkClass to: (empty)');
-      }
-      setIsComplete(false);
-    }, timeoutBlinkDuration * 1000);
-  }, [setIsComplete, setActualBlinkClass, timeoutBlinkDuration, debug]);
 
   // Get className for timer panel, adding blink class when needed
   const getTimerPanelClassName = () => {
     const baseClasses = "timer-content flex items-center space-x-2 text-white bg-black bg-opacity-50 p-2 rounded";
     if (actualBlinkClass) {
       const finalClassName = `${baseClasses} ${actualBlinkClass}`;
-      if (debug) {
-        console.log('Timer panel className with blink:', finalClassName);
-      }
       return finalClassName;
-    }
-    if (debug) {
-      console.log('Timer panel className without blink:', baseClasses);
     }
     return baseClasses;
   };
 
-  // Timer tick function
-  const tick = useCallback(() => {
-    if (type === 'countdown') {
-      setTime(prevTime => {
-        // Calculate total seconds
-        let totalSeconds = prevTime.hours * 3600 + prevTime.minutes * 60 + prevTime.seconds;
-        
-        // Decrement by 1 second
-        totalSeconds -= 1;
-        
-        // Check if countdown is complete
-        if (totalSeconds <= 0) {
-          // Schedule state updates for next tick to avoid setState during render
-          setTimeout(() => {
-            // Stop the timer
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-            setIsActive(false);
-            setIsComplete(true);
-            
-            // Call the onComplete callback if provided
-            if (onComplete) {
-              onComplete();
-            }
-            
-            // Start blinking
-            startBlinking();
-          }, 0);
-          
-          // Return zeros for time
-          return { hours: 0, minutes: 0, seconds: 0 };
-        }
-        
-        // Calculate new hours, minutes, seconds
-        const newHours = Math.floor(totalSeconds / 3600);
-        const newMinutes = Math.floor((totalSeconds % 3600) / 60);
-        const newSeconds = totalSeconds % 60;
-        
-        return {
-          hours: newHours,
-          minutes: newMinutes,
-          seconds: newSeconds
-        };
-      });
-    } else {
-      // Chronometer - count up
-      setTime(prevTime => {
-        // Calculate total seconds
-        let totalSeconds = prevTime.hours * 3600 + prevTime.minutes * 60 + prevTime.seconds;
-        
-        // Increment by 1 second
-        totalSeconds += 1;
-        
-        // Calculate new hours, minutes, seconds
-        const newHours = Math.floor(totalSeconds / 3600);
-        const newMinutes = Math.floor((totalSeconds % 3600) / 60);
-        const newSeconds = totalSeconds % 60;
-        
-        return {
-          hours: newHours,
-          minutes: newMinutes,
-          seconds: newSeconds
-        };
-      });
-    }
-  }, [type, onComplete, setTime, setIsActive, setIsComplete, startBlinking]);
-  
+  // Get the appropriate font size based on timer type
+  const getFontSizeClass = () => {
+    const fontSize = type === 'countdown' ? countdownFontSize : chronometerFontSize;
+    return timerFontSizes[fontSize] || 'text-lg';
+  };
+
   // Start/pause timer
   const toggleTimer = () => {
+    // Use external toggle method if available
+    if (hasExternalState && onTimerStateChange?.toggleTimer) {
+      // If starting fresh, make sure to set the correct initial time
+      if (!isActive && !isPaused) {
+        let newTime;
+        if (type === 'countdown') {
+          newTime = configTime;
+        } else {
+          newTime = { hours: 0, minutes: 0, seconds: 0 };
+        }
+        if (onTimerStateChange.setTime) {
+          onTimerStateChange.setTime(newTime);
+        }
+      }
+      
+      onTimerStateChange.toggleTimer();
+      setShowSettings(false);
+      return;
+    }
+    
+    // Fallback to internal logic (when no external state)
     if (!isActive) {
       // Starting or resuming timer
       if (!isPaused) {
@@ -197,18 +158,14 @@ const TimerDisplay = ({
       setIsComplete(false);
       setActualBlinkClass('');
       
-      // Only create interval if this is the icon component (which controls the timer)
-      // The below component should only display, not manage intervals
-      if (position === 'icon' || !hasExternalState) {
-        // Only start interval if we don't already have one running
-        if (!intervalRef.current) {
-          intervalRef.current = setInterval(tick, 1000);
-        }
+      // Only create interval if this component manages its own state
+      if (!hasExternalState) {
+        // Note: When using external state, the useTimer hook manages intervals
+        // We don't need to create intervals here anymore
       }
     } else {
       // Pausing timer
-      // Only clear interval if this component manages it
-      if (position === 'icon' || !hasExternalState) {
+      if (!hasExternalState) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
@@ -220,11 +177,17 @@ const TimerDisplay = ({
     // Hide settings when starting
     setShowSettings(false);
   };
-  
+
   // Reset timer
   const resetTimer = () => {
-    // Only clear interval if this component manages it
-    if (position === 'icon' || !hasExternalState) {
+    // Use external reset method if available
+    if (hasExternalState && onTimerStateChange?.resetTimer) {
+      onTimerStateChange.resetTimer();
+      return;
+    }
+    
+    // Fallback to internal logic (when no external state)
+    if (!hasExternalState) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
@@ -236,6 +199,8 @@ const TimerDisplay = ({
     setIsPaused(false);
     setIsComplete(false);
     setActualBlinkClass('');
+    
+    // Don't reset configTimeManuallySet - keep popup values persistent
     
     if (type === 'countdown') {
       setTime(configTime);
@@ -250,33 +215,71 @@ const TimerDisplay = ({
   
   // Show/hide settings panel
   const toggleSettings = () => {
+    if (!showSettings) {
+      // Opening the popup - show last used values, or defaults if first time
+      const lastValues = getLastPopupValues();
+      
+      if (isFirstTimeOpeningPopup) {
+        setConfigTime({
+          hours: 0,
+          minutes: 5,
+          seconds: 0
+        });
+        setIsFirstTimeOpeningPopup(false);
+      } else {
+        // Show the last popup values that were used
+        setConfigTime(lastValues);
+      }
+    }
     setShowSettings(!showSettings);
   };
   
   // Apply settings and start timer
   const applyAndStartTimer = () => {
+    let newTime;
     if (type === 'countdown') {
-      setTime(configTime);
+      newTime = {
+        hours: configTime.hours,
+        minutes: configTime.minutes,
+        seconds: configTime.seconds
+      };
+      // Save these values as the last used popup values
+      updateLastPopupValues(newTime);
     } else {
-      // For chronometer, start from 00:00:00
-      const startTime = { hours: 0, minutes: 0, seconds: 0 };
-      setTime(startTime);
+      newTime = { hours: 0, minutes: 0, seconds: 0 };
     }
-    
+    // Mark that the user has manually set config time
+    setConfigTimeManuallySet(true);
     setShowSettings(false);
-    
-    // Start the timer after applying settings
-    if (!isActive) {
-      setIsActive(true);
-      setIsPaused(false);
-      setIsComplete(false);
-      setActualBlinkClass('');
-      
-      // Only create interval if this is the icon component (which controls the timer)
-      if (position === 'icon' || !hasExternalState) {
-        intervalRef.current = setInterval(tick, 1000);
+    // Use external state if available
+    if (hasExternalState && onTimerStateChange?.setTime) {
+      onTimerStateChange.setTime(newTime);
+      // Use startTimer instead of setIsActive + toggleTimer to avoid conflicts
+      if (onTimerStateChange.startTimer) {
+        onTimerStateChange.startTimer();
+      } else if (onTimerStateChange.toggleTimer) {
+        onTimerStateChange.toggleTimer();
       }
+      return;
     }
+    // Fallback to internal logic
+    setTime(newTime);
+    setIsActive(true);
+    setIsPaused(false);
+    setIsComplete(false);
+    setActualBlinkClass('');
+  };
+
+  // Reset to default values (5 minutes)
+  const resetToDefaults = () => {
+    const defaultValues = {
+      hours: 0,
+      minutes: 5,
+      seconds: 0
+    };
+    setConfigTime(defaultValues);
+    // Update the last popup values to the defaults
+    updateLastPopupValues(defaultValues);
   };
   
   // Handle input changes
@@ -296,33 +299,41 @@ const TimerDisplay = ({
       ...prev,
       [field]: constrainedValue
     }));
+    
+    // Mark that the user has manually set config time
+    setConfigTimeManuallySet(true);
   };
   
-  // Cleanup interval on unmount
+
+  // Cleanup interval on unmount (only if not using external state)
   useEffect(() => {
+    if (hasExternalState) return;
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }
     };
-  }, []);
+  }, [hasExternalState]);
 
-  // Clear interval when timer is paused (from any component)
+  // Clear interval when timer is paused (from any component, only if not using external state)
   useEffect(() => {
-    // Only clear interval if this component is responsible for managing it
+    if (hasExternalState) return;
     if (isPaused && intervalRef.current && (position === 'icon' || !hasExternalState)) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
   }, [isPaused, position, hasExternalState]);
 
-  // Create interval when timer becomes active (for interval-managing components)
+  // Cleanup interval on unmount (only if not using external state)
   useEffect(() => {
-    // Only create interval if this component is responsible for managing it and timer is active
-    if (isActive && !intervalRef.current && (position === 'icon' || !hasExternalState)) {
-      intervalRef.current = setInterval(tick, 1000);
-    }
-  }, [isActive, position, hasExternalState, tick]);
+    if (hasExternalState) return;
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [hasExternalState]);
   
   // Click outside to close settings panel
   useEffect(() => {
@@ -342,66 +353,132 @@ const TimerDisplay = ({
   
   // Update timer display when initial values change
   useEffect(() => {
-    if (!isActive && !isPaused) {
+    // Always update when timer is not active, regardless of paused state
+    // This ensures countdown values are always applied when timer is stopped
+    // But only update configTime if it hasn't been manually set by the user
+    if (!isActive) {
       setTime({
         hours: initialHours,
         minutes: initialMinutes,
         seconds: initialSeconds
       });
-      setConfigTime({
-        hours: initialHours,
-        minutes: initialMinutes,
-        seconds: initialSeconds
-      });
+      
+      // Only update configTime if user hasn't manually set custom values
+      if (!configTimeManuallySet) {
+        setConfigTime({
+          hours: initialHours,
+          minutes: initialMinutes,
+          seconds: initialSeconds
+        });
+      }
     }
-  }, [initialHours, initialMinutes, initialSeconds, isActive, isPaused, setTime]);
+  }, [initialHours, initialMinutes, initialSeconds, isActive, setTime, configTimeManuallySet]);
   
-  // Format time display
-  const formatTime = (hours, minutes, seconds) => {
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  };
-  
-  // Only return null if the timer is completely inactive and disabled
+  // Format time display with localization
+  const formatTime = useCallback((hours, minutes, seconds) => {
+    // Create a date object with the time components
+    // Using a fixed date (epoch) and only setting time components
+    const date = new Date(0);
+    date.setUTCHours(hours);
+    date.setUTCMinutes(minutes);
+    date.setUTCSeconds(seconds);
+    
+    try {
+      // Use the browser's localization for time formatting
+      const timeString = date.toLocaleTimeString(language, {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+        timeZone: 'UTC' // Use UTC to avoid timezone conversion
+      });
+      return timeString;
+    } catch {
+      // Fallback to manual formatting if localization fails
+      return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+  }, [language]);
+    // Only return null if the timer is completely inactive and disabled
   // This ensures the timer continues to be displayed when active, even if disabled in settings
+  // Note: isHidden only affects "below" position, not the icon
   if (!enabled && !isActive && !isPaused && !isComplete && !showSettings) {
     return null;
   }
-  
-  // Render icon button only - always show the icon when showIconButton is true and position is icon
-  if (showIconButton && position === 'icon' && !showSettings) {
+
+  // For "below" position - only show when timer is active, paused, or complete (display-only)
+  // AND not hidden (isHidden only applies to below position)
+  if (position === 'below') {
+    if ((!isActive && !isPaused && !isComplete) || isHidden) {
+      return null; // Don't show anything when timer is not running or is hidden
+    }
+    
     return (
-      <div className="absolute right-[-24px] top-0">
-        <button
-          onClick={toggleSettings}
-          className="p-0.5 rounded-full hover:bg-white/20 transition-colors"
-          title={t.timer || 'Timer'}
-        >
-          <ClockIcon className="h-4 w-4 text-white" />
-        </button>
+      <div className="timer-display-below">
+        <div className={getTimerPanelClassName()}>
+          <div className={`timer-time ${getFontSizeClass()} font-bold text-white mr-2`}>
+            {isComplete ? (t.timeOut || 'Time Out') : formatTime(time.hours, time.minutes, time.seconds)}
+          </div>
+          {/* Timer Controls - Hide when timer is complete */}
+          {!isComplete && (
+            <div className="timer-controls flex space-x-1">
+              <button
+                onClick={toggleTimer}
+                className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                title={isActive ? t.pause || 'Pause' : t.start || 'Start'}
+              >
+                {isActive ? 
+                  <PauseIcon className="h-4 w-4 text-white" /> : 
+                  <PlayIcon className="h-4 w-4 text-white" />
+                }
+              </button>
+              <button
+                onClick={resetTimer}
+                className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                title={t.reset || 'Reset'}
+              >
+                <StopIcon className="h-4 w-4 text-white" />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     );
   }
 
-  // For icon position, show settings panel if settings are open
+  // For icon position, show just the icon and settings panel
   if (position === 'icon' && showIconButton) {
-    return (
-      <div>
-        <div className="absolute right-[-24px] top-0">
+    // Always show just the icon (the actual timer display is handled by the "below" position)
+    if (!showSettings) {
+      return (
+        <div className="relative">
           <button
             onClick={toggleSettings}
-            className="p-0.5 rounded-full hover:bg-white/20 transition-colors"
+            className="p-1 rounded-full hover:bg-white/20 transition-colors"
             title={t.timer || 'Timer'}
           >
-            <ClockIcon className="h-4 w-4 text-white" />
+            <ClockIcon className="h-5 w-5 text-white" />
           </button>
         </div>
+      );
+    }
+    
+    // Show settings panel when icon is clicked
+    return (
+      <div className="relative">
+        <button
+          onClick={toggleSettings}
+          className="p-1 rounded-full hover:bg-white/20 transition-colors"
+          title={t.timer || 'Timer'}
+        >
+          <ClockIcon className="h-5 w-5 text-white" />
+        </button>
         
         {/* Settings Panel for icon position */}
         {showSettings && (
           <div 
             ref={settingsRef}
             className="settings-panel absolute z-20 bg-black/80 rounded-lg p-2 shadow-lg w-80"
-            style={{ top: '100%', marginTop: '4px', right: '-24px' }}
+            style={{ top: '100%', marginTop: '8px', left: '50%', transform: 'translateX(-50%)' }}
           >
             <h3 className="text-xs font-medium mb-1">{t.timer || 'Timer'}</h3>
             
@@ -445,7 +522,7 @@ const TimerDisplay = ({
                     max="99"
                     value={configTime.hours}
                     onChange={(e) => handleInputChange('hours', e.target.value)}
-                    className="w-8 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                    className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
                   />
                   <span className="text-xs">M:</span>
                   <input
@@ -454,7 +531,7 @@ const TimerDisplay = ({
                     max="59"
                     value={configTime.minutes}
                     onChange={(e) => handleInputChange('minutes', e.target.value)}
-                    className="w-8 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                    className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
                   />
                   <span className="text-xs">S:</span>
                   <input
@@ -463,7 +540,7 @@ const TimerDisplay = ({
                     max="59"
                     value={configTime.seconds}
                     onChange={(e) => handleInputChange('seconds', e.target.value)}
-                    className="w-8 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                    className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
                   />
                 </div>
               </div>
@@ -475,6 +552,12 @@ const TimerDisplay = ({
                 className="bg-gray-600 hover:bg-gray-700 text-white py-0.5 px-2 rounded text-xs"
               >
                 {t.cancel || 'Cancel'}
+              </button>
+              <button 
+                onClick={resetToDefaults}
+                className="bg-blue-600 hover:bg-blue-700 text-white py-0.5 px-2 rounded text-xs"
+              >
+                {t.reset || 'Reset'}
               </button>
               <button 
                 onClick={applyAndStartTimer}
@@ -575,7 +658,7 @@ const TimerDisplay = ({
                   max="99"
                   value={configTime.hours}
                   onChange={(e) => handleInputChange('hours', e.target.value)}
-                  className="w-8 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                  className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
                 />
                 <span className="text-xs">M:</span>
                 <input
@@ -584,7 +667,7 @@ const TimerDisplay = ({
                   max="59"
                   value={configTime.minutes}
                   onChange={(e) => handleInputChange('minutes', e.target.value)}
-                  className="w-8 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                  className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
                 />
                 <span className="text-xs">S:</span>
                 <input
@@ -593,7 +676,7 @@ const TimerDisplay = ({
                   max="59"
                   value={configTime.seconds}
                   onChange={(e) => handleInputChange('seconds', e.target.value)}
-                  className="w-8 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                  className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
                 />
               </div>
             </div>
@@ -607,7 +690,13 @@ const TimerDisplay = ({
               {t.cancel || 'Cancel'}
             </button>
             <button 
-              onClick={toggleTimer}
+              onClick={resetToDefaults}
+              className="bg-blue-600 hover:bg-blue-700 text-white py-0.5 px-2 rounded text-xs"
+            >
+              {t.reset || 'Reset'}
+            </button>
+            <button 
+              onClick={applyAndStartTimer}
               className="bg-green-600 hover:bg-green-700 text-white py-0.5 px-2 rounded text-xs"
             >
               {t.start || 'Start'}
@@ -632,11 +721,13 @@ TimerDisplay.propTypes = {
   showIconButton: PropTypes.bool,
   onTimerTypeChange: PropTypes.func,
   timeoutBlinkDuration: PropTypes.number,
-  debug: PropTypes.bool,
+  countdownFontSize: PropTypes.oneOf(['size-1', 'size-2', 'size-3', 'size-4', 'size-5', 'size-6', 'size-7', 'size-8']),
+  chronometerFontSize: PropTypes.oneOf(['size-1', 'size-2', 'size-3', 'size-4', 'size-5', 'size-6', 'size-7', 'size-8']),
   // Shared timer state props
   isActive: PropTypes.bool,
   isPaused: PropTypes.bool,
   isComplete: PropTypes.bool,
+  isHidden: PropTypes.bool,
   timerTime: PropTypes.shape({
     hours: PropTypes.number,
     minutes: PropTypes.number,
@@ -647,8 +738,14 @@ TimerDisplay.propTypes = {
     setIsActive: PropTypes.func,
     setIsPaused: PropTypes.func,
     setIsComplete: PropTypes.func,
+    setIsHidden: PropTypes.func,
     setTime: PropTypes.func,
-    setBlinkClass: PropTypes.func
+    setBlinkClass: PropTypes.func,
+    toggleTimer: PropTypes.func,
+    startTimer: PropTypes.func,
+    resetTimer: PropTypes.func,
+    getLastPopupValues: PropTypes.func,
+    updateLastPopupValues: PropTypes.func
   })
 };
 

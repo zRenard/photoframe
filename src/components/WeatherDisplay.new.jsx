@@ -35,38 +35,18 @@ const weatherSizes = {
 // WeatherDisplay Component - Optimized and Refactored
 const WeatherDisplay = memo(({ 
   location = '', 
-  coordinates = null,
   forecastMode = 'today', 
   unit = 'metric', 
-  position = 'top-right',
   language = 'en', 
   translations = {},
-  timePosition,
-  datePosition,
-  showTime,
-  showDate,
   size = 'size-2',
   apiKey = null,
   refreshInterval = 60,
   showAirQuality = false,
-  showRefreshCountdown = false,
+  coordinates = null,
   showLastUpdated = false,
-  showRefreshButton = false,
-  isUnified = false
+  showRefreshButton = false
 }) => {
-  // Position classes mapping
-  const positionClasses = {
-    'top-left': 'absolute top-4 left-4',
-    'top-center': 'absolute top-4 left-1/2 transform -translate-x-1/2',
-    'top-right': 'absolute top-4 right-4',
-    'center-left': 'absolute top-1/2 left-4 transform -translate-y-1/2',
-    'center': 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
-    'center-right': 'absolute top-1/2 right-4 transform -translate-y-1/2',
-    'bottom-left': 'absolute bottom-16 left-4',
-    'bottom-center': 'absolute bottom-16 left-1/2 transform -translate-x-1/2',
-    'bottom-right': 'absolute bottom-16 right-4'
-  };
-
   // Use the optimized weather data hook
   const {
     weatherData,
@@ -129,22 +109,6 @@ const WeatherDisplay = memo(({
     return `${seconds}s`;
   };
 
-  // Check if we should render this as part of an existing time/date component
-  const shouldRenderWithTimeComponent = showTime && timePosition === position;
-  const shouldRenderWithDateComponent = showDate && datePosition === position && 
-                                      (!showTime || timePosition !== datePosition);
-  const allThreeInSamePosition = showTime && showDate && 
-                               timePosition === position && 
-                               datePosition === position;
-  
-  // In these cases, we don't render our component separately
-  if (shouldRenderWithTimeComponent || shouldRenderWithDateComponent || allThreeInSamePosition) {
-    return null;
-  }
-
-  // Get valid position
-  const validPosition = position && positionClasses[position] ? position : 'top-right';
-
   // Render loading state
   if (loading) {
     return (
@@ -192,7 +156,7 @@ const WeatherDisplay = memo(({
       contextKey = t.forecastModes?.today;
     }
     
-    title = contextKey ? `${t.forecast} (${contextKey})` : t.forecast;
+    title = `${t.forecast} (${contextKey})`;
   }
   
   // Extract air quality data if available
@@ -202,9 +166,7 @@ const WeatherDisplay = memo(({
     : null;
 
   return (
-    <div 
-      className={`weather-widget ${isUnified ? '' : positionClasses[validPosition]} ${isUnified ? '' : 'z-10 bg-black bg-opacity-50 rounded-lg'} text-white p-3 transition-all duration-300`}
-    >
+    <div className="weather-display">
       <div className="text-sm font-medium mb-1 text-center">{title}</div>
       
       <div className="flex items-center justify-center">
@@ -269,23 +231,6 @@ const WeatherDisplay = memo(({
         </div>
       )}
       
-      {/* Weather refresh countdown */}
-      {showRefreshCountdown && (
-        <div className="mt-2 pt-1 border-t border-white border-opacity-20 flex items-center justify-between text-xs">
-          <div className="text-white text-opacity-75">
-            {t.nextUpdate || 'Next'}: {formatTimeRemaining()}
-          </div>
-          <button 
-            onClick={() => refreshWeather()} 
-            className="px-1 py-0.5 bg-white bg-opacity-20 hover:bg-opacity-30 rounded text-white text-opacity-90 hover:text-opacity-100 transition-all"
-            title="Refresh weather now"
-            type="button"
-          >
-            ↻
-          </button>
-        </div>
-      )}
-      
       {/* Debug info */}
       {showLastUpdated && lastUpdated && (
         <div className="mt-1 text-xs text-center text-white text-opacity-50">
@@ -315,31 +260,20 @@ WeatherDisplay.displayName = 'WeatherDisplay';
 
 WeatherDisplay.propTypes = {
   location: PropTypes.string,
-  coordinates: PropTypes.shape({
-    lat: PropTypes.number,
-    lon: PropTypes.number
-  }),
   forecastMode: PropTypes.oneOf(['today', 'tomorrow', 'smart']),
   unit: PropTypes.oneOf(['metric', 'imperial']),
-  position: PropTypes.oneOf([
-    'top-left', 'top-center', 'top-right',
-    'center-left', 'center', 'center-right',
-    'bottom-left', 'bottom-center', 'bottom-right'
-  ]),
   language: PropTypes.string,
   translations: PropTypes.object,
-  timePosition: PropTypes.string,
-  datePosition: PropTypes.string,
-  showTime: PropTypes.bool,
-  showDate: PropTypes.bool,
   size: PropTypes.oneOf(['size-1', 'size-2', 'size-3', 'size-4', 'size-5']),
   apiKey: PropTypes.string,
   refreshInterval: PropTypes.number,
   showAirQuality: PropTypes.bool,
-  showRefreshCountdown: PropTypes.bool,
+  coordinates: PropTypes.shape({
+    lat: PropTypes.number,
+    lon: PropTypes.number
+  }),
   showLastUpdated: PropTypes.bool,
-  showRefreshButton: PropTypes.bool,
-  isUnified: PropTypes.bool
+  showRefreshButton: PropTypes.bool
 };
 
 export default WeatherDisplay;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, isSameMonth, isSameDay, parseISO } from 'date-fns';
 // Import date-fns locale for internationalization
@@ -29,11 +29,9 @@ const translations = {
 };
 
 const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek = 0, language = 'en', events = defaultConfig.dateDisplay?.calendarEvents || [] }) => {
-  // Store initialDate as a ref to avoid re-renders
-  const initialDateRef = React.useRef(initialDate);
-  
-  const [currentMonth, setCurrentMonth] = useState(new Date(initialDate));
-  const [selectedDate, setSelectedDate] = useState(new Date(initialDate));
+  // Use initialDate only for initial state, don't reset on changes
+  const [currentMonth, setCurrentMonth] = useState(() => new Date(initialDate));
+  const [selectedDate, setSelectedDate] = useState(() => new Date(initialDate));
   const [selectedEvent, setSelectedEvent] = useState(null);
   
   // Get the appropriate locale for the current language
@@ -47,15 +45,7 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
     dateObj: parseISO(event.date)
   }));
   
-  // Only update state if initialDate has actually changed (compare timestamps)
-  useEffect(() => {
-    // Only update if the dates are different (by timestamp)
-    if (initialDateRef.current.getTime() !== initialDate.getTime()) {
-      initialDateRef.current = initialDate;
-      setSelectedDate(new Date(initialDate));
-      setCurrentMonth(new Date(initialDate));
-    }
-  }, [initialDate]);
+  // Remove the useEffect that was causing the calendar to reset
 
   const renderHeader = () => {
     const today = new Date();
@@ -83,8 +73,8 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
           </button>
         </div>
         
-        {/* Today button - only show if not already viewing current month */}
-        {!isCurrentMonth && (
+        {/* Today button - show if not viewing current month OR if today is not selected */}
+        {(!isCurrentMonth || !isSameDay(selectedDate, today)) && (
           <div className="today-button-container">
             <button 
               className="today-button"
@@ -92,6 +82,22 @@ const CalendarPopin = ({ initialDate = new Date(), onSelectDate, firstDayOfWeek 
                 const now = new Date();
                 setCurrentMonth(now);
                 setSelectedDate(now);
+                
+                // Check if today has an event
+                const todayEvent = calendarEvents.find(event => 
+                  isSameDay(event.dateObj, now)
+                );
+                
+                if (todayEvent) {
+                  setSelectedEvent(todayEvent);
+                } else {
+                  setSelectedEvent(null);
+                }
+                
+                // Notify parent component
+                if (onSelectDate) {
+                  onSelectDate(now, todayEvent || null);
+                }
               }}
               aria-label={t.goToCurrentMonth}
             >

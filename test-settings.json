@@ -1,0 +1,62 @@
+{
+  "debug": false,
+  "language": "en",
+  "theme": "light",
+  "imageDisplayMode": "fit",
+  "transition": {
+    "type": "fade",
+    "duration": 1000
+  },
+  "showImageCounter": true,
+  "showCountdown": true,
+  "rotationTime": 30,
+  "weather": {
+    "show": true,
+    "location": "Test City",
+    "coordinates": {
+      "lat": 45.0,
+      "lon": 2.0
+    },
+    "forecastMode": "today",
+    "position": "top-left",
+    "unit": "metric",
+    "size": "size-3",
+    "apiKey": "",
+    "refreshInterval": 30,
+    "showAirQuality": true,
+    "showCountdown": false
+  },
+  "timeDisplay": {
+    "show": true,
+    "format24h": false,
+    "showSeconds": true,
+    "position": "bottom-right",
+    "size": "size-4",
+    "timer": {
+      "enabled": true,
+      "type": "chronometer",
+      "countdownHours": 1,
+      "countdownMinutes": 30,
+      "countdownSeconds": 45,
+      "position": "below",
+      "timeoutBlinkDuration": 5,
+      "countdownFontSize": "size-6",
+      "chronometerFontSize": "size-6"
+    }
+  },
+  "dateDisplay": {
+    "show": true,
+    "format": "MM/DD/YYYY",
+    "position": "top-center",
+    "size": "size-2",
+    "enableCalendar": true,
+    "firstDayOfWeek": 0,
+    "calendarEvents": [
+      {
+        "date": "2025-07-20",
+        "title": "Test Event",
+        "description": "This is a test event for import functionality"
+      }
+    ]
+  }
+}

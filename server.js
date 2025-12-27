@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
 import cors from 'cors';
+import multer from 'multer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -12,6 +13,58 @@ const PORT = process.env.PORT || 3001;
 
 // Enable CORS for all routes
 app.use(cors());
+
+// Enable JSON parsing for uploads
+app.use(express.json());
+
+// Configure multer for image uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const photosDir = join(__dirname, 'public', 'photos');
+    // Ensure the photos directory exists
+    if (!fs.existsSync(photosDir)) {
+      fs.mkdirSync(photosDir, { recursive: true });
+    }
+    cb(null, photosDir);
+  },
+  filename: (req, file, cb) => {
+    // Use original filename or generate a unique one
+    const originalName = file.originalname;
+    const filePath = join(__dirname, 'public', 'photos', originalName);
+    
+    // If file already exists, add a number suffix
+    if (fs.existsSync(filePath)) {
+      const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
+      const ext = originalName.match(/\.[^/.]+$/)?.[0] || '';
+      let counter = 1;
+      let newName;
+      
+      do {
+        newName = `${nameWithoutExt}_${counter}${ext}`;
+        counter++;
+      } while (fs.existsSync(join(__dirname, 'public', 'photos', newName)));
+      
+      cb(null, newName);
+    } else {
+      cb(null, originalName);
+    }
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Accept only image files
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
 
 // Request logging middleware (disabled)
 app.use((req, res, next) => {
@@ -57,8 +110,53 @@ app.get('/api/images', async (req, res) => {
     }
 
     res.json(imageFiles);
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to fetch images' });
+  }
+});
+
+// Upload image endpoint
+app.post('/api/upload-image', upload.single('image'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image file provided' });
+    }
+    
+    res.json({ 
+      success: true, 
+      filename: req.file.filename,
+      message: 'Image uploaded successfully'
+    });
+  } catch (_error) {
+    res.status(500).json({ error: 'Failed to upload image' });
+  }
+});
+
+// Delete image endpoint
+app.delete('/api/delete-image', (req, res) => {
+  try {
+    const { name } = req.query;
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Image name is required' });
+    }
+    
+    const imagePath = join(__dirname, 'public', 'photos', name);
+    
+    // Check if file exists
+    if (!fs.existsSync(imagePath)) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+    
+    // Delete the file
+    fs.unlinkSync(imagePath);
+    
+    res.json({ 
+      success: true, 
+      message: 'Image deleted successfully'
+    });
+  } catch (_error) {
+    res.status(500).json({ error: 'Failed to delete image' });
   }
 });
 
@@ -76,13 +174,14 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Error handling middleware
-app.use((err, req, res, next) => {
+app.use((err, req, res, _next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
 // Start the server
 app.listen(PORT, () => {
-  // Server started successfully
+  console.log(`📸 PhotoFrame Express server running on http://localhost:${PORT}`);
+  console.log(`🔗 API endpoints available at http://localhost:${PORT}/api/`);
 });
 
 // Handle unhandled promise rejections

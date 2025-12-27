@@ -9,6 +9,9 @@
   },
   "showImageCounter": false,
   "showCountdown": false,
+  "countdownPosition": "bottom-left",
+  "imageCounterPosition": "bottom-right",
+  "uiControlsPosition": "top-right",
   "rotationTime": 60,
   "weather": {
     "show": true,
@@ -39,7 +42,9 @@
       "countdownMinutes": 0,
       "countdownSeconds": 3,
       "position": "below",
-      "timeoutBlinkDuration": 10
+      "timeoutBlinkDuration": 10,
+      "countdownFontSize": "size-4",
+      "chronometerFontSize": "size-4"
     }
   },
   "dateDisplay": {
