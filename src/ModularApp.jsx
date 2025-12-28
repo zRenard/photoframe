@@ -15,7 +15,7 @@ import UIControls from './components/UIControls';
 import DisplayManager from './components/DisplayManager';
 import SettingsPanel from './components/SettingsPanel';
 import CalendarPopin from './components/CalendarPopin';
-import { getAllAvailableImages } from './utils/imageUtils';
+import { getAllAvailableImages, clearImageCache } from './utils/imageUtils';
 
 // Function to fetch images without Express server
 const fetchImages = async () => {
@@ -94,7 +94,6 @@ function ModularApp() {
   // Function to force refresh images (clears cache first)
   const forceRefreshImages = useCallback(async () => {
     // Clear cache to force fresh scan
-    const { clearImageCache } = await import('./utils/imageUtils');
     clearImageCache();
     await refreshImages();
   }, [refreshImages]);
