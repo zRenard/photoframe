@@ -57,12 +57,14 @@ A modern, responsive photo frame application built with React, Vite, and Express
 ### 📥 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/zrenard/photoframe.git
    cd photoframe
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -72,24 +74,29 @@ A modern, responsive photo frame application built with React, Vite, and Express
 ### 🎯 Quick Start Modes
 
 #### Mode 1: Simple Static Mode (Default)
+
 ```bash
 npm run dev
 ```
-- **Port**: http://localhost:5173
+
+- **Port**: <http://localhost:5173>
 - **Image Management**: Manual file system only
 - **Features**: View images, automatic detection
 - **Best for**: Quick setup, basic usage
 
 #### Mode 2: Full Development Mode  
+
 ```bash
 npm run dev:full
 ```
-- **Ports**: http://localhost:5173 (Vite) + http://localhost:3001 (Express)
+
+- **Ports**: <http://localhost:5173> (Vite) + <http://localhost:3001> (Express)
 - **Image Management**: Upload/delete from browser + file system
 - **Features**: All features including browser-based image management
 - **Best for**: Development, content management
 
 #### Mode 3: Remote API Mode (NEW)
+
 ```bash
 # Configure your API key first
 cp config/api.local.template.js config/api.local.js
@@ -98,37 +105,32 @@ cp config/api.local.template.js config/api.local.js
 # Start the server
 node server.js
 ```
-- **Port**: http://localhost:3001 (or your configured port)
+
+- **Port**: <http://localhost:3001> (or your configured port)
 - **Image Management**: Secured remote uploads + all local features
 - **Features**: Enterprise-grade API with authentication and rate limiting
-- **Validation Page**: http://localhost:3001/validate
+- **Validation Page**: <http://localhost:3001/validate>
 - **Best for**: Production deployment, remote integrations
 - **Best for**: Quick setup, basic usage
-
-#### Mode 2: Full Development Mode  
-```bash
-npm run dev:full
-```
-- **Ports**: http://localhost:5173 (Vite) + http://localhost:3001 (Express)
-- **Image Management**: Upload/delete from browser + file system
-- **Features**: All features including browser-based image management
-- **Best for**: Development, content management
 
 ### 🖼️ Managing Images
 
 #### Static Mode (Simple)
+
 1. Add images to `public/photos/` directory
 2. Open Settings → General → Images tab
 3. Click "Scan for Images" to refresh
 4. Delete files manually from `public/photos/`
 
 #### Full Mode (Express API)
+
 1. Open Settings → General → Images tab  
 2. Use "Upload Image" button to add files
 3. Click red ❌ button on thumbnails to delete
 4. Files are automatically synced
 
 #### Remote API Mode (NEW)
+
 1. **Configure Authentication**: Set API key in config or environment
 2. **Use Validation Page**: Visit `/validate` for interactive testing
 3. **Remote Uploads**: POST to `/api/remote-upload` with API key
@@ -161,6 +163,7 @@ The PhotoFrame API now includes a professional configuration system with secured
 ### Quick Setup
 
 #### Option 1: Environment Variables (Production)
+
 ```bash
 # Set your API key
 export PHOTOFRAME_API_KEY="your-secure-api-key-here"
@@ -171,6 +174,7 @@ node server.js
 ```
 
 #### Option 2: Local Configuration File (Development)
+
 ```bash
 # Copy the template
 cp config/api.local.template.js config/api.local.js
@@ -180,6 +184,7 @@ node server.js
 ```
 
 ### Configuration Sources (Priority Order)
+
 1. **Environment Variables** (highest priority)
 2. **Local Config File** (`config/api.local.js`)
 3. **Default Configuration** (fallback)
@@ -204,11 +209,12 @@ node server.js
 ### Testing the Remote API
 
 1. **Start the server**: `node server.js`
-2. **Visit validation page**: http://localhost:3001/validate (or your configured port)
+2. **Visit validation page**: <http://localhost:3001/validate> (or your configured port)
 3. **Use your API key** to test uploads and authentication
 4. **Upload images** via the beautiful web interface
 
 ### Example: Remote Upload with curl
+
 ```bash
 curl -X POST http://localhost:3001/api/remote-upload \
   -H "X-API-Key: your-api-key" \
@@ -216,6 +222,7 @@ curl -X POST http://localhost:3001/api/remote-upload \
 ```
 
 ### Security Features
+
 - 🔐 **API Key Authentication** - Required for all remote operations  
 - ⏱️ **Rate Limiting** - 10 uploads per 15 minutes per client
 - 🛡️ **File Validation** - Only allowed image types and sizes
@@ -224,15 +231,14 @@ curl -X POST http://localhost:3001/api/remote-upload \
 
 For complete configuration documentation, see [`docs/config/README.md`](docs/config/README.md).
 
-
-### 🚀 Testings
+## 🚀 Testings
 
 - **Test**
    ```npm test```
 - **Run tests with coverage**
    ```npm test -- --coverage```
 
-### 🚀 Performance Optimizations
+## 🚀 Performance Optimizations
 
 This application has been optimized for better performance with:
 
@@ -242,12 +248,12 @@ This application has been optimized for better performance with:
 - **Efficient State Management**: Grouped related state and optimized updates
 - **Lazy Loading**: Components load only when needed
 
-
 ## 🚀 Production Deployment
 
 ### Option 1: Container with Podman (Recommended)
 
 1. **Build the container image**
+
    ```bash
    # Build the image
    podman build -t photoframe .
@@ -264,6 +270,7 @@ This application has been optimized for better performance with:
    ```
 
 2. **Run the container**
+
    ```bash
    # Basic deployment
    podman run -d \
@@ -292,9 +299,11 @@ This application has been optimized for better performance with:
      --health-retries=3 \
      photoframe
    ```
+
    The application will be available at `http://localhost:3001`
 
 3. **Adding photos**
+
    ```bash
    # Copy photos to the volume
    podman volume inspect photoframe-photos --format '{{.Mountpoint}}/.'
@@ -305,6 +314,7 @@ This application has been optimized for better performance with:
    ```
 
 4. **View logs**
+
    ```bash
    podman logs -f photoframe
    ```
@@ -312,6 +322,7 @@ This application has been optimized for better performance with:
 ### Option 2: Node.js Server
 
 1. **Build the application**
+
    ```bash
    npm run build
    # Deploy 'dist' folder to any static host
@@ -319,6 +330,7 @@ This application has been optimized for better performance with:
    ```
 
 2. **Configure for production**
+
    ```bash
    # Option A: Environment variables
    export PHOTOFRAME_API_KEY="your-secure-api-key-here"
@@ -331,6 +343,7 @@ This application has been optimized for better performance with:
    ```
 
 3. **Start the production server**
+
    ```bash
    # Basic server
    NODE_ENV=production node server.js
@@ -341,11 +354,13 @@ This application has been optimized for better performance with:
    # With PM2 (recommended)
    pm2 start server.js --name photoframe --env production
    ```
+
    The application will be available at `http://localhost:3001` (or your configured port)
 
 ### Option 3: Apache Web Server
 
 1. **Build the application**
+
    ```bash
    npm run build
    ```
@@ -364,8 +379,9 @@ This application has been optimized for better performance with:
 PhotoFrame now uses a professional multi-source configuration system:
 
 **Priority Order:**
+
 1. Environment Variables (highest)
-2. Local Config File (`config/api.local.js`) 
+2. Local Config File (`config/api.local.js`)
 3. Default Values (fallback)
 
 ### Environment Variables
@@ -439,11 +455,13 @@ NODE_ENV=development
 Access the configuration panel by clicking the gear icon (⚙️) in the top-right corner.
 
 ### Display Options
+
 - **Show Date**: Toggle date display
 - **Show Time**: Toggle time display
 - **Show Image Counter**: Display the current image number
 
 ### Date & Time Settings
+
 - **Date Format**: Multiple format options
 - **Time Format**: 12/24 hour format
 - **Show Seconds**: Toggle seconds in time display
@@ -457,7 +475,7 @@ Access the configuration panel by clicking the gear icon (⚙️) in the top-rig
 PhotoFrame includes a beautiful, interactive validation page for testing the remote API:
 
 1. **Start the server**: `node server.js`
-2. **Visit**: http://localhost:3001/validate (or your configured port)
+2. **Visit**: <http://localhost:3001/validate> (or your configured port)
 3. **Features**:
    - Test API connectivity with your API key
    - Upload images through the web interface
@@ -483,6 +501,7 @@ curl -X POST http://localhost:3001/api/remote-upload \
 ### API Documentation
 
 Visit `http://localhost:3001/api/info` for complete API documentation including:
+
 - Available endpoints
 - Authentication requirements  
 - Rate limiting information
@@ -518,6 +537,7 @@ Visit `http://localhost:3001/api/info` for complete API documentation including:
 ### Server Startup Messages
 
 Look for these messages when starting the server:
+
 ```
 📋 Loaded local API configuration    # Config file found and loaded
 🔐 API Key: ✅ Custom key configured  # Secure API key in use
@@ -525,26 +545,15 @@ Look for these messages when starting the server:
 📏 Upload limits: 10MB, 10 per 15min  # Current limits displayed
 ```
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), and [Express](https://expressjs.com/)
-- Styled with [Tailwind CSS](https://tailwindcss.com/)
-- Icons by [Heroicons](https://heroicons.com/)
-- Secure file uploads with [Multer](https://github.com/expressjs/multer)
-- Professional configuration system with multi-source support
-
-#
 ## 🎨 Customization
 
 ### Adding Custom Styles
+
 You can customize the appearance by modifying the Tailwind configuration in `tailwind.config.js` or by adding custom CSS in `src/index.css`.
 
-### Environment Variables
-Create a `.env` file in the root directory to set environment variables:
+### Frontend Environment Variables
+
+Create a `.env` file in the root directory to set Vite environment variables:
 
 ```env
 VITE_API_URL=http://localhost:3000  # Backend API URL
@@ -566,13 +575,16 @@ This will create a `dist` directory with the production-ready files that you can
 ## 🚀 Deployment
 
 ### Static Hosting
+
 Deploy the contents of the `dist` directory to any static hosting service:
+
 - [Vercel](https://vercel.com/)
 - [Netlify](https://www.netlify.com/)
 - [GitHub Pages](https://pages.github.com/)
 - [Cloudflare Pages](https://pages.cloudflare.com/)
 
 ### Containerized Deployment
+
 A `Containerfile` is included for containerized deployment:
 
 ```bash
@@ -607,8 +619,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), and [Tailwind CSS](https://tailwindcss.com/)
+- Built with [Vite](https://vitejs.dev/), [React](https://reactjs.org/), and [Express](https://expressjs.com/)
+- Styled with [Tailwind CSS](https://tailwindcss.com/)
 - Icons by [Heroicons](https://heroicons.com/)
+- Secure file uploads with [Multer](https://github.com/expressjs/multer)
+- Professional configuration system with multi-source support
 - Inspired by digital photo frames and smart displays
 
 ## 📸 Adding Photos
@@ -618,7 +633,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 3. For best results, use landscape-oriented images with a 16:9 aspect ratio
 
 ## 📱 Mobile Support
+
 The application is fully responsive and works on:
+
 - Desktop browsers (Chrome, Firefox, Safari, Edge)
 - Tablets and iPads
 - Mobile devices (with touch controls)
@@ -626,16 +643,19 @@ The application is fully responsive and works on:
 ## ⚠️ Troubleshooting
 
 ### Images not loading?
+
 - Ensure images are in the `public/photos` directory
 - Check file extensions (.jpg, .jpeg, .png, .gif, .webp)
 - Verify file permissions
 
 ### Configuration not saving?
+
 - The app uses browser's localStorage to save settings
 - Clear your browser cache if you experience issues
 - Try a hard refresh (Ctrl+F5 or Cmd+Shift+R)
 
 ### Container build issues?
+
 - If you encounter npm version compatibility errors, use `--build-arg SKIP_NPM_UPDATE=true`
 - For production environments, consider using a security-hardened base image
 - You can specify a different Node.js version with `--build-arg NODE_VERSION=x.y.z`
