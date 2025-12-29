@@ -46,5 +46,22 @@ export default {
   testMatch: ["**/__tests__/**/*.[jt]s?(x)", "**/?(*.)+(spec|test).[jt]s?(x)"],
   
   // Verbose output
-  verbose: true
+  verbose: true,
+  
+  // HTML Test Reporter configuration
+  reporters: [
+    "default",
+    [
+      "jest-html-reporter",
+      {
+        pageTitle: "PhotoFrame Test Report",
+        outputPath: "test-report/index.html",
+        includeFailureMsg: true,
+        includeConsoleLog: true,
+        theme: "darkTheme",
+        logo: "",
+        dateFormat: "yyyy-mm-dd HH:MM:ss"
+      }
+    ]
+  ]
 };

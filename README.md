@@ -237,6 +237,9 @@ For complete configuration documentation, see [`docs/config/README.md`](docs/con
    ```npm test```
 - **Run tests with coverage**
    ```npm test -- --coverage```
+- **Generate HTML test report**
+   ```npm test -- --reporters=default --reporters=jest-html-reporter```
+   Report available at: `test-report.html`
 
 ## 🚀 Performance Optimizations
 

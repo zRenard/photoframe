@@ -3,6 +3,7 @@
  */
 import pkg from '@jest/globals';
 const { describe, test, expect } = pkg;
+import { renderHook } from '@testing-library/react';
 import { translations, useTranslations } from '../utils/translations.js';
 
 describe('translations module', () => {
@@ -216,6 +217,173 @@ describe('translations module', () => {
       expect(testHookLogic('unsupported')).toEqual(translations.en);
       expect(testHookLogic(null)).toEqual(translations.en);
       expect(testHookLogic(undefined)).toEqual(translations.en);
+    });
+
+    test('should return English translations for valid language code (en)', () => {
+      const { result } = renderHook(() => useTranslations('en'));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.en);
+      expect(result.current.settings).toBe('Slideshow Settings');
+    });
+
+    test('should return Spanish translations for valid language code (es)', () => {
+      const { result } = renderHook(() => useTranslations('es'));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.es);
+      expect(result.current.settings).toBe('Configuración de Presentación');
+    });
+
+    test('should return French translations for valid language code (fr)', () => {
+      const { result } = renderHook(() => useTranslations('fr'));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.fr);
+      expect(result.current.settings).toBe('Paramètres du Diaporama');
+    });
+
+    test('should return Italian translations for valid language code (it)', () => {
+      const { result } = renderHook(() => useTranslations('it'));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.it);
+      expect(result.current.settings).toBe('Impostazioni Slideshow');
+    });
+
+    test('should return German translations for valid language code (de)', () => {
+      const { result } = renderHook(() => useTranslations('de'));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.de);
+      expect(result.current.settings).toBe('Diashow-Einstellungen');
+    });
+
+    test('should return Chinese translations for valid language code (zh)', () => {
+      const { result } = renderHook(() => useTranslations('zh'));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.zh);
+      expect(result.current.settings).toBe('幻灯片设置');
+    });
+
+    test('should return Japanese translations for valid language code (ja)', () => {
+      const { result } = renderHook(() => useTranslations('ja'));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.ja);
+      expect(result.current.settings).toBe('スライドショー設定');
+    });
+
+    test('should fallback to English for unsupported language code', () => {
+      const { result } = renderHook(() => useTranslations('unsupported-lang'));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.en);
+      expect(result.current.settings).toBe('Slideshow Settings');
+    });
+
+    test('should fallback to English for null language', () => {
+      const { result } = renderHook(() => useTranslations(null));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.en);
+    });
+
+    test('should fallback to English for undefined language', () => {
+      const { result } = renderHook(() => useTranslations(undefined));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.en);
+    });
+
+    test('should fallback to English for empty string language', () => {
+      const { result } = renderHook(() => useTranslations(''));
+      
+      expect(result.current).toBeDefined();
+      expect(result.current).toEqual(translations.en);
+    });
+
+    test('should memoize translations based on language', () => {
+      const { result, rerender } = renderHook(
+        ({ lang }) => useTranslations(lang),
+        { initialProps: { lang: 'en' } }
+      );
+      
+      const firstResult = result.current;
+      expect(firstResult).toEqual(translations.en);
+      
+      // Re-render with same language - should return same memoized object
+      rerender({ lang: 'en' });
+      expect(result.current).toBe(firstResult);
+    });
+
+    test('should update memoized translations when language changes', () => {
+      const { result, rerender } = renderHook(
+        ({ lang }) => useTranslations(lang),
+        { initialProps: { lang: 'en' } }
+      );
+      
+      expect(result.current).toEqual(translations.en);
+      expect(result.current.settings).toBe('Slideshow Settings');
+      
+      // Change language
+      rerender({ lang: 'es' });
+      expect(result.current).toEqual(translations.es);
+      expect(result.current.settings).toBe('Configuración de Presentación');
+      
+      // Change to French
+      rerender({ lang: 'fr' });
+      expect(result.current).toEqual(translations.fr);
+      expect(result.current.settings).toBe('Paramètres du Diaporama');
+    });
+
+    test('should handle rapid language changes', () => {
+      const { result, rerender } = renderHook(
+        ({ lang }) => useTranslations(lang),
+        { initialProps: { lang: 'en' } }
+      );
+      
+      expect(result.current.settings).toBe('Slideshow Settings');
+      
+      rerender({ lang: 'es' });
+      expect(result.current.settings).toBe('Configuración de Presentación');
+      
+      rerender({ lang: 'it' });
+      expect(result.current.settings).toBe('Impostazioni Slideshow');
+      
+      rerender({ lang: 'de' });
+      expect(result.current.settings).toBe('Diashow-Einstellungen');
+      
+      // Back to English
+      rerender({ lang: 'en' });
+      expect(result.current.settings).toBe('Slideshow Settings');
+    });
+
+    test('should return complete translation object with all keys', () => {
+      const { result } = renderHook(() => useTranslations('en'));
+      
+      expect(result.current).toHaveProperty('settings');
+      expect(result.current).toHaveProperty('general');
+      expect(result.current).toHaveProperty('save');
+      expect(result.current).toHaveProperty('cancel');
+      expect(result.current).toHaveProperty('positions');
+      expect(result.current).toHaveProperty('sizes');
+      expect(result.current).toHaveProperty('dateFormats');
+      expect(result.current).toHaveProperty('transitions');
+    });
+
+    test('should preserve nested object structures', () => {
+      const { result } = renderHook(() => useTranslations('en'));
+      
+      expect(typeof result.current.positions).toBe('object');
+      expect(result.current.positions['top-left']).toBeDefined();
+      
+      expect(typeof result.current.sizes).toBe('object');
+      expect(result.current.sizes['size-1']).toBeDefined();
+      
+      expect(typeof result.current.dateFormats).toBe('object');
+      expect(typeof result.current.transitions).toBe('object');
     });
   });
 
