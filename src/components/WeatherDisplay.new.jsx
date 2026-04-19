@@ -200,7 +200,7 @@ const WeatherDisplay = memo(({
       
       {/* Air Quality Display */}
       {showAirQuality && airQualityInfo && (
-        <div className="mt-2 border-t border-white border-opacity-20 pt-2">
+        <div className="mt-2 border-t border-white/20 pt-2">
           <div className="text-xs font-medium mb-1">
             {t.airQuality || 'Air Quality'}: {airQualityInfo.level}
           </div>
@@ -221,19 +221,19 @@ const WeatherDisplay = memo(({
       
       {/* Location footer */}
       {displayData && (
-        <div className="mt-2 text-xs text-center border-t border-white border-opacity-20 pt-1 font-light tracking-wide">
+        <div className="mt-2 text-xs text-center border-t border-white/20 pt-1 font-light tracking-wide">
           <span className="font-medium">
             {getLocationDisplayName(displayData)}
           </span>
           {formatLocationInfo(displayData)?.coordinates && (
-            <span className="text-white text-opacity-75 ml-1">{formatLocationInfo(displayData)?.coordinates}</span>
+            <span className="text-white/75 ml-1">{formatLocationInfo(displayData)?.coordinates}</span>
           )}
         </div>
       )}
       
       {/* Debug info */}
       {showLastUpdated && lastUpdated && (
-        <div className="mt-1 text-xs text-center text-white text-opacity-50">
+        <div className="mt-1 text-xs text-center text-white/50">
           Updated: {lastUpdated.toLocaleTimeString()}
           <br />
           Next: {formatTimeRemaining()}
@@ -245,7 +245,7 @@ const WeatherDisplay = memo(({
         <div className="mt-2 text-center">
           <button
             onClick={() => refreshWeather()}
-            className="text-xs bg-white bg-opacity-20 hover:bg-opacity-30 px-2 py-1 rounded transition-colors"
+            className="text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors"
             type="button"
           >
             🔄 Refresh

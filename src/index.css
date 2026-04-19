@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 /* Prevent scrollbars in fullscreen mode */
 :root:fullscreen {
@@ -697,6 +696,22 @@ body {
   --tw-ring-color: var(--accent-color);
 }
 
+.bg-panel-bg-50 {
+  background-color: color-mix(in srgb, var(--panel-bg) 50%, transparent);
+}
+
+.bg-panel-bg-80 {
+  background-color: color-mix(in srgb, var(--panel-bg) 80%, transparent);
+}
+
+.ring-accent-70 {
+  --tw-ring-color: color-mix(in srgb, var(--accent-color) 70%, transparent);
+}
+
+.bg-accent-70 {
+  background-color: color-mix(in srgb, var(--accent-color) 70%, transparent);
+}
+
 .focus\:ring-indigo-500:focus {
   --tw-ring-color: var(--accent-color);
 }
@@ -767,18 +782,7 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
+
 /* Style for select elements in the control panel */
 select {
   background-color: var(--input-bg);

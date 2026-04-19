@@ -110,7 +110,7 @@ const DateDisplay = memo(({
   }
 
   return (
-    <div className={`date-display ${positionClasses[dateDisplay.position]} z-10 bg-black bg-opacity-50 text-white p-3 rounded-lg transition-all duration-300`}>
+    <div className={`date-display ${positionClasses[dateDisplay.position]} z-10 bg-black/50 text-white p-3 rounded-lg transition-all duration-300`}>
       <div className="flex items-center justify-center">
         <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
           {currentDate}
@@ -129,7 +129,7 @@ const DateDisplay = memo(({
       
       {/* Calendar Modal would go here if needed */}
       {showCalendar && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-4 rounded-lg">
             <p>{translations?.[language]?.calendarPlaceholder || translations?.en?.calendarPlaceholder || 'Calendar component would go here'}</p>
             <button 

@@ -348,7 +348,7 @@ function useWeatherData(location, forecastMode, unit, language, translations, si
         
         {/* Air Quality Display */}
         {showAirQuality && airQualityInfo && (
-          <div className="mt-2 border-t border-white border-opacity-20 pt-2">
+          <div className="mt-2 border-t border-white/20 pt-2">
             <div className="text-xs font-medium mb-1">
               {t.airQuality || 'Air Quality'}: {airQualityInfo.level}
             </div>
@@ -369,12 +369,12 @@ function useWeatherData(location, forecastMode, unit, language, translations, si
         
         {/* Location footer with name and coordinates */}
         {displayData && (
-          <div className="mt-2 text-xs text-center border-t border-white border-opacity-20 pt-1 font-light tracking-wide">
+          <div className="mt-2 text-xs text-center border-t border-white/20 pt-1 font-light tracking-wide">
             <span className="font-medium">
               {getLocationDisplayName(displayData)}
             </span>
             {formatLocationInfo(displayData)?.coordinates && (
-              <span className="text-white text-opacity-75 ml-1">{formatLocationInfo(displayData)?.coordinates}</span>
+              <span className="text-white/75 ml-1">{formatLocationInfo(displayData)?.coordinates}</span>
             )}
           </div>
         )}
@@ -538,13 +538,13 @@ const WeatherDisplay = memo(({
         
         {/* Weather refresh countdown and button */}
         {showRefreshCountdown && (
-          <div className="mt-2 pt-1 border-t border-white border-opacity-20 flex items-center justify-between text-xs">
-            <div className="text-white text-opacity-75">
+          <div className="mt-2 pt-1 border-t border-white/20 flex items-center justify-between text-xs">
+            <div className="text-white/75">
               {translations[language]?.nextUpdate || 'Next'}: {formattedTimeRemaining}
             </div>
             <button 
               onClick={() => refreshWeather()} 
-              className="px-1 py-0.5 bg-accent bg-opacity-70 hover:bg-opacity-100 rounded text-white text-opacity-90 hover:text-opacity-100 transition-all"
+              className="px-1 py-0.5 bg-accent-70 hover:bg-accent rounded text-white/90 hover:text-white transition-all"
               title="Refresh weather now"
             >
               ↻
@@ -558,7 +558,7 @@ const WeatherDisplay = memo(({
   // Render standalone weather component
   return (
     <div 
-      className={`weather-widget ${positionClasses[validPosition]} fixed z-10 bg-black bg-opacity-50 text-white p-3 rounded-lg transition-all duration-300`}
+      className={`weather-widget ${positionClasses[validPosition]} fixed z-10 bg-black/50 text-white p-3 rounded-lg transition-all duration-300`}
     >
       {renderCustomWeatherContent()}
     </div>

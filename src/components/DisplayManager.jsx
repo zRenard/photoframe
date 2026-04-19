@@ -134,7 +134,7 @@ const DisplayManager = memo(({
     const hasWeatherAtSamePosition = showWeather && weatherPosition === timeDisplay.position;
     
     return (
-      <div className={`time-display ${positionClasses[timeDisplay.position]} z-10 bg-black bg-opacity-50 text-white p-4 rounded-lg transition-all duration-300`}>
+      <div className={`time-display ${positionClasses[timeDisplay.position]} z-10 bg-black/50 text-white p-4 rounded-lg transition-all duration-300`}>
         {/* Time Display */}
         <div className="time-section">
           <div className={`${timeSizes[timeDisplay.size]} font-bold text-center relative flex items-center justify-center gap-2`}>
@@ -272,7 +272,7 @@ const DisplayManager = memo(({
     const hasWeatherAtSamePosition = showWeather && weatherPosition === dateDisplay.position;
     
     return (
-      <div className={`date-display ${positionClasses[dateDisplay.position]} z-10 bg-black bg-opacity-50 text-white p-3 rounded-lg transition-all duration-300`}>
+      <div className={`date-display ${positionClasses[dateDisplay.position]} z-10 bg-black/50 text-white p-3 rounded-lg transition-all duration-300`}>
         <div className="flex items-center justify-center">
           <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
             {currentDate}

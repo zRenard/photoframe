@@ -104,7 +104,7 @@ const TimerDisplay = ({
 
   // Get className for timer panel, adding blink class when needed
   const getTimerPanelClassName = () => {
-    const baseClasses = "timer-content flex items-center space-x-2 text-white bg-black bg-opacity-50 p-2 rounded";
+    const baseClasses = "timer-content flex items-center space-x-2 text-white bg-black/50 p-2 rounded";
     if (actualBlinkClass) {
       const finalClassName = `${baseClasses} ${actualBlinkClass}`;
       return finalClassName;

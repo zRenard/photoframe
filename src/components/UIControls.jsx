@@ -43,7 +43,7 @@ const UIControls = memo(({
       {/* Config Button */}
       <button
         onClick={handleConfigClick}
-        className="config-button p-3 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+        className="config-button p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
         aria-label={t.settings}
       >
         <Cog6ToothIcon className="w-6 h-6" />
@@ -52,7 +52,7 @@ const UIControls = memo(({
       {/* Fullscreen Button */}
       <button
         onClick={handleFullscreenClick}
-        className="p-3 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+        className="p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
         aria-label={isFullscreen ? t.exitFullscreen : t.enterFullscreen}
       >
         {isFullscreen ? (

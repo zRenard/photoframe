@@ -503,7 +503,7 @@ const SettingsPanel = memo(({
   }, [tabCategories, activeTab]);
 
   return (
-    <div className="config-overlay fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+    <div className="config-overlay fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
       <div className="config-panel modern-panel">
         {/* Modern Header */}
         <div className="modern-panel-header">
@@ -902,8 +902,8 @@ const SettingsPanel = memo(({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 flex items-center justify-center">
-                          <div className="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity bg-black bg-opacity-75 px-2 py-1 rounded">
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-200 flex items-center justify-center">
+                          <div className="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity bg-black/75 px-2 py-1 rounded">
                             {image}
                           </div>
                         </div>

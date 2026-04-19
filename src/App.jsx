@@ -803,14 +803,8 @@ const translations = {
 
 // Function to fetch images from the server
 const fetchImages = async () => {
-  // In development, use the full URL to the API server
-  const apiBase = import.meta.env.DEV 
-    ? 'http://localhost:3001' 
-    : '';
-  const apiUrl = `${apiBase}/api/images`;
-  
   try {
-    const response = await fetch(apiUrl);
+    const response = await fetch('/api/images');
     
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1501,8 +1495,8 @@ function App() {
   const getButtonClasses = (isActive = false) => {
     const baseClasses = 'button-theme p-2 rounded-md transition-colors';
     const activeClasses = isActive 
-      ? 'ring-2 ring-opacity-50 bg-opacity-30' 
-      : 'hover:bg-opacity-20';
+      ? 'ring-2 ring-white/50 bg-white/30' 
+      : 'hover:bg-white/20';
     return `${baseClasses} ${activeClasses}`;
   };
 
@@ -1630,7 +1624,7 @@ function App() {
           {/* Settings Button */}
           <button
             onClick={toggleConfig}
-            className="p-3 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+            className="p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
             aria-label={t.settings}
           >
             <Cog6ToothIcon className="w-6 h-6" />
@@ -1639,7 +1633,7 @@ function App() {
           {/* Fullscreen Button */}
           <button
             onClick={toggleFullscreen}
-            className="p-3 rounded-full bg-black bg-opacity-50 text-white hover:bg-opacity-70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+            className="p-3 rounded-full bg-black/50 text-white hover:bg-black/70 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/50"
             aria-label={isFullscreen ? t.exitFullscreen : t.enterFullscreen}
           >
             {isFullscreen ? (
@@ -1654,7 +1648,7 @@ function App() {
         {showTime && showDate && showWeather && 
          timeDisplay.position === dateDisplay.position && 
          dateDisplay.position === weatherPosition && (
-          <div className={`unified-display ${positionClasses[timeDisplay.position]} fixed bg-black bg-opacity-50 text-white p-4 rounded-lg transition-all duration-300`}>
+          <div className={`unified-display ${positionClasses[timeDisplay.position]} fixed bg-black/50 text-white p-4 rounded-lg transition-all duration-300`}>
             {/* Time */}
             <div className={`${timeSizes[timeDisplay.size]} font-bold text-center relative`}>
               {currentTime}
@@ -1752,7 +1746,7 @@ function App() {
         
         {/* Time Display - When not all three components are at the same position */}
         {showTime && !(showDate && showWeather && timeDisplay.position === dateDisplay.position && dateDisplay.position === weatherPosition) && (
-          <div className={`time-display ${positionClasses[timeDisplay.position]} fixed bg-black bg-opacity-50 text-white p-4 rounded-lg transition-all duration-300`}>
+          <div className={`time-display ${positionClasses[timeDisplay.position]} fixed bg-black/50 text-white p-4 rounded-lg transition-all duration-300`}>
             <div className={`${timeSizes[timeDisplay.size]} font-bold text-center relative`}>
               {currentTime}
               
@@ -1857,7 +1851,7 @@ function App() {
         {/* Date Display - When different position than time and not unified with weather */}
         {showDate && (!showTime || timeDisplay.position !== dateDisplay.position) && 
          !(showWeather && showTime && timeDisplay.position === dateDisplay.position && dateDisplay.position === weatherPosition) && (
-          <div className={`date-display ${positionClasses[dateDisplay.position]} fixed bg-black bg-opacity-50 text-white p-3 rounded-lg transition-all duration-300`}>
+          <div className={`date-display ${positionClasses[dateDisplay.position]} fixed bg-black/50 text-white p-3 rounded-lg transition-all duration-300`}>
                 <div className="flex items-center justify-center">
                   <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
                     {currentDate}
@@ -1911,7 +1905,7 @@ function App() {
         <div className="bottom-bar">
           {/* Countdown - Bottom Left */}
           {showCountdown && (
-            <div className="fixed bottom-4 left-4 z-50 bg-black bg-opacity-50 text-white p-3 rounded-lg">
+            <div className="fixed bottom-4 left-4 z-50 bg-black/50 text-white p-3 rounded-lg">
               <div className="text-sm text-gray-300">{t.nextIn}</div>
               <div className="text-2xl font-bold">{timeLeft}s</div>
             </div>
@@ -1920,7 +1914,7 @@ function App() {
           {/* No Images Found Message */}
           {images.length === 0 && (
             <div className="no-images-message absolute inset-0 flex items-center justify-center">
-              <div className="text-center p-4 bg-panel-bg bg-opacity-80 text-text rounded-lg border border-panel-border">
+              <div className="text-center p-4 bg-panel-bg-80 text-text rounded-lg border border-panel-border">
                 <p className="text-lg fontmedium">{t.noImagesFound}</p>
                 <p className="text-sm mt-1">{t.addImagesToFolder}</p>
               </div>
@@ -1930,7 +1924,7 @@ function App() {
           {/* Image Counter - Bottom Center */}
           {showImageCounter && images.length > 0 && (
             <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-              <div className="bg-black bg-opacity-50 text-white px-4 py-2 rounded-lg">
+              <div className="bg-black/50 text-white px-4 py-2 rounded-lg">
                 <div className="text-sm text-gray-300 text-center">{t.photo}</div>
                 <div className="text-xl font-bold text-center">
                   {currentImageIndex + 1} / {images.length}
@@ -2012,8 +2006,8 @@ function App() {
                             className={`p-2 rounded-md transition-all ${
                               isSelected 
                                 ? isDarkTheme 
-                                  ? 'ring-2 ring-white ring-opacity-50 bg-opacity-30 bg-gray-800' 
-                                  : 'ring-2 ring-white ring-opacity-50 bg-opacity-30 bg-white'
+                                  ? 'ring-2 ring-white/50 bg-gray-800/30' 
+                                  : 'ring-2 ring-white/50 bg-white/30'
                                 : 'bg-panel-bg hover:bg-panel-bg-hover'
                             }`}
                             title={themeOption.charAt(0).toUpperCase() + themeOption.slice(1)}
@@ -2281,7 +2275,7 @@ function App() {
                         <label className="block text-sm font-medium">
                           {t.position}
                         </label>
-                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
+                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg-50">
                           <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
                           {[
                             { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
@@ -2311,7 +2305,7 @@ function App() {
                                 onClick={() => setTimeDisplay({...timeDisplay, position: pos})}
                                 className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
                                   timeDisplay.position === pos 
-                                    ? 'bg-accent ring-2 ring-accent ring-opacity-70 shadow-md' 
+                                    ? 'bg-accent ring-2 ring-accent-70 shadow-md' 
                                     : 'bg-panel-border hover:bg-panel-border-hover border-2 border-panel-border-hover'
                                 }`}
                                 aria-label={`Time position ${pos}`}
@@ -2479,7 +2473,7 @@ function App() {
                         <label className="block text-sm font-medium">
                           {t.position}
                         </label>
-                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
+                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg-50">
                           <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
                           {[
                             { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
@@ -2501,7 +2495,7 @@ function App() {
                                 onClick={() => setDateDisplay({...dateDisplay, position: pos})}
                                 className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
                                   dateDisplay.position === pos 
-                                    ? 'bg-accent ring-2 ring-accent ring-opacity-70 shadow-md' 
+                                    ? 'bg-accent ring-2 ring-accent-70 shadow-md' 
                                     : 'bg-panel-border hover:bg-panel-border-hover border-2 border-panel-border-hover'
                                 }`}
                                 aria-label={`Date position ${pos}`}
@@ -2660,7 +2654,7 @@ function App() {
                         <label className="block text-sm font-medium">
                           {t.position}
                         </label>
-                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
+                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg-50">
                           <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
                           {[
                             { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
@@ -2693,7 +2687,7 @@ function App() {
                                 }}
                                 className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
                                   weatherPosition === pos 
-                                    ? 'bg-accent ring-2 ring-accent ring-opacity-70 shadow-md' 
+                                    ? 'bg-accent ring-2 ring-accent-70 shadow-md' 
                                     : 'bg-panel-border hover:bg-panel-border-hover border-2 border-panel-border-hover'
                                 }`}
                                 aria-label={`Weather position ${pos}`}
@@ -2803,7 +2797,7 @@ function App() {
                           {t.refreshWeatherNow}
                         </button>
                         
-                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg/50">
+                        <div className="relative w-full h-40 border border-panel-border rounded-lg p-4 bg-panel-bg-50">
                           <div className="absolute inset-0 border-2 border-panel-border rounded pointer-events-none"></div>
                           {[
                             { pos: 'top-left', x: 'left-4', y: 'top-4', transform: '' },
@@ -2836,7 +2830,7 @@ function App() {
                                 }}
                                 className={`w-5 h-5 rounded-full transition-all flex items-center justify-center ${
                                   weatherPosition === pos 
-                                    ? 'bg-accent ring-2 ring-accent ring-opacity-70 shadow-md' 
+                                    ? 'bg-accent ring-2 ring-accent-70 shadow-md' 
                                     : 'bg-panel-border hover:bg-panel-border-hover border-2 border-panel-border-hover'
                                 }`}
                                 aria-label={`Weather position ${pos}`}
@@ -2876,7 +2870,7 @@ function App() {
       
       {/* Calendar Popin - Date Picker */}
       {showCalendar && enableCalendar && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
           <div className="bg-white rounded-lg shadow-lg p-6 max-w-md w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">{translations[language].selectDate}</h3>
