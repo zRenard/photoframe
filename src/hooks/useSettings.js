@@ -9,6 +9,9 @@ export const useSettings = () => {
   const [firstDayOfWeek, setFirstDayOfWeek] = useState(defaultConfig.dateDisplay.firstDayOfWeek || 0);
   const [showImageCounter, setShowImageCounter] = useState(defaultConfig.showImageCounter);
   const [showCountdown, setShowCountdown] = useState(defaultConfig.showCountdown);
+  const [kenBurnsEffect, setKenBurnsEffect] = useState(defaultConfig.kenBurnsEffect ?? false);
+  const [vignetteEffect, setVignetteEffect] = useState(defaultConfig.vignetteEffect ?? false);
+  const [vignetteIntensity, setVignetteIntensity] = useState(defaultConfig.vignetteIntensity ?? 60);
   const [countdownPosition, setCountdownPosition] = useState(defaultConfig.countdownPosition ?? "bottom-left");
   const [imageCounterPosition, setImageCounterPosition] = useState(defaultConfig.imageCounterPosition ?? "bottom-right");
   const [uiControlsPosition, setUiControlsPosition] = useState(defaultConfig.uiControlsPosition ?? "top-right");
@@ -64,6 +67,9 @@ export const useSettings = () => {
     if (settings.imageDisplayMode !== undefined) setImageDisplayMode(settings.imageDisplayMode);
     if (settings.showImageCounter !== undefined) setShowImageCounter(settings.showImageCounter);
     if (settings.showCountdown !== undefined) setShowCountdown(settings.showCountdown);
+    if (settings.kenBurnsEffect !== undefined) setKenBurnsEffect(settings.kenBurnsEffect);
+    if (settings.vignetteEffect !== undefined) setVignetteEffect(settings.vignetteEffect);
+    if (settings.vignetteIntensity !== undefined) setVignetteIntensity(settings.vignetteIntensity);
     if (settings.countdownPosition !== undefined) setCountdownPosition(settings.countdownPosition);
     if (settings.imageCounterPosition !== undefined) setImageCounterPosition(settings.imageCounterPosition);
     if (settings.uiControlsPosition !== undefined) setUiControlsPosition(settings.uiControlsPosition);
@@ -150,7 +156,10 @@ export const useSettings = () => {
     setShowDate(defaultConfig.dateDisplay.show);
     setShowTime(defaultConfig.timeDisplay.show);
     setShowImageCounter(defaultConfig.showImageCounter);
+    setKenBurnsEffect(defaultConfig.kenBurnsEffect ?? false);
     setShowCountdown(defaultConfig.showCountdown);
+    setVignetteEffect(defaultConfig.vignetteEffect ?? false);
+    setVignetteIntensity(defaultConfig.vignetteIntensity ?? 60);
     setCountdownPosition(defaultConfig.countdownPosition ?? "bottom-left");
     setImageCounterPosition(defaultConfig.imageCounterPosition ?? "bottom-right");
     setUiControlsPosition(defaultConfig.uiControlsPosition ?? "top-right");
@@ -205,7 +214,10 @@ export const useSettings = () => {
       theme,
       imageDisplayMode,
       showImageCounter,
+      kenBurnsEffect,
       showCountdown,
+      vignetteEffect,
+      vignetteIntensity,
       countdownPosition,
       imageCounterPosition,
       uiControlsPosition,
@@ -254,7 +266,7 @@ export const useSettings = () => {
     
     localStorage.setItem('photoframeSettings', JSON.stringify(settings));
   }, [
-    language, theme, imageDisplayMode, showImageCounter, showCountdown, countdownPosition, imageCounterPosition, uiControlsPosition, rotationTime, slideshowOrder,
+    language, theme, imageDisplayMode, showImageCounter, showCountdown, kenBurnsEffect, vignetteEffect, vignetteIntensity, countdownPosition, imageCounterPosition, uiControlsPosition, rotationTime, slideshowOrder,
     showWeather, weatherLocation, weatherCoordinates, forecastMode, weatherPosition,
     weatherUnit, weatherSize, weatherRefreshInterval, showWeatherCountdown, showAirQuality,
     showTime, timeFormat24h, showSeconds, timeDisplay, timerEnabled, timerType,
@@ -269,6 +281,12 @@ export const useSettings = () => {
     setRotationTime(clampedValue);
   }, []);
 
+  // Validation wrapper for vignetteIntensity
+  const setValidatedVignetteIntensity = useCallback((value) => {
+    const clampedValue = Math.max(10, Math.min(100, value));
+    setVignetteIntensity(clampedValue);
+  }, []);
+
   return {
     // Basic settings
     showDate, setShowDate,
@@ -277,6 +295,9 @@ export const useSettings = () => {
     firstDayOfWeek, setFirstDayOfWeek,
     showImageCounter, setShowImageCounter,
     showCountdown, setShowCountdown,
+    kenBurnsEffect, setKenBurnsEffect,
+    vignetteEffect, setVignetteEffect,
+    vignetteIntensity, setVignetteIntensity: setValidatedVignetteIntensity,
     countdownPosition, setCountdownPosition,
     imageCounterPosition, setImageCounterPosition,
     uiControlsPosition, setUiControlsPosition,

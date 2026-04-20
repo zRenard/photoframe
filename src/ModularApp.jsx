@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import './App.css';
 
 // Import custom hooks
@@ -53,12 +53,16 @@ const fetchImages = async () => {
   }
 };
 
+// All concrete transition types (excludes 'random' which is meta)
+const CONCRETE_TRANSITION_TYPES = ['fade', 'slide-right', 'slide-left', 'slide-up', 'slide-down', 'zoom-in', 'zoom-out', 'rotate', 'flip', 'blur'];
+
 function ModularApp() {
   // State
   const [images, setImages] = useState([]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [transition, setTransition] = useState({ type: 'fade', duration: 1000 });
+  const randomTypeRef = useRef('fade');
   const [showCalendar, setShowCalendar] = useState(false);
 
   // Memoize the initial date to prevent unnecessary re-renders of CalendarPopin
@@ -84,6 +88,19 @@ function ModularApp() {
     );
     document.documentElement.classList.add(`theme-${settings.theme}`);
   }, [settings.theme]);
+
+  // Pick a new random transition type on each image change when mode is 'random'
+  useEffect(() => {
+    if (transition.type === 'random') {
+      const prev = randomTypeRef.current;
+      let next;
+      do {
+        next = CONCRETE_TRANSITION_TYPES[Math.floor(Math.random() * CONCRETE_TRANSITION_TYPES.length)];
+      } while (next === prev && CONCRETE_TRANSITION_TYPES.length > 1);
+      randomTypeRef.current = next;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentImageIndex]);
 
   // Function to refresh images (can be called from SettingsPanel)
   const refreshImages = useCallback(async () => {
@@ -181,9 +198,26 @@ function ModularApp() {
         <ImageSlideshow
           currentImage={currentImage}
           imageDisplayMode={settings.imageDisplayMode}
-          transition={transition}
+          transition={transition.type === 'random' ? { ...transition, type: randomTypeRef.current } : transition}
           isTransitioning={isTransitioning}
+          kenBurnsEffect={settings.kenBurnsEffect}
+          rotationTime={settings.rotationTime}
         />
+
+        {settings.vignetteEffect && (
+          <div
+            className="vignette-overlay"
+            style={{
+              opacity: (() => {
+                const raw = Math.max(10, Math.min(100, settings.vignetteIntensity ?? 60));
+                const normalized = (raw - 10) / 90;
+                // Non-linear curve: low values remain subtle, high values become much stronger.
+                return 0.08 + 0.92 * Math.pow(normalized, 2.2);
+              })()
+            }}
+            aria-hidden="true"
+          />
+        )}
 
         {/* UI Controls */}
         <UIControls

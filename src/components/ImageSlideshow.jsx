@@ -1,11 +1,13 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
-const ImageSlideshow = memo(({ 
-  currentImage, 
-  imageDisplayMode, 
-  transition, 
-  isTransitioning
+const ImageSlideshow = memo(({
+  currentImage,
+  imageDisplayMode,
+  transition,
+  isTransitioning,
+  kenBurnsEffect,
+  rotationTime
 }) => {
   // Memoize image style calculation
   const imageStyle = useMemo(() => {
@@ -13,6 +15,7 @@ const ImageSlideshow = memo(({
       width: '100%',
       height: '100vh',
       transition: `all ${transition.duration}ms ease-in-out`,
+      animationDuration: kenBurnsEffect ? `${Math.max(rotationTime, 8)}s` : undefined
     };
 
     switch (imageDisplayMode) {
@@ -34,7 +37,7 @@ const ImageSlideshow = memo(({
           objectFit: 'contain'
         };
     }
-  }, [imageDisplayMode, transition.duration]);
+  }, [imageDisplayMode, transition.duration, kenBurnsEffect, rotationTime]);
 
   if (!currentImage) {
     return null;
@@ -43,7 +46,7 @@ const ImageSlideshow = memo(({
   return (
     <>
       {/* Current Image */}
-      <div 
+      <div
         key={`current-${currentImage.url}`}
         className={`slide transition-${transition.type} ${isTransitioning ? '' : 'active'}`}
         style={{
@@ -55,7 +58,7 @@ const ImageSlideshow = memo(({
           src={currentImage.url}
           alt={currentImage.name}
           style={imageStyle}
-          className="w-full h-full"
+          className={`w-full h-full ${kenBurnsEffect ? 'ken-burns-image' : ''}`}
           loading="lazy"
           onError={(e) => {
             console.error('Failed to load image:', currentImage.url);
@@ -79,7 +82,14 @@ ImageSlideshow.propTypes = {
     type: PropTypes.string.isRequired,
     duration: PropTypes.number.isRequired
   }).isRequired,
-  isTransitioning: PropTypes.bool.isRequired
+  isTransitioning: PropTypes.bool.isRequired,
+  kenBurnsEffect: PropTypes.bool,
+  rotationTime: PropTypes.number
+};
+
+ImageSlideshow.defaultProps = {
+  kenBurnsEffect: false,
+  rotationTime: 60
 };
 
 export default ImageSlideshow;

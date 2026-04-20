@@ -110,14 +110,14 @@ const DateDisplay = memo(({
   }
 
   return (
-    <div className={`date-display ${positionClasses[dateDisplay.position]} z-10 bg-black/50 text-white p-3 rounded-lg transition-all duration-300`}>
+    <div className={`date-display ${positionClasses[dateDisplay.position]} z-10 p-3 rounded-lg display-surface transition-all duration-300`}>
       <div className="flex items-center justify-center">
         <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
           {currentDate}
         </div>
         {enableCalendar && (
           <button 
-            className="ml-2 text-white hover:text-blue-300 cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
+            className="ml-2 display-action-button cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
             onClick={() => setShowCalendar(true)}
             aria-label="Open calendar"
             type="button"
@@ -130,11 +130,11 @@ const DateDisplay = memo(({
       {/* Calendar Modal would go here if needed */}
       {showCalendar && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white p-4 rounded-lg">
+          <div className="p-4 rounded-lg display-surface">
             <p>{translations?.[language]?.calendarPlaceholder || translations?.en?.calendarPlaceholder || 'Calendar component would go here'}</p>
             <button 
               onClick={() => setShowCalendar(false)}
-              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+              className="mt-2 px-4 py-2 rounded display-mini-button"
               type="button"
             >
               {translations?.[language]?.close || translations?.en?.close || 'Close'}

@@ -203,6 +203,90 @@ html, body {
   pointer-events: auto;
 }
 
+/* Shared display surfaces (clock, weather, counters, floating info panels) */
+.display-surface {
+  background-color: var(--display-surface-bg);
+  color: var(--display-surface-text);
+  border: 1px solid var(--display-surface-border);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+.display-surface-text {
+  color: var(--display-surface-text);
+}
+
+.display-spinner {
+  border-top-color: var(--display-surface-text);
+  border-bottom-color: var(--display-surface-text);
+}
+
+.display-feedback-error {
+  color: var(--display-feedback-error);
+}
+
+.display-surface-muted {
+  color: var(--display-surface-muted);
+}
+
+.display-surface-divider {
+  border-color: var(--display-surface-divider) !important;
+}
+
+.display-action-button {
+  color: var(--display-action-color);
+}
+
+.display-action-button:hover {
+  color: var(--display-action-hover);
+}
+
+.display-control-button {
+  background-color: var(--display-control-bg);
+  color: var(--display-action-color);
+  transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.display-control-button:hover {
+  background-color: var(--display-control-bg-hover);
+  color: var(--display-action-hover);
+}
+
+.display-control-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--display-control-focus);
+}
+
+.display-mini-button {
+  background-color: var(--display-control-bg);
+  color: var(--display-action-color);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.display-mini-button:hover {
+  background-color: var(--display-control-bg-hover);
+  color: var(--display-action-hover);
+}
+
+/* Ensure utility text classes inside display panels follow theme surface colors */
+.display-surface .text-white,
+.display-surface .text-white\/90,
+.display-surface .text-white\/75,
+.display-surface .text-white\/50 {
+  color: var(--display-surface-text) !important;
+}
+
+.display-surface .text-gray-300,
+.display-surface .text-gray-400,
+.display-surface .text-gray-500 {
+  color: var(--display-surface-muted) !important;
+}
+
+.display-surface .border-white\/20,
+.display-surface .border-gray-500 {
+  border-color: var(--display-surface-divider) !important;
+}
+
 /* Bottom bar and controls */
 .bottom-bar {
   position: absolute;
@@ -288,10 +372,50 @@ html, body {
   --panel-text-color: #f9fafb;
   --panel-text-muted: #9ca3af;
   --panel-bg-hover: #1f2937;
+  --display-surface-bg: rgba(0, 0, 0, 0.5);
+  --display-surface-text: #ffffff;
+  --display-surface-muted: rgba(255, 255, 255, 0.78);
+  --display-surface-border: rgba(255, 255, 255, 0.2);
+  --display-surface-divider: rgba(255, 255, 255, 0.25);
+  --display-action-color: #ffffff;
+  --display-action-hover: #93c5fd;
+  --display-control-bg: rgba(0, 0, 0, 0.5);
+  --display-control-bg-hover: rgba(0, 0, 0, 0.7);
+  --display-control-focus: rgba(255, 255, 255, 0.5);
+  --display-feedback-error: #fca5a5;
 }
 
 /* Theme classes - override panel styles to match light theme */
-.theme-light,
+.theme-light {
+  --bg-color: #000000;
+  --text-color: #dadada;
+  --accent-color: #818cf8;
+  --accent-color-rgb: 129, 140, 248;
+  --accent-hover: #6366f1;
+  --icon-color: #9ca3af;
+  --icon-hover: #ffffff;
+  --button-bg: rgba(255, 255, 255, 0.1);
+  --button-hover: rgba(255, 255, 255, 0.2);
+  --panel-bg: rgba(0, 0, 0, 0.9);
+  --panel-border: #374151;
+  --input-bg: rgba(31, 41, 55, 0.7);
+  --input-border: #4b5563;
+  --input-focus: #818cf8;
+  --panel-text-color: #949494;
+  --panel-text-muted: #9ca3af;
+  --panel-bg-hover: #1f2937;  
+  --display-surface-bg: rgba(0, 0, 0, 0.2);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, rgb(145, 145, 145) 28%);
+  --display-surface-border: rgba(17, 24, 39, 0.16);
+  --display-surface-divider: rgba(17, 24, 39, 0.22);
+  --display-action-color: #111827;
+  --display-action-hover: #1d4ed8;
+  --display-control-bg: rgba(255, 255, 255, 0.72);
+  --display-control-bg-hover: rgba(255, 255, 255, 0.92);
+  --display-control-focus: rgba(59, 130, 246, 0.35);
+}
+
 .theme-blue,
 .theme-green,
 .theme-red,
@@ -305,27 +429,48 @@ html, body {
   --panel-bg-hover: #f9fafb;
   --input-bg: #f3f4f6;
   --input-border: #d1d5db;
+  --display-surface-bg: rgba(255, 255, 255, 0.72);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, white 28%);
+  --display-surface-border: rgba(17, 24, 39, 0.16);
+  --display-surface-divider: rgba(17, 24, 39, 0.22);
+  --display-action-color: #111827;
+  --display-action-hover: #1d4ed8;
+  --display-control-bg: rgba(255, 255, 255, 0.72);
+  --display-control-bg-hover: rgba(255, 255, 255, 0.92);
+  --display-control-focus: rgba(59, 130, 246, 0.35);
 }
 
 /* Dark theme - keep the dark background */
 .theme-dark {
   --bg-color: #9c9898;
-  --text-color: #000000;
-  --accent-color: #4d5b9e;
+  --text-color: rgb(32, 32, 32);
+  --accent-color: #979cb9;
   --accent-color-rgb: 77, 91, 158;
-  --accent-hover: #3a4573;
-  --icon-color: #495057;
-  --icon-hover: #212529;
-  --button-bg: rgba(218, 164, 164, 0.5);
-  --button-hover: rgba(0, 0, 0, 0.1);
-  --panel-bg: rgba(0, 0, 0, 0.95); /* Always use light theme panel */
-  --panel-border: #e5e7eb; /* Light theme border */
-  --input-bg: #f3f4f6; /* Light theme input */
-  --input-border: #d1d5db; /* Light theme border */
+  --accent-hover: #262936;
+  --icon-color: #6b7280;
+  --icon-hover: #374151;
+  --button-bg: rgba(255, 255, 255, 0.16);
+  --button-hover: rgba(255, 255, 255, 0.26);
+  --panel-bg: rgba(153, 150, 150, 0.95);
+  --panel-border: #374151;
+  --input-bg: rgba(82, 91, 104, 0.7);
+  --input-border: #4b5563;
   --input-focus: #4d5b9e;
-  --panel-text-color: #111827; /* Light theme text color */
-  --panel-text-muted: #4b5563; /* Muted text color */
-  --panel-bg-hover: #f9fafb; /* Hover state */
+  --panel-text-color: #37383a;
+  --panel-text-muted: #6f7074;
+  --panel-bg-hover: #310e0e;
+  --display-surface-bg: rgba(153, 150, 150, 0.3);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, white 28%);
+  --display-surface-border: rgba(55, 65, 81, 0.2);
+  --display-surface-divider: rgba(55, 65, 81, 0.2);
+  --display-action-color: var(--text-color);
+  --display-action-hover: #bfdbfe;
+  --display-control-bg: rgba(153, 150, 150, 0.62);
+  --display-control-bg-hover: rgba(153, 150, 150, 0.82);
+  --display-control-focus: rgba(191, 219, 254, 0.45);
+  --display-feedback-error: #fecaca;
 }
 
 /* Blue Theme */
@@ -345,6 +490,17 @@ html, body {
   --input-border: #60a5fa;
   --input-focus: #93c5fd;
   --panel-text-color: #000000; /* Blue theme text color for control panel */
+  --display-surface-bg: rgba(30, 64, 175, 0.2);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, white 28%);
+  --display-surface-border: rgba(147, 197, 253, 0.38);
+  --display-surface-divider: rgba(191, 219, 254, 0.45);
+  --display-action-color: var(--text-color);
+  --display-action-hover: #ffffff;
+  --display-control-bg: rgba(30, 64, 175, 0.6);
+  --display-control-bg-hover: rgba(30, 64, 175, 0.78);
+  --display-control-focus: rgba(147, 197, 253, 0.5);
+  --display-feedback-error: #fee2e2;
 }
 
 /* Green Theme */
@@ -364,6 +520,17 @@ html, body {
   --input-border: #4ade80;
   --input-focus: #86efac;
   --panel-text-color: #000000; /* Green theme text color for control panel */
+  --display-surface-bg: rgba(22, 101, 52, 0.2);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, white 28%);
+  --display-surface-border: rgba(134, 239, 172, 0.34);
+  --display-surface-divider: rgba(167, 243, 208, 0.45);
+  --display-action-color: var(--text-color);
+  --display-action-hover: #ffffff;
+  --display-control-bg: rgba(22, 101, 52, 0.6);
+  --display-control-bg-hover: rgba(22, 101, 52, 0.78);
+  --display-control-focus: rgba(134, 239, 172, 0.5);
+  --display-feedback-error: #fee2e2;
 }
 
 /* Red Theme */
@@ -383,6 +550,17 @@ html, body {
   --input-border: #f87171;
   --input-focus: #fca5a5;
   --panel-text-color: #000000; /* Red theme text color for control panel */
+  --display-surface-bg: rgba(153, 27, 27, 0.2);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, white 28%);
+  --display-surface-border: rgba(252, 165, 165, 0.36);
+  --display-surface-divider: rgba(254, 202, 202, 0.45);
+  --display-action-color: var(--text-color);
+  --display-action-hover: #ffffff;
+  --display-control-bg: rgba(153, 27, 27, 0.6);
+  --display-control-bg-hover: rgba(153, 27, 27, 0.78);
+  --display-control-focus: rgba(252, 165, 165, 0.5);
+  --display-feedback-error: #fee2e2;
 }
 
 /* Purple Theme */
@@ -402,6 +580,17 @@ html, body {
   --input-border: #a78bfa;
   --input-focus: #c4b5fd;
   --panel-text-color: #000000; /* Purple theme text color for control panel */
+  --display-surface-bg: rgba(107, 33, 168, 0.2);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, white 28%);
+  --display-surface-border: rgba(196, 181, 253, 0.36);
+  --display-surface-divider: rgba(221, 214, 254, 0.45);
+  --display-action-color: var(--text-color);
+  --display-action-hover: #ffffff;
+  --display-control-bg: rgba(107, 33, 168, 0.6);
+  --display-control-bg-hover: rgba(107, 33, 168, 0.78);
+  --display-control-focus: rgba(196, 181, 253, 0.5);
+  --display-feedback-error: #fee2e2;
 }
 
 /* Orange Theme */
@@ -421,6 +610,17 @@ html, body {
   --input-border: #fb923c;
   --input-focus: #fdba74;
   --panel-text-color: #000000; /* Orange theme text color for control panel */
+  --display-surface-bg: rgba(154, 52, 18, 0.2);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, white 28%);
+  --display-surface-border: rgba(253, 186, 116, 0.38);
+  --display-surface-divider: rgba(254, 215, 170, 0.45);
+  --display-action-color: var(--text-color);
+  --display-action-hover: #ffffff;
+  --display-control-bg: rgba(154, 52, 18, 0.62);
+  --display-control-bg-hover: rgba(154, 52, 18, 0.8);
+  --display-control-focus: rgba(253, 186, 116, 0.5);
+  --display-feedback-error: #fee2e2;
 }
 
 /* Pink Theme */
@@ -440,6 +640,17 @@ html, body {
   --input-border: #f472b6;
   --input-focus: #f9a8d4;
   --panel-text-color: #000000; /* Pink theme text color for control panel */
+  --display-surface-bg: rgba(157, 23, 77, 0.2);
+  --display-surface-text: var(--text-color);
+  --display-surface-muted: color-mix(in srgb, var(--text-color) 72%, white 28%);
+  --display-surface-border: rgba(249, 168, 212, 0.38);
+  --display-surface-divider: rgba(251, 207, 232, 0.45);
+  --display-action-color: var(--text-color);
+  --display-action-hover: #ffffff;
+  --display-control-bg: rgba(157, 23, 77, 0.6);
+  --display-control-bg-hover: rgba(157, 23, 77, 0.78);
+  --display-control-focus: rgba(249, 168, 212, 0.5);
+  --display-feedback-error: #fee2e2;
 }
 
 /* Apply theme colors */
@@ -798,7 +1009,7 @@ select {
 /* Style for select options */
 select option {
   background-color: var(--input-bg);
-  color: var(--text-color);
+  color: var(--panel-text-color);
 }
 
 /* Focus state for better accessibility */
@@ -1410,7 +1621,7 @@ select {
   border: none;
   border-radius: 6px;
   font-size: 0.875rem;
-  color: var(--text-color);
+  color: var(--panel-text-color);
   text-align: left;
   cursor: pointer;
   transition: all 0.2s ease;

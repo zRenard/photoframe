@@ -54,7 +54,7 @@ const TimerWrapper = memo(({
   }
 
   return (
-    <div className={`time-display ${positionClasses[timeDisplay.position]} fixed bg-black/50 text-white p-4 rounded-lg transition-all duration-300`}>
+    <div className={`time-display ${positionClasses[timeDisplay.position]} fixed p-4 rounded-lg display-surface transition-all duration-300`}>
       <div className={`${timeSizes[timeDisplay.size]} font-bold text-center relative`}>
         {formattedTime}
       </div>

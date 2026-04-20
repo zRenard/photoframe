@@ -53,3 +53,43 @@
   opacity: 1;
   z-index: 2;
 }
+
+/* Subtle edge darkening for photo frame effect */
+.vignette-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at center,
+    rgba(0, 0, 0, 0) 42%,
+    rgba(0, 0, 0, 0.12) 60%,
+    rgba(0, 0, 0, 0.35) 78%,
+    rgba(0, 0, 0, 0.78) 100%
+  );
+}
+
+.ken-burns-image {
+  animation-name: ken-burns-pan-zoom;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: 1;
+  animation-fill-mode: both;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@keyframes ken-burns-pan-zoom {
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+
+  100% {
+    transform: scale(1.25) translate3d(-4%, -3%, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ken-burns-image {
+    animation: none !important;
+  }
+}

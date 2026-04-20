@@ -134,7 +134,7 @@ const DisplayManager = memo(({
     const hasWeatherAtSamePosition = showWeather && weatherPosition === timeDisplay.position;
     
     return (
-      <div className={`time-display ${positionClasses[timeDisplay.position]} z-10 bg-black/50 text-white p-4 rounded-lg transition-all duration-300`}>
+      <div className={`time-display ${positionClasses[timeDisplay.position]} z-10 p-4 rounded-lg display-surface transition-all duration-300`}>
         {/* Time Display */}
         <div className="time-section">
           <div className={`${timeSizes[timeDisplay.size]} font-bold text-center relative flex items-center justify-center gap-2`}>
@@ -232,7 +232,7 @@ const DisplayManager = memo(({
               </div>
               {enableCalendar && (
                 <button 
-                  className="ml-2 text-white hover:text-blue-300 cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
+                  className="ml-2 display-action-button cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
                   onClick={onCalendarClick}
                   aria-label="Open calendar"
                   type="button"
@@ -246,7 +246,7 @@ const DisplayManager = memo(({
         
         {/* Weather Display - When same position as time */}
         {hasWeatherAtSamePosition && (
-          <div className="weather-with-time mt-3 pt-3 border-t border-gray-500">
+          <div className="weather-with-time mt-3 pt-3 border-t display-surface-divider">
             <WeatherDisplay
               location={weatherLocation}
               coordinates={weatherCoordinates}
@@ -272,14 +272,14 @@ const DisplayManager = memo(({
     const hasWeatherAtSamePosition = showWeather && weatherPosition === dateDisplay.position;
     
     return (
-      <div className={`date-display ${positionClasses[dateDisplay.position]} z-10 bg-black/50 text-white p-3 rounded-lg transition-all duration-300`}>
+      <div className={`date-display ${positionClasses[dateDisplay.position]} z-10 p-3 rounded-lg display-surface transition-all duration-300`}>
         <div className="flex items-center justify-center">
           <div className={`${dateSizes[dateDisplay.size]} font-medium text-center`}>
             {currentDate}
           </div>
           {enableCalendar && (
             <button 
-              className="ml-2 text-white hover:text-blue-300 cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
+              className="ml-2 display-action-button cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
               onClick={onCalendarClick}
               aria-label="Open calendar"
               type="button"
@@ -291,7 +291,7 @@ const DisplayManager = memo(({
         
         {/* Weather Display - When same position as date but not time */}
         {hasWeatherAtSamePosition && (!showTime || timeDisplay.position !== dateDisplay.position) && (
-          <div className="weather-with-date mt-3 pt-3 border-t border-gray-500">
+          <div className="weather-with-date mt-3 pt-3 border-t display-surface-divider">
             <WeatherDisplay
               location={weatherLocation}
               coordinates={weatherCoordinates}

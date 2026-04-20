@@ -44,8 +44,8 @@ const CountdownDisplay = memo(({
   };
   
   return (
-    <div className={`${positionClasses[validPosition]} z-50 bg-black/50 text-white p-3 rounded-lg`}>
-      <div className="text-sm text-gray-300">{t.nextIn}</div>
+    <div className={`${positionClasses[validPosition]} z-50 p-3 rounded-lg display-surface`}>
+      <div className="text-sm display-surface-muted">{t.nextIn}</div>
       <div className="text-2xl font-bold">{formatTime(timeLeft)}</div>
     </div>
   );

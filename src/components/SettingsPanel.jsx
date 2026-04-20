@@ -145,6 +145,9 @@ const SettingsPanel = memo(({
       },
       showImageCounter: settings.showImageCounter,
       showCountdown: settings.showCountdown,
+      kenBurnsEffect: settings.kenBurnsEffect,
+      vignetteEffect: settings.vignetteEffect,
+      vignetteIntensity: settings.vignetteIntensity,
       countdownPosition: settings.countdownPosition,
       imageCounterPosition: settings.imageCounterPosition,
       uiControlsPosition: settings.uiControlsPosition,
@@ -230,6 +233,9 @@ const SettingsPanel = memo(({
             if (importedData.slideshowOrder !== undefined) settings.setSlideshowOrder(importedData.slideshowOrder);
             if (importedData.showImageCounter !== undefined) settings.setShowImageCounter(importedData.showImageCounter);
             if (importedData.showCountdown !== undefined) settings.setShowCountdown(importedData.showCountdown);
+            if (importedData.kenBurnsEffect !== undefined) settings.setKenBurnsEffect(importedData.kenBurnsEffect);
+            if (importedData.vignetteEffect !== undefined) settings.setVignetteEffect(importedData.vignetteEffect);
+            if (importedData.vignetteIntensity !== undefined) settings.setVignetteIntensity(importedData.vignetteIntensity);
             if (importedData.countdownPosition !== undefined) settings.setCountdownPosition(importedData.countdownPosition);
             if (importedData.imageCounterPosition !== undefined) settings.setImageCounterPosition(importedData.imageCounterPosition);
             if (importedData.uiControlsPosition !== undefined) settings.setUiControlsPosition(importedData.uiControlsPosition);
@@ -651,6 +657,82 @@ const SettingsPanel = memo(({
                     <option value="orange">🧡 Orange</option>
                     <option value="pink">💗 Pink</option>
                   </select>
+                </div>
+
+                {/* Ken Burns Effect */}
+                <div className="form-group">
+                  <label className="form-label">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-4.553a1.5 1.5 0 00-2.121-2.121L12.879 7.88M9 14l-4.553 4.553a1.5 1.5 0 102.121 2.121L11.121 16.12M7 7h10v10H7z" />
+                    </svg>
+                    {t.kenBurnsEffect || 'Ken Burns Effect'}
+                  </label>
+                  <div className="toggle-item">
+                    <div className="toggle-content">
+                      <div className="toggle-info">
+                        <span className="toggle-description">{t.kenBurnsEffectDescription || 'Apply a subtle pan and zoom animation to each photo'}</span>
+                      </div>
+                      <label className="modern-toggle" aria-label={t.kenBurnsEffect || 'Ken Burns Effect'}>
+                        <input
+                          type="checkbox"
+                          checked={settings.kenBurnsEffect}
+                          onChange={(e) => settings.setKenBurnsEffect(e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vignette Effect */}
+                <div className="form-group">
+                  <label className="form-label">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7a4 4 0 014-4h10a4 4 0 014 4v10a4 4 0 01-4 4H7a4 4 0 01-4-4V7z" />
+                    </svg>
+                    {t.vignetteEffect || 'Vignette Effect'}
+                  </label>
+                  <div className="toggle-item">
+                    <div className="toggle-content">
+                      <div className="toggle-info">
+                        <span className="toggle-description">{t.vignetteEffectDescription || 'Darken edges of the screen for a framed photo look'}</span>
+                      </div>
+                      <label className="modern-toggle" aria-label={t.vignetteEffect || 'Vignette Effect'}>
+                        <input
+                          type="checkbox"
+                          checked={settings.vignetteEffect}
+                          onChange={(e) => settings.setVignetteEffect(e.target.checked)}
+                        />
+                        <span className="toggle-slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`form-group ${settings.vignetteEffect ? '' : 'opacity-60'}`}>
+                  <label className="form-label" htmlFor="vignette-intensity-slider">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12h18M5 8h14M7 16h10" />
+                    </svg>
+                    {t.vignetteIntensity || 'Vignette Intensity'}
+                  </label>
+                  <div className="slider-container">
+                    <input
+                      id="vignette-intensity-slider"
+                      type="range"
+                      min="10"
+                      max="100"
+                      step="5"
+                      value={settings.vignetteIntensity}
+                      disabled={!settings.vignetteEffect}
+                      onChange={(e) => settings.setVignetteIntensity(Number.parseInt(e.target.value, 10))}
+                      className="form-slider"
+                    />
+                    <span className="slider-value">{settings.vignetteIntensity}%</span>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    {t.vignetteIntensityDescription || 'Adjust the strength of the edge darkening effect'}
+                  </div>
                 </div>
               </div>
 
@@ -1721,6 +1803,7 @@ const SettingsPanel = memo(({
                   <option value="rotate">🔄 {t.transitions?.rotate || 'Rotate'}</option>
                   <option value="flip">🔀 {t.transitions?.flip || 'Flip'}</option>
                   <option value="blur">🌫️ {t.transitions?.blur || 'Blur'}</option>
+                  <option value="random">🎲 {t.transitions?.random || 'Random'}</option>
                 </select>
               </div>
 

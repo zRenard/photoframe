@@ -27,7 +27,7 @@ const ImageCounter = memo(({
   const validPosition = position && positionClasses[position] ? position : 'bottom-right';
   
   return (
-    <div className={`${positionClasses[validPosition]} z-50 bg-black/50 text-white p-3 rounded-lg`}>
+    <div className={`${positionClasses[validPosition]} z-50 p-3 rounded-lg display-surface`}>
       <div className="text-sm">
         {t.photo} {current + 1} / {total}
       </div>

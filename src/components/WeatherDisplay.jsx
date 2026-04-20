@@ -149,14 +149,14 @@ const WeatherDisplay = memo(({
   if (loading) {
     return (
       <div className="flex justify-center items-center h-16">
-        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-white"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-transparent display-spinner"></div>
       </div>
     );
   }
   
   // Render error state
   if (error) {
-    return <div className="text-sm text-red-300 text-center">⚠️ {error}</div>;
+    return <div className="text-sm text-center display-feedback-error">⚠️ {error}</div>;
   }
   
   // Get display data
@@ -202,8 +202,8 @@ const WeatherDisplay = memo(({
     : null;
 
   return (
-    <div 
-      className={`weather-widget ${isUnified ? '' : positionClasses[validPosition]} ${isUnified ? '' : 'z-10 bg-black/50 rounded-lg'} text-white p-3 transition-all duration-300`}
+      <div 
+      className={`weather-widget ${isUnified ? '' : positionClasses[validPosition]} ${isUnified ? '' : 'z-10 rounded-lg display-surface'} display-surface-text p-3 transition-all duration-300`}
     >
       <div className="text-sm font-medium mb-1 text-center">{title}</div>
       
@@ -238,7 +238,7 @@ const WeatherDisplay = memo(({
       
       {/* Air Quality Display */}
       {showAirQuality && airQualityInfo && (
-        <div className="mt-2 border-t border-white/20 pt-2">
+        <div className="mt-2 border-t display-surface-divider pt-2">
           <div className="text-xs font-medium mb-1">
             {t.airQuality || 'Air Quality'}: {airQualityInfo.level}
           </div>
@@ -259,25 +259,25 @@ const WeatherDisplay = memo(({
       
       {/* Location footer */}
       {displayData && (
-        <div className="mt-2 text-xs text-center border-t border-white/20 pt-1 font-light tracking-wide">
+        <div className="mt-2 text-xs text-center border-t display-surface-divider pt-1 font-light tracking-wide">
           <span className="font-medium">
             {getLocationDisplayName(displayData)}
           </span>
           {formatLocationInfo(displayData)?.coordinates && (
-            <span className="text-white/75 ml-1">{formatLocationInfo(displayData)?.coordinates}</span>
+            <span className="display-surface-muted ml-1">{formatLocationInfo(displayData)?.coordinates}</span>
           )}
         </div>
       )}
       
       {/* Weather refresh countdown */}
       {showRefreshCountdown && (
-        <div className="mt-2 pt-1 border-t border-white/20 flex items-center justify-between text-xs">
-          <div className="text-white/75">
+        <div className="mt-2 pt-1 border-t display-surface-divider flex items-center justify-between text-xs">
+          <div className="display-surface-muted">
             {t.nextUpdate || 'Next'}: {formatTimeRemaining()}
           </div>
           <button 
             onClick={() => refreshWeather()} 
-            className="px-1 py-0.5 bg-white/20 hover:bg-white/30 rounded text-white/90 hover:text-white transition-all"
+            className="px-1 py-0.5 rounded display-mini-button transition-all"
             title="Refresh weather now"
             type="button"
           >
@@ -288,7 +288,7 @@ const WeatherDisplay = memo(({
       
       {/* Debug info */}
       {showLastUpdated && lastUpdated && (
-        <div className="mt-1 text-xs text-center text-white/50">
+        <div className="mt-1 text-xs text-center display-surface-muted">
           Updated: {lastUpdated.toLocaleTimeString()}
           <br />
           Next: {formatTimeRemaining()}
@@ -300,7 +300,7 @@ const WeatherDisplay = memo(({
         <div className="mt-2 text-center">
           <button
             onClick={() => refreshWeather()}
-            className="text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded transition-colors"
+            className="text-xs px-2 py-1 rounded display-mini-button transition-colors"
             type="button"
           >
             🔄 Refresh

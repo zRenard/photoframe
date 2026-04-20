@@ -104,7 +104,7 @@ const TimerDisplay = ({
 
   // Get className for timer panel, adding blink class when needed
   const getTimerPanelClassName = () => {
-    const baseClasses = "timer-content flex items-center space-x-2 text-white bg-black/50 p-2 rounded";
+    const baseClasses = "timer-content flex items-center space-x-2 p-2 rounded display-surface";
     if (actualBlinkClass) {
       const finalClassName = `${baseClasses} ${actualBlinkClass}`;
       return finalClassName;
@@ -415,7 +415,7 @@ const TimerDisplay = ({
     return (
       <div className="timer-display-below">
         <div className={getTimerPanelClassName()}>
-          <div className={`timer-time ${getFontSizeClass()} font-bold text-white mr-2`}>
+          <div className={`timer-time ${getFontSizeClass()} font-bold display-surface-text mr-2`}>
             {isComplete ? (t.timeOut || 'Time Out') : formatTime(time.hours, time.minutes, time.seconds)}
           </div>
           {/* Timer Controls - Hide when timer is complete */}
@@ -423,20 +423,20 @@ const TimerDisplay = ({
             <div className="timer-controls flex space-x-1">
               <button
                 onClick={toggleTimer}
-                className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                className="p-1 rounded-full display-mini-button transition-colors"
                 title={isActive ? t.pause || 'Pause' : t.start || 'Start'}
               >
                 {isActive ? 
-                  <PauseIcon className="h-4 w-4 text-white" /> : 
-                  <PlayIcon className="h-4 w-4 text-white" />
+                  <PauseIcon className="h-4 w-4" /> : 
+                  <PlayIcon className="h-4 w-4" />
                 }
               </button>
               <button
                 onClick={resetTimer}
-                className="p-1 rounded-full hover:bg-white/20 transition-colors"
+                className="p-1 rounded-full display-mini-button transition-colors"
                 title={t.reset || 'Reset'}
               >
-                <StopIcon className="h-4 w-4 text-white" />
+                <StopIcon className="h-4 w-4" />
               </button>
             </div>
           )}
@@ -453,10 +453,10 @@ const TimerDisplay = ({
         <div className="relative">
           <button
             onClick={toggleSettings}
-            className="p-1 rounded-full hover:bg-white/20 transition-colors"
+            className="p-1 rounded-full display-mini-button transition-colors"
             title={t.timer || 'Timer'}
           >
-            <ClockIcon className="h-5 w-5 text-white" />
+            <ClockIcon className="h-5 w-5" />
           </button>
         </div>
       );
@@ -467,17 +467,17 @@ const TimerDisplay = ({
       <div className="relative">
         <button
           onClick={toggleSettings}
-          className="p-1 rounded-full hover:bg-white/20 transition-colors"
+          className="p-1 rounded-full display-mini-button transition-colors"
           title={t.timer || 'Timer'}
         >
-          <ClockIcon className="h-5 w-5 text-white" />
+          <ClockIcon className="h-5 w-5" />
         </button>
         
         {/* Settings Panel for icon position */}
         {showSettings && (
           <div 
             ref={settingsRef}
-            className="settings-panel absolute z-20 bg-black/80 rounded-lg p-2 shadow-lg w-80"
+            className="settings-panel absolute z-20 rounded-lg p-2 shadow-lg w-80 display-surface"
             style={{ top: '100%', marginTop: '8px', left: '50%', transform: 'translateX(-50%)' }}
           >
             <h3 className="text-xs font-medium mb-1">{t.timer || 'Timer'}</h3>
@@ -522,7 +522,7 @@ const TimerDisplay = ({
                     max="99"
                     value={configTime.hours}
                     onChange={(e) => handleInputChange('hours', e.target.value)}
-                    className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                    className="w-12 input-theme rounded px-1 py-0.5 text-xs text-center"
                   />
                   <span className="text-xs">M:</span>
                   <input
@@ -531,7 +531,7 @@ const TimerDisplay = ({
                     max="59"
                     value={configTime.minutes}
                     onChange={(e) => handleInputChange('minutes', e.target.value)}
-                    className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                    className="w-12 input-theme rounded px-1 py-0.5 text-xs text-center"
                   />
                   <span className="text-xs">S:</span>
                   <input
@@ -540,7 +540,7 @@ const TimerDisplay = ({
                     max="59"
                     value={configTime.seconds}
                     onChange={(e) => handleInputChange('seconds', e.target.value)}
-                    className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                    className="w-12 input-theme rounded px-1 py-0.5 text-xs text-center"
                   />
                 </div>
               </div>
@@ -549,19 +549,19 @@ const TimerDisplay = ({
             <div className="flex justify-between mt-1 gap-1">
               <button 
                 onClick={() => setShowSettings(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white py-0.5 px-2 rounded text-xs"
+                className="display-mini-button py-0.5 px-2 rounded text-xs"
               >
                 {t.cancel || 'Cancel'}
               </button>
               <button 
                 onClick={resetToDefaults}
-                className="bg-blue-600 hover:bg-blue-700 text-white py-0.5 px-2 rounded text-xs"
+                className="display-mini-button py-0.5 px-2 rounded text-xs"
               >
                 {t.reset || 'Reset'}
               </button>
               <button 
                 onClick={applyAndStartTimer}
-                className="bg-green-600 hover:bg-green-700 text-white py-0.5 px-2 rounded text-xs"
+                className="display-mini-button py-0.5 px-2 rounded text-xs"
               >
                 {t.start || 'Start'}
               </button>
@@ -579,7 +579,7 @@ const TimerDisplay = ({
         <div 
           className={getTimerPanelClassName()}
         >
-          <div className="timer-time text-xl font-bold text-white">
+          <div className="timer-time text-xl font-bold display-surface-text">
             {isComplete ? (t.timeOut || 'Time Out') : formatTime(time.hours, time.minutes, time.seconds)}
           </div>
           {/* Timer Controls - Hide when timer is complete */}
@@ -587,20 +587,20 @@ const TimerDisplay = ({
             <div className="timer-controls flex space-x-1">
               <button
                 onClick={toggleTimer}
-                className="p-0.5 rounded-full hover:bg-white/20 transition-colors"
+                className="p-0.5 rounded-full display-mini-button transition-colors"
                 title={isActive ? t.pause || 'Pause' : t.start || 'Start'}
               >
                 {isActive ? 
-                  <PauseIcon className="h-3 w-3 text-white" /> : 
-                  <PlayIcon className="h-3 w-3 text-white" />
+                  <PauseIcon className="h-3 w-3" /> : 
+                  <PlayIcon className="h-3 w-3" />
                 }
               </button>
               <button
                 onClick={resetTimer}
-                className="p-0.5 rounded-full hover:bg-white/20 transition-colors"
+                className="p-0.5 rounded-full display-mini-button transition-colors"
                 title={t.reset || 'Reset'}
               >
-                <StopIcon className="h-3 w-3 text-white" />
+                <StopIcon className="h-3 w-3" />
               </button>
             </div>
           )}
@@ -611,7 +611,7 @@ const TimerDisplay = ({
       {showSettings && (
         <div 
           ref={settingsRef}
-          className="settings-panel absolute z-20 bg-black/80 rounded-lg p-2 shadow-lg w-80"
+          className="settings-panel absolute z-20 rounded-lg p-2 shadow-lg w-80 display-surface"
           style={{ top: position === 'below' ? '100%' : '0', marginTop: position === 'below' ? '4px' : '0' }}
         >
           <h3 className="text-xs font-medium mb-1">{t.timer || 'Timer'}</h3>
@@ -658,7 +658,7 @@ const TimerDisplay = ({
                   max="99"
                   value={configTime.hours}
                   onChange={(e) => handleInputChange('hours', e.target.value)}
-                  className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                  className="w-12 input-theme rounded px-1 py-0.5 text-xs text-center"
                 />
                 <span className="text-xs">M:</span>
                 <input
@@ -667,7 +667,7 @@ const TimerDisplay = ({
                   max="59"
                   value={configTime.minutes}
                   onChange={(e) => handleInputChange('minutes', e.target.value)}
-                  className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                  className="w-12 input-theme rounded px-1 py-0.5 text-xs text-center"
                 />
                 <span className="text-xs">S:</span>
                 <input
@@ -676,7 +676,7 @@ const TimerDisplay = ({
                   max="59"
                   value={configTime.seconds}
                   onChange={(e) => handleInputChange('seconds', e.target.value)}
-                  className="w-12 bg-gray-700 rounded px-1 py-0.5 text-white text-xs text-center"
+                  className="w-12 input-theme rounded px-1 py-0.5 text-xs text-center"
                 />
               </div>
             </div>
@@ -685,19 +685,19 @@ const TimerDisplay = ({
           <div className="flex justify-between mt-1 gap-1">
             <button 
               onClick={() => setShowSettings(false)}
-              className="bg-gray-600 hover:bg-gray-700 text-white py-0.5 px-2 rounded text-xs"
+              className="display-mini-button py-0.5 px-2 rounded text-xs"
             >
               {t.cancel || 'Cancel'}
             </button>
             <button 
               onClick={resetToDefaults}
-              className="bg-blue-600 hover:bg-blue-700 text-white py-0.5 px-2 rounded text-xs"
+              className="display-mini-button py-0.5 px-2 rounded text-xs"
             >
               {t.reset || 'Reset'}
             </button>
             <button 
               onClick={applyAndStartTimer}
-              className="bg-green-600 hover:bg-green-700 text-white py-0.5 px-2 rounded text-xs"
+              className="display-mini-button py-0.5 px-2 rounded text-xs"
             >
               {t.start || 'Start'}
             </button>
