@@ -19,9 +19,9 @@ export const useTimer = (countdownHours, countdownMinutes, countdownSeconds, tim
   const [originalManualTime, setOriginalManualTime] = useState(null);
   // Store the last popup values at the hook level so they persist across all components
   const [lastPopupValues, setLastPopupValues] = useState({
-    hours: 0,
-    minutes: 5,
-    seconds: 0
+    hours: countdownHours,
+    minutes: countdownMinutes,
+    seconds: countdownSeconds
   });
   // Prevent global settings from overwriting manual popup set
   const justSetManually = useRef(false);
@@ -81,6 +81,17 @@ export const useTimer = (countdownHours, countdownMinutes, countdownSeconds, tim
       }
     }
   }, [countdownHours, countdownMinutes, countdownSeconds, timerType, timerIsActive, timerIsPaused, timeManuallySet]);
+
+  // Keep popup defaults aligned with user settings until user sets a manual value.
+  useEffect(() => {
+    if (!timeManuallySet) {
+      setLastPopupValues({
+        hours: countdownHours,
+        minutes: countdownMinutes,
+        seconds: countdownSeconds
+      });
+    }
+  }, [countdownHours, countdownMinutes, countdownSeconds, timeManuallySet]);
 
   // Timer tick function
   const tick = useCallback(() => {
@@ -202,9 +213,6 @@ export const useTimer = (countdownHours, countdownMinutes, countdownSeconds, tim
     setTimerIsHidden(false);
     setTimerBlinkClass('');
     
-    // Reset manual flag so timer uses global settings again
-    setTimeManuallySet(false);
-    
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
@@ -217,15 +225,20 @@ export const useTimer = (countdownHours, countdownMinutes, countdownSeconds, tim
     }
     
     if (timerType === 'countdown') {
-      setTimerTime({
-        hours: countdownHours,
-        minutes: countdownMinutes,
-        seconds: countdownSeconds
-      });
+      if (timeManuallySet && originalManualTime) {
+        // Preserve the first manual execution value when stopping the timer.
+        setTimerTime(originalManualTime);
+      } else {
+        setTimerTime({
+          hours: countdownHours,
+          minutes: countdownMinutes,
+          seconds: countdownSeconds
+        });
+      }
     } else {
       setTimerTime({ hours: 0, minutes: 0, seconds: 0 });
     }
-  }, [timerType, countdownHours, countdownMinutes, countdownSeconds]);
+  }, [timerType, countdownHours, countdownMinutes, countdownSeconds, timeManuallySet, originalManualTime]);
 
 
 

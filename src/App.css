@@ -84,7 +84,12 @@
   }
 
   100% {
-    transform: scale(1.25) translate3d(-4%, -3%, 0);
+    transform: scale(calc(1 + (var(--ken-burns-scale-delta, 0.35) * var(--ken-burns-motion-ratio, 1))))
+      translate3d(
+        calc(var(--ken-burns-pan-x, -8%) * var(--ken-burns-motion-ratio, 1)),
+        calc(var(--ken-burns-pan-y, -6%) * var(--ken-burns-motion-ratio, 1)),
+        0
+      );
   }
 }
 

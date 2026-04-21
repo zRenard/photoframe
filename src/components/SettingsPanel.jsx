@@ -146,6 +146,7 @@ const SettingsPanel = memo(({
       showImageCounter: settings.showImageCounter,
       showCountdown: settings.showCountdown,
       kenBurnsEffect: settings.kenBurnsEffect,
+      kenBurnsStyle: settings.kenBurnsStyle || 'standard',
       vignetteEffect: settings.vignetteEffect,
       vignetteIntensity: settings.vignetteIntensity,
       countdownPosition: settings.countdownPosition,
@@ -234,6 +235,7 @@ const SettingsPanel = memo(({
             if (importedData.showImageCounter !== undefined) settings.setShowImageCounter(importedData.showImageCounter);
             if (importedData.showCountdown !== undefined) settings.setShowCountdown(importedData.showCountdown);
             if (importedData.kenBurnsEffect !== undefined) settings.setKenBurnsEffect(importedData.kenBurnsEffect);
+            if (importedData.kenBurnsStyle !== undefined) settings.setKenBurnsStyle(importedData.kenBurnsStyle);
             if (importedData.vignetteEffect !== undefined) settings.setVignetteEffect(importedData.vignetteEffect);
             if (importedData.vignetteIntensity !== undefined) settings.setVignetteIntensity(importedData.vignetteIntensity);
             if (importedData.countdownPosition !== undefined) settings.setCountdownPosition(importedData.countdownPosition);
@@ -682,6 +684,29 @@ const SettingsPanel = memo(({
                       </label>
                     </div>
                   </div>
+                </div>
+
+                <div className={`form-group ${settings.kenBurnsEffect ? '' : 'opacity-60'}`}>
+                  <label className="form-label" htmlFor="ken-burns-style-select">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 12h16M4 17h16" />
+                    </svg>
+                    {t.kenBurnsStyle || 'Style Ken Burns'}
+                  </label>
+                  <select
+                    id="ken-burns-style-select"
+                    value={settings.kenBurnsStyle || 'standard'}
+                    onChange={(e) => settings.setKenBurnsStyle(e.target.value)}
+                    disabled={!settings.kenBurnsEffect}
+                    className="form-select"
+                  >
+                    <option value="gentle">{t.kenBurnsStyleGentle || 'Doux'}</option>
+                    <option value="standard">{t.kenBurnsStyleStandard || 'Standard'}</option>
+                    <option value="cinematic">{t.kenBurnsStyleCinematic || 'Cinéma'}</option>
+                  </select>
+                  <p className="form-description">
+                    {t.kenBurnsStyleDescription || 'Choisir l\'intensité du mouvement tout en gardant la même vitesse quelle que soit la durée de la diapositive'}
+                  </p>
                 </div>
 
                 {/* Vignette Effect */}

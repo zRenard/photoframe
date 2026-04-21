@@ -1,21 +1,48 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 
+const KEN_BURNS_REFERENCE_DURATION = 60;
+const KEN_BURNS_STYLE_PRESETS = {
+  gentle: {
+    scaleDelta: 0.22,
+    panX: -5,
+    panY: -3.5
+  },
+  standard: {
+    scaleDelta: 0.35,
+    panX: -8,
+    panY: -6
+  },
+  cinematic: {
+    scaleDelta: 0.5,
+    panX: -12,
+    panY: -8
+  }
+};
+
 const ImageSlideshow = memo(({
   currentImage,
   imageDisplayMode,
   transition,
   isTransitioning,
-  kenBurnsEffect,
-  rotationTime
+  kenBurnsEffect = false,
+  kenBurnsStyle = 'standard',
+  rotationTime = 60
 }) => {
   // Memoize image style calculation
   const imageStyle = useMemo(() => {
+    const safeRotationTime = Math.max(rotationTime || 0, 1);
+    const selectedStyle = KEN_BURNS_STYLE_PRESETS[kenBurnsStyle] || KEN_BURNS_STYLE_PRESETS.standard;
+
     const baseStyle = {
       width: '100%',
       height: '100vh',
       transition: `all ${transition.duration}ms ease-in-out`,
-      animationDuration: kenBurnsEffect ? `${Math.max(rotationTime, 8)}s` : undefined
+      animationDuration: kenBurnsEffect ? `${safeRotationTime}s` : undefined,
+      '--ken-burns-motion-ratio': kenBurnsEffect ? safeRotationTime / KEN_BURNS_REFERENCE_DURATION : undefined,
+      '--ken-burns-scale-delta': kenBurnsEffect ? selectedStyle.scaleDelta : undefined,
+      '--ken-burns-pan-x': kenBurnsEffect ? `${selectedStyle.panX}%` : undefined,
+      '--ken-burns-pan-y': kenBurnsEffect ? `${selectedStyle.panY}%` : undefined
     };
 
     switch (imageDisplayMode) {
@@ -37,7 +64,7 @@ const ImageSlideshow = memo(({
           objectFit: 'contain'
         };
     }
-  }, [imageDisplayMode, transition.duration, kenBurnsEffect, rotationTime]);
+  }, [imageDisplayMode, transition.duration, kenBurnsEffect, kenBurnsStyle, rotationTime]);
 
   if (!currentImage) {
     return null;
@@ -84,12 +111,8 @@ ImageSlideshow.propTypes = {
   }).isRequired,
   isTransitioning: PropTypes.bool.isRequired,
   kenBurnsEffect: PropTypes.bool,
+  kenBurnsStyle: PropTypes.oneOf(['gentle', 'standard', 'cinematic']),
   rotationTime: PropTypes.number
-};
-
-ImageSlideshow.defaultProps = {
-  kenBurnsEffect: false,
-  rotationTime: 60
 };
 
 export default ImageSlideshow;

@@ -10,6 +10,7 @@ export const useSettings = () => {
   const [showImageCounter, setShowImageCounter] = useState(defaultConfig.showImageCounter);
   const [showCountdown, setShowCountdown] = useState(defaultConfig.showCountdown);
   const [kenBurnsEffect, setKenBurnsEffect] = useState(defaultConfig.kenBurnsEffect ?? false);
+  const [kenBurnsStyle, setKenBurnsStyle] = useState(defaultConfig.kenBurnsStyle ?? 'standard');
   const [vignetteEffect, setVignetteEffect] = useState(defaultConfig.vignetteEffect ?? false);
   const [vignetteIntensity, setVignetteIntensity] = useState(defaultConfig.vignetteIntensity ?? 60);
   const [countdownPosition, setCountdownPosition] = useState(defaultConfig.countdownPosition ?? "bottom-left");
@@ -68,6 +69,7 @@ export const useSettings = () => {
     if (settings.showImageCounter !== undefined) setShowImageCounter(settings.showImageCounter);
     if (settings.showCountdown !== undefined) setShowCountdown(settings.showCountdown);
     if (settings.kenBurnsEffect !== undefined) setKenBurnsEffect(settings.kenBurnsEffect);
+    if (settings.kenBurnsStyle !== undefined) setKenBurnsStyle(settings.kenBurnsStyle);
     if (settings.vignetteEffect !== undefined) setVignetteEffect(settings.vignetteEffect);
     if (settings.vignetteIntensity !== undefined) setVignetteIntensity(settings.vignetteIntensity);
     if (settings.countdownPosition !== undefined) setCountdownPosition(settings.countdownPosition);
@@ -157,6 +159,7 @@ export const useSettings = () => {
     setShowTime(defaultConfig.timeDisplay.show);
     setShowImageCounter(defaultConfig.showImageCounter);
     setKenBurnsEffect(defaultConfig.kenBurnsEffect ?? false);
+    setKenBurnsStyle(defaultConfig.kenBurnsStyle ?? 'standard');
     setShowCountdown(defaultConfig.showCountdown);
     setVignetteEffect(defaultConfig.vignetteEffect ?? false);
     setVignetteIntensity(defaultConfig.vignetteIntensity ?? 60);
@@ -215,6 +218,7 @@ export const useSettings = () => {
       imageDisplayMode,
       showImageCounter,
       kenBurnsEffect,
+      kenBurnsStyle,
       showCountdown,
       vignetteEffect,
       vignetteIntensity,
@@ -266,7 +270,7 @@ export const useSettings = () => {
     
     localStorage.setItem('photoframeSettings', JSON.stringify(settings));
   }, [
-    language, theme, imageDisplayMode, showImageCounter, showCountdown, kenBurnsEffect, vignetteEffect, vignetteIntensity, countdownPosition, imageCounterPosition, uiControlsPosition, rotationTime, slideshowOrder,
+    language, theme, imageDisplayMode, showImageCounter, showCountdown, kenBurnsEffect, kenBurnsStyle, vignetteEffect, vignetteIntensity, countdownPosition, imageCounterPosition, uiControlsPosition, rotationTime, slideshowOrder,
     showWeather, weatherLocation, weatherCoordinates, forecastMode, weatherPosition,
     weatherUnit, weatherSize, weatherRefreshInterval, showWeatherCountdown, showAirQuality,
     showTime, timeFormat24h, showSeconds, timeDisplay, timerEnabled, timerType,
@@ -296,6 +300,7 @@ export const useSettings = () => {
     showImageCounter, setShowImageCounter,
     showCountdown, setShowCountdown,
     kenBurnsEffect, setKenBurnsEffect,
+    kenBurnsStyle, setKenBurnsStyle,
     vignetteEffect, setVignetteEffect,
     vignetteIntensity, setVignetteIntensity: setValidatedVignetteIntensity,
     countdownPosition, setCountdownPosition,

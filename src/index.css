@@ -241,6 +241,14 @@ html, body {
   color: var(--display-action-hover);
 }
 
+.theme-light .calendar-action-button {
+  color: #ffffff;
+}
+
+.theme-light .calendar-action-button:hover {
+  color: #dbeafe;
+}
+
 .display-control-button {
   background-color: var(--display-control-bg);
   color: var(--display-action-color);

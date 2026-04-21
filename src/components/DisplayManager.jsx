@@ -232,7 +232,7 @@ const DisplayManager = memo(({
               </div>
               {enableCalendar && (
                 <button 
-                  className="ml-2 display-action-button cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
+                  className="ml-2 display-action-button calendar-action-button cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
                   onClick={onCalendarClick}
                   aria-label="Open calendar"
                   type="button"
@@ -279,7 +279,7 @@ const DisplayManager = memo(({
           </div>
           {enableCalendar && (
             <button 
-              className="ml-2 display-action-button cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
+              className="ml-2 display-action-button calendar-action-button cursor-pointer p-1 rounded-full flex items-center justify-center transition-colors" 
               onClick={onCalendarClick}
               aria-label="Open calendar"
               type="button"

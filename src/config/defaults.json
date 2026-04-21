@@ -10,6 +10,7 @@
   "showImageCounter": false,
   "showCountdown": false,
   "kenBurnsEffect": false,
+  "kenBurnsStyle": "standard",
   "vignetteEffect": false,
   "vignetteIntensity": 60,
   "countdownPosition": "bottom-left",

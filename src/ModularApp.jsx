@@ -201,6 +201,7 @@ function ModularApp() {
           transition={transition.type === 'random' ? { ...transition, type: randomTypeRef.current } : transition}
           isTransitioning={isTransitioning}
           kenBurnsEffect={settings.kenBurnsEffect}
+          kenBurnsStyle={settings.kenBurnsStyle}
           rotationTime={settings.rotationTime}
         />
 

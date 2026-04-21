@@ -71,9 +71,9 @@ const TimerDisplay = ({
   
   // Use shared popup values if external state is available, otherwise use local state
   const [localLastPopupValues, setLocalLastPopupValues] = useState({
-    hours: 0,
-    minutes: 5,
-    seconds: 0
+    hours: initialHours,
+    minutes: initialMinutes,
+    seconds: initialSeconds
   });
   
   const getLastPopupValues = hasExternalState && onTimerStateChange?.getLastPopupValues 
@@ -93,6 +93,12 @@ const TimerDisplay = ({
   
   const [blinkClass, setBlinkClass] = useState('');
   const intervalRef = useRef(null);
+
+  const getConfiguredDefaultCountdown = useCallback(() => ({
+    hours: initialHours,
+    minutes: initialMinutes,
+    seconds: initialSeconds
+  }), [initialHours, initialMinutes, initialSeconds]);
   
   // Use external blink state if available, otherwise use internal
   const actualBlinkClass = hasExternalState ? externalBlinkClass : blinkClass;
@@ -220,11 +226,7 @@ const TimerDisplay = ({
       const lastValues = getLastPopupValues();
       
       if (isFirstTimeOpeningPopup) {
-        setConfigTime({
-          hours: 0,
-          minutes: 5,
-          seconds: 0
-        });
+        setConfigTime(getConfiguredDefaultCountdown());
         setIsFirstTimeOpeningPopup(false);
       } else {
         // Show the last popup values that were used
@@ -272,11 +274,7 @@ const TimerDisplay = ({
 
   // Reset to default values (5 minutes)
   const resetToDefaults = () => {
-    const defaultValues = {
-      hours: 0,
-      minutes: 5,
-      seconds: 0
-    };
+    const defaultValues = getConfiguredDefaultCountdown();
     setConfigTime(defaultValues);
     // Update the last popup values to the defaults
     updateLastPopupValues(defaultValues);
@@ -351,17 +349,19 @@ const TimerDisplay = ({
     };
   }, [showSettings]);
   
-  // Update timer display when initial values change
+  // Update timer display when initial values change.
+  // Do not overwrite current time while paused, otherwise pause loses its value.
   useEffect(() => {
-    // Always update when timer is not active, regardless of paused state
-    // This ensures countdown values are always applied when timer is stopped
-    // But only update configTime if it hasn't been manually set by the user
-    if (!isActive) {
-      setTime({
-        hours: initialHours,
-        minutes: initialMinutes,
-        seconds: initialSeconds
-      });
+    // Only update when timer is fully stopped (not active and not paused).
+    // In external state mode, the hook owns the runtime timer value.
+    if (!isActive && !isPaused) {
+      if (!hasExternalState) {
+        setTime({
+          hours: initialHours,
+          minutes: initialMinutes,
+          seconds: initialSeconds
+        });
+      }
       
       // Only update configTime if user hasn't manually set custom values
       if (!configTimeManuallySet) {
@@ -372,7 +372,7 @@ const TimerDisplay = ({
         });
       }
     }
-  }, [initialHours, initialMinutes, initialSeconds, isActive, setTime, configTimeManuallySet]);
+  }, [initialHours, initialMinutes, initialSeconds, isActive, isPaused, setTime, configTimeManuallySet, hasExternalState]);
   
   // Format time display with localization
   const formatTime = useCallback((hours, minutes, seconds) => {
