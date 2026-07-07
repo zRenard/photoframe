@@ -43,9 +43,9 @@
     "react-swipeable": "^7.0.0"
   },
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.29.6",
-    "@babel/preset-env": "^7.27.2",
-    "@babel/preset-react": "^7.27.1",
+    "@babel/plugin-transform-runtime": "^8.0.0",
+    "@babel/preset-env": "^8.0.0",
+    "@babel/preset-react": "^8.0.0",
     "@eslint/js": "^9.7.0",
     "@tailwindcss/nesting": "^0.0.0-insiders.565cd3e",
     "@tailwindcss/postcss": "^4.1.4",
