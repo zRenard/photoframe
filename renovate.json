@@ -2,5 +2,12 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "description": "Bloquer ESLint 10 tant que eslint-plugin-react ne le supporte pas (peer dep max ^9.7)",
+      "matchPackageNames": ["eslint", "@eslint/js"],
+      "allowedVersions": "^9.0.0"
+    }
   ]
 }
