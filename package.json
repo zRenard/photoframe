@@ -71,7 +71,7 @@
     "markdownlint-cli": "^0.49.0",
     "postcss": "^8.4.35",
     "postcss-import": "^16.1.0",
-    "postcss-nested": "^7.0.2",
+    "postcss-nested": "^8.0.0",
     "tailwindcss": "^4.0.0",
     "vite": "^8.0.8",
     "vitest": "^4.1.4"
