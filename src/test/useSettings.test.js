@@ -25,10 +25,15 @@ describe('useSettings', () => {
       clear: jest.fn()
     };
     
-    global.localStorage = localStorageMock;
+    Object.defineProperty(globalThis, 'localStorage', {
+      value: localStorageMock,
+      writable: true,
+      configurable: true
+    });
     Object.defineProperty(window, 'localStorage', {
       value: localStorageMock,
-      writable: true
+      writable: true,
+      configurable: true
     });
     
     // Suppress console output for cleaner test output

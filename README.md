@@ -235,11 +235,17 @@ For complete configuration documentation, see [`docs/config/README.md`](docs/con
 
 - **Test**
    ```npm test```
+- **Run the tests with Vitest**
+   ```npm run test:vitest```
 - **Run tests with coverage**
    ```npm test -- --coverage```
 - **Generate HTML test report**
    ```npm test -- --reporters=default --reporters=jest-html-reporter```
    Report available at: `test-report.html`
+
+Vitest maps the existing `@jest/globals` imports and `jest` global to its own
+test APIs. Vitest does not hoist `jest.mock` calls through this compatibility
+layer; use explicit spies for mocks shared by both runners.
 
 ## 🚀 Performance Optimizations
 

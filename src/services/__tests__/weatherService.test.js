@@ -18,12 +18,12 @@ import {
 } from '../weatherService.js';
 import defaultConfig from '../../config/defaults.json';
 
-// Mock axios
-jest.mock('axios');
-
 describe('weatherService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(axios, 'get').mockImplementation(() => {
+      throw new Error('Unexpected axios request');
+    });
     // Suppress console.error for cleaner test output
     jest.spyOn(console, 'error').mockImplementation(() => {});
     jest.spyOn(console, 'log').mockImplementation(() => {});
